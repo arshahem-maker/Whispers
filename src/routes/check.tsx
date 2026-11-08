@@ -6,6 +6,10 @@ import { CitizenShell, useLeave } from "@/components/whispers/CitizenShell";
 import { useWhispers } from "@/lib/whispers/context";
 import { TIME_LABEL, t } from "@/lib/whispers/i18n";
 import type { ContributorStatus, ContributorView } from "@/lib/whispers/types";
+import { useServerFn } from "@tanstack/react-start";
+import { pilotReceipt } from "@/lib/whispers/pilot.functions";
+import { Button } from "@/components/ui/button";
+import { pilotContributorView } from "@/lib/whispers/pilot-adapter";
 
 export const Route = createFileRoute("/check")({
   head: () => ({
@@ -26,7 +30,8 @@ const ORDER: ContributorStatus[] = ["received", "under_review", "more_info", "co
 
 function CheckPage() {
   useTranslationVersion();
-  const { store, heldCode, setHeldCode } = useWhispers();
+  const { store, heldCode, setHeldCode, connected, setConnected } = useWhispers();
+  const receipt = useServerFn(pilotReceipt);
   const [code, setCode] = useState("");
   const [show, setShow] = useState(false);
   const [view, setView] = useState<ContributorView | null>(null);
@@ -35,19 +40,32 @@ function CheckPage() {
   const [busy, setBusy] = useState(false);
   const [reply, setReply] = useState("");
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const read = async (c: string, action: "open" | "message" | "removal" = "open") => {
+    if (connected) return pilotContributorView(await receipt({ data: { code: c, action, ...(action === "message" ? { text: reply } : {}) } }));
+    if (action === "message") return store.addContributorMessage(c, reply);
+    if (action === "removal") return store.requestRemoval(c);
+    return store.openReceipt(c);
+  };
 
   const open = async (c: string) => {
     setBusy(true); setErr(false);
-    const v = await store.openReceipt(c);
-    setBusy(false);
-    if (!v) { setErr(true); return; }
-    setView(v); setActive(c); setCode("");
+    try {
+      const v = await read(c);
+      if (!v) { setErr(true); return; }
+      setView(v); setActive(c); setCode("");
+    } catch { setErr(true); } finally { setBusy(false); }
   };
 
   useEffect(() => { if (heldCode) { const c = heldCode; setHeldCode(null); void open(c); } /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
   // Refresh when the store changes (e.g. demo reviewer reply).
   useWhispers();
-  useEffect(() => { if (active) store.openReceipt(active).then((v) => (v ? setView(v) : (setView(null), setActive(null)))); }, [store.version, active, store]);
+  useEffect(() => { if (active && !connected) store.openReceipt(active).then((v) => (v ? setView(v) : (setView(null), setActive(null)))); }, [store.version, active, store, connected]);
+  const act = async (action: "open" | "message" | "removal") => {
+    if (!active) return;
+    setBusy(true); setErr(false);
+    try { setView(await read(active, action)); if (action === "message") setReply(""); setConfirmRemove(false); }
+    catch { setErr(true); } finally { setBusy(false); }
+  };
 
   const close = () => { setView(null); setActive(null); setReply(""); setConfirmRemove(false); };
 
@@ -56,6 +74,7 @@ function CheckPage() {
       {!view ? (
         <form onSubmit={(e) => { e.preventDefault(); void open(code); }} autoComplete="off">
           <h1>{t("check.title")}</h1>
+          <label className="flex gap-3 mt-4 text-sm"><input type="checkbox" checked={connected} onChange={(e) => setConnected(e.target.checked)} />{tr("Open saved pilot report")}</label>
           <label htmlFor="code" className="label block mt-6 mb-2">{t("check.label")}</label>
           <div className="flex gap-2">
             <input id="code" className="field font-mono tracking-wider" type={show ? "text" : "password"} value={code}
@@ -71,10 +90,12 @@ function CheckPage() {
         </form>
       ) : (
         <ContributorPanel view={view} reply={reply} setReply={setReply} confirmRemove={confirmRemove} setConfirmRemove={setConfirmRemove}
-          onSend={async () => { if (!active || !reply.trim()) return; setView(await store.addContributorMessage(active, reply)); setReply(""); }}
-          onRemove={async () => { if (!active) return; setView(await store.requestRemoval(active)); setConfirmRemove(false); }}
+          onSend={() => { if (!busy && reply.trim()) void act("message"); }}
+          onRemove={() => { if (!busy) void act("removal"); }}
           onClose={close} />
       )}
+      {view && connected && <Button className="mt-4" variant="outline" disabled={busy} onClick={() => void act("open")}>{tr("Refresh")}</Button>}
+      {view && err && <p role="alert" className="text-destructive mt-3">{t("check.generic")}</p>}
     </CitizenShell>
   );
 }

@@ -15,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { WhispersProvider } from "../lib/whispers/context";
 import { LanguageProvider } from "@/components/whispers/LanguagePicker";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   useTranslationVersion();
@@ -122,6 +123,15 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   useTranslationVersion();
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (!["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"].includes(event)) return;
+      void router.invalidate();
+      if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
+    });
+    return () => data.subscription.unsubscribe();
+  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>

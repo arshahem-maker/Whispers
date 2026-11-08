@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { Languages, Loader2, X } from "lucide-react";
 import { PRIORITY_LANGUAGES } from "@/lib/whispers/languages";
 import { installTranslations, tr, useTranslationVersion } from "@/lib/whispers/translation";
-import { translateInterface } from "@/lib/whispers/translate.functions";
+import { prepareInterfaceTranslation, translateInterface } from "@/lib/whispers/translate.functions";
 
 const LanguageContext = createContext({ open: () => {}, name: "English", busy: false });
 
@@ -35,9 +35,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setBusy(true); setProgress(0);
     try {
       let offset: number | null = 0;
+      let waits = 0;
       const phrases: Record<string, string> = {};
       while (offset !== null) {
-        const batch = await translateInterface({ data: { language, offset } });
+        let batch = await translateInterface({ data: { language, offset } });
+        if (batch.status === "unavailable") {
+          batch = await prepareInterfaceTranslation({ data: { language, offset } }).catch(() => { throw new Error(tr("This language hasn't been prepared yet. Please choose a listed language.")); });
+        }
+        if (batch.status === "pending") {
+          if (++waits > 20) throw new Error(tr("Translation unavailable. English is still available."));
+          await new Promise((r) => setTimeout(r, 3000));
+          continue;
+        }
         Object.assign(phrases, batch.phrases);
         offset = batch.next;
         setProgress((p) => p + 1);
@@ -64,7 +73,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         </div>
         <label htmlFor="custom-language" className="label block mt-5">{tr("Other language")}</label>
         <div className="flex gap-2 mt-2"><input id="custom-language" className="field min-w-0" placeholder={tr("Language name")} maxLength={60} value={custom} disabled={busy} onChange={(e) => setCustom(e.target.value)} /><button className="btn btn-primary btn-sm" disabled={busy || custom.trim().length < 2} onClick={() => void select(custom.trim(), "und", /arabic|urdu|persian|dari|pashto|hebrew|sorani/i.test(custom))}>{tr("Translate")}</button></div>
-        {busy && <p role="status" className="flex gap-2 items-center mt-4"><Loader2 className="h-5 w-5 animate-spin" />{tr("Translating…")} {progress > 0 ? `${progress}/7` : ""}</p>}
+        {busy && <p role="status" className="flex gap-2 items-center mt-4"><Loader2 className="h-5 w-5 animate-spin" />{tr("Translating…")} {progress > 0 ? `${progress}/8` : ""}</p>}
         {error && <p role="alert" className="text-destructive mt-4 break-words">{error}</p>}
       </section>
     </div>}

@@ -31,7 +31,7 @@ export const emptyDraft = (): Draft => ({
   publicPermission: false, ack: false, photos: [],
 });
 
-interface Submission { code: string; idempotencyKey: string; accepted: boolean }
+interface Submission { code: string; idempotencyKey: string; accepted: boolean; provider?: "demo" | "pilot" }
 
 interface Ctx {
   store: WhispersStore;
@@ -42,6 +42,8 @@ interface Ctx {
   heldCode: string | null; // code held in memory for "Check my report"
   setHeldCode: (c: string | null) => void;
   wipe: () => void;
+  connected: boolean;
+  setConnected: (connected: boolean) => void;
 }
 
 const C = createContext<Ctx | null>(null);
@@ -51,13 +53,15 @@ export function WhispersProvider({ children }: { children: ReactNode }) {
   const [draft, setDraftState] = useState<Draft>(emptyDraft);
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [heldCode, setHeldCode] = useState<string | null>(null);
+  const [connected, setConnected] = useState(false);
   const setDraft = useCallback((fn: (d: Draft) => Draft) => setDraftState(fn), []);
   const wipe = useCallback(() => {
     setDraftState((d) => { d.photos.forEach((p) => URL.revokeObjectURL(p.url)); return emptyDraft(); });
     setSubmission(null);
     setHeldCode(null);
+    setConnected(false);
   }, []);
-  return <C.Provider value={{ store, draft, setDraft, submission, setSubmission, heldCode, setHeldCode, wipe }}>{children}</C.Provider>;
+  return <C.Provider value={{ store, draft, setDraft, submission, setSubmission, heldCode, setHeldCode, wipe, connected, setConnected }}>{children}</C.Provider>;
 }
 
 export function useWhispers() {

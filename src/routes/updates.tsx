@@ -3,8 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { useWhispers } from "@/lib/whispers/context";
 import { t } from "@/lib/whispers/i18n";
+import { pilotPublicUpdates } from "@/lib/whispers/pilot.functions";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+
+const publicUpdatesQuery = queryOptions({ queryKey: ["pilot-public-updates"], queryFn: () => pilotPublicUpdates() });
 
 export const Route = createFileRoute("/updates")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(publicUpdatesQuery),
   head: () => ({
     meta: [
       { title: "Updates — Whispers" },
@@ -23,7 +28,8 @@ const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "n
 function Updates() {
   useTranslationVersion();
   const { store } = useWhispers();
-  const updates = store.listPublicUpdates(); // public projection only
+  const { data: connectedUpdates } = useSuspenseQuery(publicUpdatesQuery);
+  const updates = [...connectedUpdates, ...store.listPublicUpdates()]; // public projection only
   return (
     <CitizenShell>
       <h1>{t("updates.title")}</h1>

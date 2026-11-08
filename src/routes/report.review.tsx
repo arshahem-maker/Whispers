@@ -11,6 +11,10 @@ import { BASIS_LABEL, CATEGORY_LABEL, IMPACT_LABEL, TIME_LABEL, t } from "@/lib/
 import { decodeImage, ImageError } from "@/lib/whispers/image";
 import { broadAreaLabel } from "@/lib/whispers/locations";
 import { ValidationError } from "@/lib/whispers/store";
+import { useServerFn } from "@tanstack/react-start";
+import { submitPilotReport } from "@/lib/whispers/pilot.functions";
+import { pilotReportSchema } from "@/lib/whispers/pilot-schema";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/report/review")({
   head: () => ({
@@ -42,7 +46,8 @@ function Row({ label, value, edit }: { label: string; value: string; edit: () =>
 
 function Review() {
   useTranslationVersion();
-  const { draft, setDraft, store, submission, setSubmission } = useWhispers();
+  const { draft, setDraft, store, submission, setSubmission, connected, setConnected } = useWhispers();
+  const submitConnected = useServerFn(submitPilotReport);
   const navigate = useNavigate();
   const [state, setState] = useState<"idle" | "sending" | "failed" | "timeout" | "offline">("idle");
   const [ackErr, setAckErr] = useState(false);
@@ -71,17 +76,20 @@ function Review() {
     if (!draft.ack) { setAckErr(true); document.getElementById("ack")?.focus(); return; }
     if (typeof navigator !== "undefined" && !navigator.onLine) { setState("offline"); return; }
     setState("sending");
-    const sub = submission ?? { code: generatePrivateCode(), idempotencyKey: randomId("idem"), accepted: false };
+    if (!draft.basis) { setState("failed"); return; }
+    const sub = submission ?? { code: generatePrivateCode(), idempotencyKey: randomId("idem"), accepted: false, provider: connected ? "pilot" as const : "demo" as const };
     if (!submission) setSubmission(sub);
     try {
-      await store.submitReport({
+      const input = {
         codeHash: await hashCode(sub.code), idempotencyKey: sub.idempotencyKey,
         payload: {
-          text: draft.text, category: draft.category, knowledgeBasis: draft.basis!, countryCode: draft.country ?? "not_shared",
+          text: draft.text, category: draft.category, knowledgeBasis: draft.basis, countryCode: draft.country ?? "not_shared",
           areaId: draft.area, timeBucket: draft.time ?? "not_sure", impacts: draft.impacts,
           publicSummaryPermission: draft.publicPermission, acknowledged: draft.ack,
         },
-      });
+      };
+      if (sub.provider === "pilot") await submitConnected({ data: { ...input, payload: pilotReportSchema.parse(input.payload), fictional: true } });
+      else await store.submitReport(input);
       setSubmission({ ...sub, accepted: true });
       navigate({ to: "/report/sent", replace: true });
     } catch (e) {
@@ -133,7 +141,10 @@ function Review() {
       </section>
 
       <p className="card p-4 mt-6">{t("s3.safe")}</p>
-      <Link to="/pilot" className="text-primary underline text-sm mt-4 inline-block">{tr("Test this fictional draft in connected pilot")}</Link>
+      <section className="mt-5 border-y py-4">
+        <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{tr("I confirm this contains only fictional test information.")}</label>
+        <p className="hint mt-2">{connected ? tr("Fictional information only. No live humanitarian review team is connected.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
+      </section>
 
       <div className="mt-6 grid gap-3">
         <button id="ack" type="button" role="checkbox" aria-checked={draft.ack} className="choice" aria-describedby={ackErr ? "ack-err" : undefined}
@@ -158,9 +169,9 @@ function Review() {
 
       <ActionBar>
         <button className="btn btn-secondary" onClick={() => go(2)} disabled={state === "sending"}>{t("common.back")}</button>
-        <button className="btn btn-primary flex-1" onClick={send} disabled={state === "sending"} aria-busy={state === "sending"}>
-          {state === "sending" ? t("s3.sending") : DEMO_MODE ? t("s3.sendDemo") : t("s3.send")}
-        </button>
+        <Button className="flex-1 min-h-12" onClick={send} disabled={state === "sending"} aria-busy={state === "sending"}>
+          {state === "sending" ? t("s3.sending") : connected ? tr("Save fictional report to Cloud") : t("s3.sendDemo")}
+        </Button>
       </ActionBar>
 
       {editing && (

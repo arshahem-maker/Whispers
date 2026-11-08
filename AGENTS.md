@@ -33,5 +33,8 @@ use the editor.
 - Demo data goes through `src/lib/whispers/store.ts`; connected fictional-pilot data goes through explicit server operations. Every operation authorises from trusted staff records, never UI state.
 - Private codes are generated client-side (CSPRNG, 160 bits) and only their SHA-256 hash is stored; never put codes or report content in URLs, storage or logs.
 - Citizen strings go through `t()`; other app-owned interface phrases use `tr()` with a bundled static allowlist. Translate only this allowlist server-side, never submitted reports, messages, private codes or form values; label machine output unreviewed and keep English available.
-- The main reporting experience remains demo-only. Connected fictional pilot operations use explicit authenticated server functions, scoped staff roles and private-code capabilities; never serialise or trust a browser store snapshot as server authority.
+- Main citizen submission and follow-up may explicitly opt into fictional Cloud pilot operations; default demo remains local. Real-source intake stays disabled pending human review. Never serialise or trust a browser store snapshot as server authority.
+- Atomic database transitions enforce photo quotas, report revocation and publication eligibility; retry private media deletion through a durable cleanup queue so storage failures cannot restore access.
 - Voice reporting uses consent-gated complete WAV uploads; dedicated transcription precedes audio understanding, with uncertain sound observations kept separate and editable English prefill.
+- Staff invitations grant only reviewer/expert access for their selected workspace after a verified-email match in an authenticated transactional function; sharing a generic sign-in link is not an access credential.
+- Private pilot photo previews use authenticated Storage downloads under report/workspace RLS and temporary object URLs revoked on close/unmount; never issue shareable signed links for previews.

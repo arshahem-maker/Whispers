@@ -37,6 +37,7 @@ export function StaffShell({ children, need, title }: { children: ReactNode; nee
           )}
           <div className="ml-auto flex items-center gap-3 text-sm">
             <LanguageButton compact />
+            <Link to="/pilot" className="text-primary underline">{tr("Connected pilot")}</Link>
             {DEMO_MODE && <Link to="/about" className="text-primary underline">{tr("Demo controls")}</Link>}
             {DEMO_MODE && <Link to="/" className="text-primary underline">{tr("Citizen view")}</Link>}
             {me && <span className="text-muted-foreground">{me.name}</span>}

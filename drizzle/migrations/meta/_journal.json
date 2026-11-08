@@ -22,6 +22,27 @@
       "when": 1794107169273,
       "tag": "0002_pilot_private_media_and_retention",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794129116650,
+      "tag": "0003_atomic_pilot_safeguards",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794130533949,
+      "tag": "0004_workspace_staff_invitations",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794131493158,
+      "tag": "0005_bounded_translation_and_voice_costs",
+      "breakpoints": true
     }
   ]
 }

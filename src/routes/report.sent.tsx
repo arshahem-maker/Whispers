@@ -6,6 +6,8 @@ import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { DEMO_MODE, emptyDraft, useWhispers } from "@/lib/whispers/context";
 import { groupCode } from "@/lib/whispers/crypto";
 import { t } from "@/lib/whispers/i18n";
+import { useServerFn } from "@tanstack/react-start";
+import { pilotUpload } from "@/lib/whispers/pilot.functions";
 
 export const Route = createFileRoute("/report/sent")({
   head: () => ({
@@ -27,6 +29,7 @@ function Sent() {
   const { submission, draft, setDraft, store, setSubmission, setHeldCode } = useWhispers();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const uploadConnected = useServerFn(pilotUpload);
   const started = useRef(false);
 
   const upload = async (id: string) => {
@@ -35,7 +38,10 @@ function Sent() {
     if (!p) return;
     setDraft((d) => ({ ...d, photos: d.photos.map((x) => (x.id === id ? { ...x, status: "sending" } : x)) }));
     let ok = false;
-    try { ok = (await store.addAttachment(submission.code, { bytes: p.bytes, width: p.width, height: p.height, type: "image/jpeg", previewUrl: p.url })).ok; } catch { ok = false; }
+    try {
+      if (submission.provider === "pilot") ok = (await uploadConnected({ data: { code: submission.code, bytes: Array.from(p.bytes), uploadId: p.id } })).ok;
+      else ok = (await store.addAttachment(submission.code, { bytes: p.bytes, width: p.width, height: p.height, type: "image/jpeg", previewUrl: p.url })).ok;
+    } catch { ok = false; }
     setDraft((d) => ({ ...d, photos: d.photos.map((x) => (x.id === id ? { ...x, status: ok ? "processed" : "failed" } : x)) }));
   };
 
@@ -58,7 +64,8 @@ function Sent() {
   const finish = (to: "/" | "/check") => {
     // Photo object URLs stay alive only for the demo reviewer preview; the draft text is cleared.
     setDraft(() => emptyDraft());
-    if (to === "/check") setHeldCode(submission!.code);
+    if (to === "/check") setHeldCode(submission.code);
+    if (submission.provider === "pilot") draft.photos.forEach((p) => URL.revokeObjectURL(p.url));
     setSubmission(null);
     navigate({ to, replace: true });
   };

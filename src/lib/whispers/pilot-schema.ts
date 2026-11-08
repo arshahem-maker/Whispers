@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { invitationSchema } from "./staff-invitations";
 export const pilotReportSchema = z.object({
   text: z.string().trim().min(10).max(2000),
   category: z.enum(["safety","shelter","food_water","health","infrastructure","aid_concern","other","not_selected"]),
@@ -10,7 +11,11 @@ export const pilotReportSchema = z.object({
 }).strict();
 export const pilotSubmitSchema = z.object({ payload: pilotReportSchema, codeHash: z.string().regex(/^[0-9a-f]{64}$/), idempotencyKey: z.string().min(8).max(100), fictional: z.literal(true) }).strict();
 export const pilotCommandSchema = z.object({
-  action: z.enum(["reply","assess","note","evidence","request_experts","interpret","expert_response","draft_update","submit_update","disclosure","approve","publish","withdraw","remove","extend","resume_voice"]),
+  action: z.enum(["reply","assess","note","evidence","request_experts","interpret","expert_response","draft_update","submit_update","disclosure","approve","publish","withdraw","remove","extend","resume_voice","staff_role","release_review","operator","invite_staff","revoke_invitation"]),
+  invitation: invitationSchema.optional(),
+  staff: z.object({ userId: z.string().uuid(), role: z.enum(["reviewer","expert","publisher","admin"]), contexts: z.array(z.enum(["ua","td","general"])).min(1).max(3), active: z.boolean() }).strict().optional(),
+  review: z.object({ kind: z.enum(["translation","security","legal","safety"]), reference: z.string().trim().min(5).max(500) }).strict().optional(),
+  operator: z.object({ name: z.string().trim().min(2).max(150), contact: z.string().trim().min(5).max(250) }).strict().optional(),
   id: z.string().uuid().optional(), text: z.string().max(2000).optional(),
   state: z.string().max(30).optional(), choice: z.enum(["consistent","conflicting","cannot_assess"]).optional(),
   packet: z.object({ claim: z.string().min(1).max(600), context: z.string().max(200), period: z.string().max(100), materials: z.string().max(2000), question: z.string().min(1).max(600) }).strict().optional(),

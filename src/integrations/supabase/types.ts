@@ -107,6 +107,24 @@ export type Database = {
         }
         Relationships: []
       }
+      whispers_daily_ai_usage: {
+        Row: {
+          day: string
+          requests: number
+          service: string
+        }
+        Insert: {
+          day?: string
+          requests?: number
+          service: string
+        }
+        Update: {
+          day?: string
+          requests?: number
+          service?: string
+        }
+        Relationships: []
+      }
       whispers_expert_assignments: {
         Row: {
           expert_id: string
@@ -198,6 +216,48 @@ export type Database = {
           },
         ]
       }
+      whispers_interface_translations: {
+        Row: {
+          batch_offset: number
+          catalog_hash: string
+          claimed_at: string
+          language: string
+          phrases: Json | null
+          status: string
+        }
+        Insert: {
+          batch_offset: number
+          catalog_hash: string
+          claimed_at?: string
+          language: string
+          phrases?: Json | null
+          status?: string
+        }
+        Update: {
+          batch_offset?: number
+          catalog_hash?: string
+          claimed_at?: string
+          language?: string
+          phrases?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
+      whispers_media_cleanup: {
+        Row: {
+          queued_at: string
+          report_id: string
+        }
+        Insert: {
+          queued_at?: string
+          report_id: string
+        }
+        Update: {
+          queued_at?: string
+          report_id?: string
+        }
+        Relationships: []
+      }
       whispers_records: {
         Row: {
           body: Json
@@ -205,6 +265,7 @@ export type Database = {
           id: string
           kind: string
           report_id: string | null
+          upload_id: string | null
           workspace: string
         }
         Insert: {
@@ -213,6 +274,7 @@ export type Database = {
           id?: string
           kind: string
           report_id?: string | null
+          upload_id?: string | null
           workspace: string
         }
         Update: {
@@ -221,6 +283,7 @@ export type Database = {
           id?: string
           kind?: string
           report_id?: string | null
+          upload_id?: string | null
           workspace?: string
         }
         Relationships: [
@@ -257,6 +320,30 @@ export type Database = {
         }
         Relationships: []
       }
+      whispers_release_reviews: {
+        Row: {
+          id: string
+          kind: string
+          reference: string
+          reviewed_at: string
+          reviewer_id: string
+        }
+        Insert: {
+          id?: string
+          kind: string
+          reference: string
+          reviewed_at?: string
+          reviewer_id: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          reference?: string
+          reviewed_at?: string
+          reviewer_id?: string
+        }
+        Relationships: []
+      }
       whispers_reports: {
         Row: {
           body: Json
@@ -265,6 +352,7 @@ export type Database = {
           id: string
           idempotency_key: string
           payload_hash: string
+          photo_count: number
           received_at: string
           removal_requested_at: string | null
           revoked_at: string | null
@@ -278,6 +366,7 @@ export type Database = {
           id?: string
           idempotency_key: string
           payload_hash: string
+          photo_count?: number
           received_at?: string
           removal_requested_at?: string | null
           revoked_at?: string | null
@@ -291,10 +380,50 @@ export type Database = {
           id?: string
           idempotency_key?: string
           payload_hash?: string
+          photo_count?: number
           received_at?: string
           removal_requested_at?: string | null
           revoked_at?: string | null
           version?: number
+          workspace?: string
+        }
+        Relationships: []
+      }
+      whispers_staff_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          revoked_at: string | null
+          role: string
+          workspace: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          revoked_at?: string | null
+          role: string
+          workspace: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          revoked_at?: string | null
+          role?: string
           workspace?: string
         }
         Relationships: []
@@ -379,11 +508,25 @@ export type Database = {
     }
     Functions: {
       reserve_voice_request: { Args: { p_bucket: string }; Returns: boolean }
+      whispers_accept_staff_invitations: { Args: never; Returns: number }
       whispers_access: {
         Args: { needed: string; ws: string }
         Returns: boolean
       }
+      whispers_claim_translation: {
+        Args: { p_hash: string; p_language: string; p_offset: number }
+        Returns: boolean
+      }
       whispers_expire_private: { Args: never; Returns: number }
+      whispers_publication_transition: {
+        Args: { p_action: string; p_actor: string; p_id: string }
+        Returns: boolean
+      }
+      whispers_reserve_daily_ai: {
+        Args: { p_cap: number; p_service: string }
+        Returns: boolean
+      }
+      whispers_revoke_private: { Args: { p_id: string }; Returns: boolean }
       whispers_update_report: {
         Args: { p_body: Json; p_id: string; p_version: number }
         Returns: boolean

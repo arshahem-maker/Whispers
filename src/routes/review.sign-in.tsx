@@ -5,6 +5,8 @@ import { DEMO_MODE, useWhispers } from "@/lib/whispers/context";
 import { useState } from "react";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/review/sign-in")({
   head: () => ({
@@ -26,6 +28,9 @@ function SignIn() {
   const { store } = useWhispers();
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const cache = useQueryClient();
+  const session = useQuery({ queryKey: ["staff-session"], queryFn: async () => (await supabase.auth.getUser()).data.user, retry: false });
+  const signOut = async () => { await cache.cancelQueries(); cache.clear(); await supabase.auth.signOut(); await navigate({ to: "/review/sign-in", replace: true }); };
   const signIn = async (provider: "google" | "lovable") => {
     setError("");
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: `${window.location.origin}/pilot` });
@@ -39,10 +44,10 @@ function SignIn() {
         <h1 className="mt-6 text-2xl">{tr("Staff sign-in")}</h1>
         <div className="card p-5 mt-5">
           <p className="font-semibold">{tr("Connected pilot staff sign-in")}</p>
-          <div className="grid gap-2 mt-4"><Button onClick={() => void signIn("google")}>{tr("Sign in with Google")}</Button><Button variant="secondary" onClick={() => void signIn("lovable")}>{tr("Sign in with Lovable")}</Button></div>
+          {session.data ? <div className="grid gap-2 mt-4"><p>{tr("Signed in")}</p><Button onClick={() => void navigate({ to: "/pilot" })}>{tr("Open connected pilot")}</Button><Button variant="outline" onClick={() => void signOut()}>{tr("Sign out")}</Button></div> : <div className="grid gap-2 mt-4"><Button onClick={() => void signIn("google")}>{tr("Sign in with Google")}</Button><Button variant="secondary" onClick={() => void signIn("lovable")}>{tr("Sign in with Lovable")}</Button></div>}
           {error && <p role="alert" className="text-destructive mt-3">{error}</p>}
           <Link to="/pilot" className="text-primary underline mt-3 inline-block">{tr("Open connected pilot")}</Link>
-          <p className="hint mt-2">{tr("A connected deployment uses server-verified accounts, administrator-provisioned roles and multi-factor authentication. Nobody can give themselves reviewer or admin access.")}</p>
+          <p className="hint mt-2">{tr("Nobody can give themselves reviewer or admin access.")}</p>
         </div>
         {DEMO_MODE && (
           <div className="card p-5 mt-4">
