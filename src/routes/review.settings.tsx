@@ -47,7 +47,7 @@ function Settings() {
       </Panel>
       <Panel title={tr("Operation")}>
         <dl className="grid grid-cols-2 gap-2 text-[0.95rem]">
-          <dt className="hint">{tr("Operating organisation")}</dt><dd>{tr("Not configured (demo)")}</dd>
+          <dt className="hint">{tr("Operating organisation")}</dt><dd>{tr("Whispers (private company) — CEO: Arsh Ahmed. Contact not yet set.")}</dd>
           <dt className="hint">{tr("Contexts")}</dt><dd>{tr("Ukraine, Eastern Chad (demo)")}</dd>
           <dt className="hint">{tr("Languages")}</dt><dd>{tr("English")}</dd>
           <dt className="hint">{tr("AI assistance")}</dt><dd>{tr("Disabled")}</dd>

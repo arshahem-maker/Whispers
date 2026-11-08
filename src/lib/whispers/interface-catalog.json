@@ -152,7 +152,7 @@
   "I understand how this report will be used.",
   "If you lose it, we cannot recover it through an email account.",
   "In a connected build, roles are granted only through an administrative process and checked on the server.",
-  "In a real deployment, the operating organisation and the purpose of reporting will be named here. Reports are read by authorised reviewers. Reviewers may share a shortened, de-identified version with a small number of invited experts. Reports are not forwarded automatically to police, armed forces, governments, media or partners.",
+  "Whispers is operated by Whispers, a private company (CEO: Arsh Ahmed). A public contact address and the purpose of reporting will be published before real reports are accepted. Reports are read by authorised reviewers. Reviewers may share a shortened, de-identified version with a small number of invited experts. Reports are not forwarded automatically to police, armed forces, governments, media or partners.",
   "In review",
   "In scope",
   "Inbox",
@@ -509,5 +509,6 @@
   "What request information is kept?",
   "Cloud submission and voice limits use a hashed network-derived identifier, not a raw address. Private-code lookups use a code hash for limits. These are still pseudonymous metadata; daily cleanup removes limit records older than one day. Hosting services may keep their own connection records.",
   "This language hasn't been prepared yet. Please choose a listed language.",
-  "Translation is busy today. English is still available."
+  "Translation is busy today. English is still available.",
+  "Whispers (private company) — CEO: Arsh Ahmed. Contact not yet set."
 ]
