@@ -1,5 +1,27 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794106451505,
+      "tag": "0000_voice_request_controls",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794107085098,
+      "tag": "0001_connected_whispers_pilot",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794107169273,
+      "tag": "0002_pilot_private_media_and_retention",
+      "breakpoints": true
+    }
+  ]
 }

@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as CheckRouteImport } from './routes/check'
 import { Route as ClosedRouteImport } from './routes/closed'
 import { Route as HelpRouteImport } from './routes/help'
+import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as UpdatesRouteImport } from './routes/updates'
 import { Route as ReportIndexRouteImport } from './routes/report.index'
 import { Route as ReportReviewRouteImport } from './routes/report.review'
@@ -22,6 +23,8 @@ import { Route as ReviewExpertRequestsRouteImport } from './routes/review.expert
 import { Route as ReviewSettingsRouteImport } from './routes/review.settings'
 import { Route as ReviewSignInRouteImport } from './routes/review.sign-in'
 import { Route as ReviewUpdatesRouteImport } from './routes/review.updates'
+import { Route as ApiPublicRetentionRouteImport } from './routes/api/public/retention'
+import { Route as ApiPublicVoiceRouteImport } from './routes/api/public/voice'
 import { Route as ExpertAssignmentsIndexRouteImport } from './routes/expert.assignments.index'
 import { Route as ExpertAssignmentsIdRouteImport } from './routes/expert.assignments.$id'
 import { Route as ReviewReportsIndexRouteImport } from './routes/review.reports.index'
@@ -50,6 +53,11 @@ const ClosedRoute = ClosedRouteImport.update({
 const HelpRoute = HelpRouteImport.update({
   id: '/help',
   path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PilotRoute = PilotRouteImport.update({
+  id: '/pilot',
+  path: '/pilot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UpdatesRoute = UpdatesRouteImport.update({
@@ -92,6 +100,16 @@ const ReviewUpdatesRoute = ReviewUpdatesRouteImport.update({
   path: '/review/updates',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRetentionRoute = ApiPublicRetentionRouteImport.update({
+  id: '/api/public/retention',
+  path: '/api/public/retention',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicVoiceRoute = ApiPublicVoiceRouteImport.update({
+  id: '/api/public/voice',
+  path: '/api/public/voice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExpertAssignmentsIndexRoute = ExpertAssignmentsIndexRouteImport.update({
   id: '/expert/assignments/',
   path: '/expert/assignments/',
@@ -119,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/check': typeof CheckRoute
   '/closed': typeof ClosedRoute
   '/help': typeof HelpRoute
+  '/pilot': typeof PilotRoute
   '/updates': typeof UpdatesRoute
   '/report/review': typeof ReportReviewRoute
   '/report/sent': typeof ReportSentRoute
@@ -127,6 +146,8 @@ export interface FileRoutesByFullPath {
   '/review/sign-in': typeof ReviewSignInRoute
   '/review/updates': typeof ReviewUpdatesRoute
   '/report/': typeof ReportIndexRoute
+  '/api/public/retention': typeof ApiPublicRetentionRoute
+  '/api/public/voice': typeof ApiPublicVoiceRoute
   '/expert/assignments/$id': typeof ExpertAssignmentsIdRoute
   '/review/reports/$id': typeof ReviewReportsIdRoute
   '/expert/assignments/': typeof ExpertAssignmentsIndexRoute
@@ -138,6 +159,7 @@ export interface FileRoutesByTo {
   '/check': typeof CheckRoute
   '/closed': typeof ClosedRoute
   '/help': typeof HelpRoute
+  '/pilot': typeof PilotRoute
   '/updates': typeof UpdatesRoute
   '/report/review': typeof ReportReviewRoute
   '/report/sent': typeof ReportSentRoute
@@ -146,6 +168,8 @@ export interface FileRoutesByTo {
   '/review/sign-in': typeof ReviewSignInRoute
   '/review/updates': typeof ReviewUpdatesRoute
   '/report': typeof ReportIndexRoute
+  '/api/public/retention': typeof ApiPublicRetentionRoute
+  '/api/public/voice': typeof ApiPublicVoiceRoute
   '/expert/assignments/$id': typeof ExpertAssignmentsIdRoute
   '/review/reports/$id': typeof ReviewReportsIdRoute
   '/expert/assignments': typeof ExpertAssignmentsIndexRoute
@@ -158,6 +182,7 @@ export interface FileRoutesById {
   '/check': typeof CheckRoute
   '/closed': typeof ClosedRoute
   '/help': typeof HelpRoute
+  '/pilot': typeof PilotRoute
   '/updates': typeof UpdatesRoute
   '/report/review': typeof ReportReviewRoute
   '/report/sent': typeof ReportSentRoute
@@ -166,6 +191,8 @@ export interface FileRoutesById {
   '/review/sign-in': typeof ReviewSignInRoute
   '/review/updates': typeof ReviewUpdatesRoute
   '/report/': typeof ReportIndexRoute
+  '/api/public/retention': typeof ApiPublicRetentionRoute
+  '/api/public/voice': typeof ApiPublicVoiceRoute
   '/expert/assignments/$id': typeof ExpertAssignmentsIdRoute
   '/review/reports/$id': typeof ReviewReportsIdRoute
   '/expert/assignments/': typeof ExpertAssignmentsIndexRoute
@@ -179,6 +206,7 @@ export interface FileRouteTypes {
     | '/check'
     | '/closed'
     | '/help'
+    | '/pilot'
     | '/updates'
     | '/report/review'
     | '/report/sent'
@@ -187,6 +215,8 @@ export interface FileRouteTypes {
     | '/review/sign-in'
     | '/review/updates'
     | '/report/'
+    | '/api/public/retention'
+    | '/api/public/voice'
     | '/expert/assignments/$id'
     | '/review/reports/$id'
     | '/expert/assignments/'
@@ -198,6 +228,7 @@ export interface FileRouteTypes {
     | '/check'
     | '/closed'
     | '/help'
+    | '/pilot'
     | '/updates'
     | '/report/review'
     | '/report/sent'
@@ -206,6 +237,8 @@ export interface FileRouteTypes {
     | '/review/sign-in'
     | '/review/updates'
     | '/report'
+    | '/api/public/retention'
+    | '/api/public/voice'
     | '/expert/assignments/$id'
     | '/review/reports/$id'
     | '/expert/assignments'
@@ -217,6 +250,7 @@ export interface FileRouteTypes {
     | '/check'
     | '/closed'
     | '/help'
+    | '/pilot'
     | '/updates'
     | '/report/review'
     | '/report/sent'
@@ -225,6 +259,8 @@ export interface FileRouteTypes {
     | '/review/sign-in'
     | '/review/updates'
     | '/report/'
+    | '/api/public/retention'
+    | '/api/public/voice'
     | '/expert/assignments/$id'
     | '/review/reports/$id'
     | '/expert/assignments/'
@@ -237,6 +273,7 @@ export interface RootRouteChildren {
   CheckRoute: typeof CheckRoute
   ClosedRoute: typeof ClosedRoute
   HelpRoute: typeof HelpRoute
+  PilotRoute: typeof PilotRoute
   UpdatesRoute: typeof UpdatesRoute
   ReportReviewRoute: typeof ReportReviewRoute
   ReportSentRoute: typeof ReportSentRoute
@@ -245,6 +282,8 @@ export interface RootRouteChildren {
   ReviewSignInRoute: typeof ReviewSignInRoute
   ReviewUpdatesRoute: typeof ReviewUpdatesRoute
   ReportIndexRoute: typeof ReportIndexRoute
+  ApiPublicRetentionRoute: typeof ApiPublicRetentionRoute
+  ApiPublicVoiceRoute: typeof ApiPublicVoiceRoute
   ExpertAssignmentsIdRoute: typeof ExpertAssignmentsIdRoute
   ReviewReportsIdRoute: typeof ReviewReportsIdRoute
   ExpertAssignmentsIndexRoute: typeof ExpertAssignmentsIndexRoute
@@ -286,6 +325,13 @@ declare module '@tanstack/react-router' {
       path: '/help'
       fullPath: '/help'
       preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pilot': {
+      id: '/pilot'
+      path: '/pilot'
+      fullPath: '/pilot'
+      preLoaderRoute: typeof PilotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/updates': {
@@ -344,6 +390,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewUpdatesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/retention': {
+      id: '/api/public/retention'
+      path: '/api/public/retention'
+      fullPath: '/api/public/retention'
+      preLoaderRoute: typeof ApiPublicRetentionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/voice': {
+      id: '/api/public/voice'
+      path: '/api/public/voice'
+      fullPath: '/api/public/voice'
+      preLoaderRoute: typeof ApiPublicVoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/expert/assignments/': {
       id: '/expert/assignments/'
       path: '/expert/assignments'
@@ -381,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckRoute: CheckRoute,
   ClosedRoute: ClosedRoute,
   HelpRoute: HelpRoute,
+  PilotRoute: PilotRoute,
   UpdatesRoute: UpdatesRoute,
   ReportReviewRoute: ReportReviewRoute,
   ReportSentRoute: ReportSentRoute,
@@ -389,6 +450,8 @@ const rootRouteChildren: RootRouteChildren = {
   ReviewSignInRoute: ReviewSignInRoute,
   ReviewUpdatesRoute: ReviewUpdatesRoute,
   ReportIndexRoute: ReportIndexRoute,
+  ApiPublicRetentionRoute: ApiPublicRetentionRoute,
+  ApiPublicVoiceRoute: ApiPublicVoiceRoute,
   ExpertAssignmentsIdRoute: ExpertAssignmentsIdRoute,
   ReviewReportsIdRoute: ReviewReportsIdRoute,
   ExpertAssignmentsIndexRoute: ExpertAssignmentsIndexRoute,

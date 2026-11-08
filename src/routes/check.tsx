@@ -10,9 +10,9 @@ import type { ContributorStatus, ContributorView } from "@/lib/whispers/types";
 export const Route = createFileRoute("/check")({
   head: () => ({
     meta: [
-      { title: "Check a report — Whispers" },
+      { title: "Modify report — Whispers" },
       { name: "description", content: "Use your private code to see replies from the review team." },
-      { property: "og:title", content: "Check a report — Whispers" },
+      { property: "og:title", content: "Modify report — Whispers" },
       { property: "og:description", content: "Use your private code to see replies." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

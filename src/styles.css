@@ -81,6 +81,9 @@
   --color-focus: var(--focus);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-record: var(--record);
+  --color-record-hover: var(--record-hover);
+  --color-record-foreground: var(--record-foreground);
   --font-sans: "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -107,6 +110,9 @@
   --destructive-foreground: oklch(0.182 0.015 239.7);
   --warning: oklch(0.821 0.1 81);
   --warning-foreground: oklch(0.182 0.015 239.7);
+  --record: oklch(0.52 0.13 48);
+  --record-hover: oklch(0.55 0.13 48);
+  --record-foreground: var(--foreground);
   --focus: oklch(0.926 0.053 183.2);
   --border: oklch(0.377 0.03 226.3);
   --input: oklch(0.377 0.03 226.3);

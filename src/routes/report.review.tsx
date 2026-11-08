@@ -133,6 +133,7 @@ function Review() {
       </section>
 
       <p className="card p-4 mt-6">{t("s3.safe")}</p>
+      <Link to="/pilot" className="text-primary underline text-sm mt-4 inline-block">{tr("Test this fictional draft in connected pilot")}</Link>
 
       <div className="mt-6 grid gap-3">
         <button id="ack" type="button" role="checkbox" aria-checked={draft.ack} className="choice" aria-describedby={ackErr ? "ack-err" : undefined}

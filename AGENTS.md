@@ -30,7 +30,8 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Whispers architecture
-- All app data goes through `src/lib/whispers/store.ts` (demo provider); every operation authorises from the staff record, never UI state, so a future connected provider can mirror the same contracts server-side.
+- Demo data goes through `src/lib/whispers/store.ts`; connected fictional-pilot data goes through explicit server operations. Every operation authorises from trusted staff records, never UI state.
 - Private codes are generated client-side (CSPRNG, 160 bits) and only their SHA-256 hash is stored; never put codes or report content in URLs, storage or logs.
 - Citizen strings go through `t()`; other app-owned interface phrases use `tr()` with a bundled static allowlist. Translate only this allowlist server-side, never submitted reports, messages, private codes or form values; label machine output unreviewed and keep English available.
-- Cloud powers interface translation only; report data remains behind the demo store until an authorised connected provider implements the same contracts server-side.
+- The main reporting experience remains demo-only. Connected fictional pilot operations use explicit authenticated server functions, scoped staff roles and private-code capabilities; never serialise or trust a browser store snapshot as server authority.
+- Voice reporting uses consent-gated complete WAV uploads; dedicated transcription precedes audio understanding, with uncertain sound observations kept separate and editable English prefill.

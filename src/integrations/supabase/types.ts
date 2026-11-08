@@ -14,13 +14,380 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      user_roles: {
+        Row: {
+          active: boolean
+          contexts: string[]
+          role: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          contexts?: string[]
+          role: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          contexts?: string[]
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      voice_request_limits: {
+        Row: {
+          bucket: string
+          requests: number
+          started_at: string
+        }
+        Insert: {
+          bucket: string
+          requests?: number
+          started_at?: string
+        }
+        Update: {
+          bucket?: string
+          requests?: number
+          started_at?: string
+        }
+        Relationships: []
+      }
+      voice_service_controls: {
+        Row: {
+          id: string
+          paused: boolean
+          reason: string | null
+          status: number | null
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          paused?: boolean
+          reason?: string | null
+          status?: number | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          paused?: boolean
+          reason?: string | null
+          status?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      whispers_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          at: string
+          id: string
+          outcome: string
+          target_id: string | null
+          workspace: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          at?: string
+          id?: string
+          outcome?: string
+          target_id?: string | null
+          workspace: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          at?: string
+          id?: string
+          outcome?: string
+          target_id?: string | null
+          workspace?: string
+        }
+        Relationships: []
+      }
+      whispers_expert_assignments: {
+        Row: {
+          expert_id: string
+          request_id: string
+        }
+        Insert: {
+          expert_id: string
+          request_id: string
+        }
+        Update: {
+          expert_id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whispers_expert_assignments_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "whispers_expert_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whispers_expert_requests: {
+        Row: {
+          created_at: string
+          id: string
+          interpretation: string | null
+          packet: Json
+          report_ids: string[]
+          state: string
+          workspace: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interpretation?: string | null
+          packet: Json
+          report_ids: string[]
+          state?: string
+          workspace: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interpretation?: string | null
+          packet?: Json
+          report_ids?: string[]
+          state?: string
+          workspace?: string
+        }
+        Relationships: []
+      }
+      whispers_expert_responses: {
+        Row: {
+          choice: string
+          created_at: string
+          expert_id: string
+          explanation: string
+          id: string
+          request_id: string
+          source: string | null
+        }
+        Insert: {
+          choice: string
+          created_at?: string
+          expert_id: string
+          explanation: string
+          id?: string
+          request_id: string
+          source?: string | null
+        }
+        Update: {
+          choice?: string
+          created_at?: string
+          expert_id?: string
+          explanation?: string
+          id?: string
+          request_id?: string
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whispers_expert_responses_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "whispers_expert_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whispers_records: {
+        Row: {
+          body: Json
+          created_at: string
+          id: string
+          kind: string
+          report_id: string | null
+          workspace: string
+        }
+        Insert: {
+          body: Json
+          created_at?: string
+          id?: string
+          kind: string
+          report_id?: string | null
+          workspace: string
+        }
+        Update: {
+          body?: Json
+          created_at?: string
+          id?: string
+          kind?: string
+          report_id?: string | null
+          workspace?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whispers_records_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "whispers_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whispers_release: {
+        Row: {
+          id: string
+          live_intake: boolean
+          operator_contact: string | null
+          operator_name: string | null
+          reviewed_at: string | null
+        }
+        Insert: {
+          id?: string
+          live_intake?: boolean
+          operator_contact?: string | null
+          operator_name?: string | null
+          reviewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          live_intake?: boolean
+          operator_contact?: string | null
+          operator_name?: string | null
+          reviewed_at?: string | null
+        }
+        Relationships: []
+      }
+      whispers_reports: {
+        Row: {
+          body: Json
+          code_hash: string
+          expires_at: string
+          id: string
+          idempotency_key: string
+          payload_hash: string
+          received_at: string
+          removal_requested_at: string | null
+          revoked_at: string | null
+          version: number
+          workspace: string
+        }
+        Insert: {
+          body: Json
+          code_hash: string
+          expires_at?: string
+          id?: string
+          idempotency_key: string
+          payload_hash: string
+          received_at?: string
+          removal_requested_at?: string | null
+          revoked_at?: string | null
+          version?: number
+          workspace: string
+        }
+        Update: {
+          body?: Json
+          code_hash?: string
+          expires_at?: string
+          id?: string
+          idempotency_key?: string
+          payload_hash?: string
+          received_at?: string
+          removal_requested_at?: string | null
+          revoked_at?: string | null
+          version?: number
+          workspace?: string
+        }
+        Relationships: []
+      }
+      whispers_updates: {
+        Row: {
+          approver_id: string | null
+          author_id: string
+          body: Json
+          created_at: string
+          disclosure_reviewer_id: string | null
+          id: string
+          published_at: string | null
+          publisher_id: string | null
+          source_report_ids: string[]
+          state: string
+          workspace: string
+        }
+        Insert: {
+          approver_id?: string | null
+          author_id: string
+          body: Json
+          created_at?: string
+          disclosure_reviewer_id?: string | null
+          id?: string
+          published_at?: string | null
+          publisher_id?: string | null
+          source_report_ids?: string[]
+          state?: string
+          workspace: string
+        }
+        Update: {
+          approver_id?: string | null
+          author_id?: string
+          body?: Json
+          created_at?: string
+          disclosure_reviewer_id?: string | null
+          id?: string
+          published_at?: string | null
+          publisher_id?: string | null
+          source_report_ids?: string[]
+          state?: string
+          workspace?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      whispers_public_updates: {
+        Row: {
+          id: string | null
+          known: string | null
+          published_at: string | null
+          sources: Json | null
+          summary: string | null
+          title: string | null
+          uncertain: string | null
+          withdrawn: boolean | null
+        }
+        Insert: {
+          id?: string | null
+          known?: never
+          published_at?: string | null
+          sources?: never
+          summary?: never
+          title?: never
+          uncertain?: never
+          withdrawn?: never
+        }
+        Update: {
+          id?: string | null
+          known?: never
+          published_at?: string | null
+          sources?: never
+          summary?: never
+          title?: never
+          uncertain?: never
+          withdrawn?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      reserve_voice_request: { Args: { p_bucket: string }; Returns: boolean }
+      whispers_access: {
+        Args: { needed: string; ws: string }
+        Returns: boolean
+      }
+      whispers_expire_private: { Args: never; Returns: number }
+      whispers_update_report: {
+        Args: { p_body: Json; p_id: string; p_version: number }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

@@ -4,6 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { Wordmark } from "@/components/whispers/Brand";
 import { t } from "@/lib/whispers/i18n";
+import { VoiceRecorder } from "@/components/whispers/VoiceRecorder";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,6 +32,7 @@ function Home() {
         </div>
         <div className="mt-4 grid gap-2">
           <Link to="/report" className="btn btn-primary btn-sm w-full">{t("home.make")}</Link>
+          <VoiceRecorder />
           <Link to="/check" className="btn btn-secondary btn-sm w-full">{t("home.check")}</Link>
         </div>
         <ol className="mt-6 grid gap-2.5 text-sm">

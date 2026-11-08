@@ -2,3 +2,10 @@
 - [x] Connect Lovable Cloud for interface translation; keep report intake visibly in demo until server access controls exist.
 - [x] Add home-page language selection and app-wide interface translation with priority crisis-region languages and custom language entry.
 - [x] Verify translation, right-to-left layout, navigation, and privacy boundaries (live Arabic, English restore, unchanged draft, 15 passing tests).
+- [x] Add consent-based voice recording, language detection, English transcription, uncertain sound observations, and editable report prefill; verified English and Spanish recordings.
+- [x] Add a separate fictional-only connected pilot with persisted reports, server-scoped roles, social staff sign-in, private-code follow-up, and reviewer/expert/publication commands. Main report experience remains demo-only.
+- [x] Add private photo re-encoding, three-photo enforcement, audit records and daily retention cleanup; full operational verification still required.
+- [x] Verify connected citizen save and follow-up through the UI, signed-out private-data exclusion, and automated release restrictions (24 tests).
+- [ ] Authenticated reviewer, expert and independent publication verification — blocked until the owner signs in and authorises staff accounts and roles; no matching owner auth account exists.
+- [ ] Integrate the complete main workflow with the connected provider, verify private media/retention under failure and concurrency, and complete abuse controls — blocked on authorised staff accounts for end-to-end verification; connected pilot is not production-ready.
+- [ ] Human translation, security/legal/operational review and named operator/contact before real-source intake; publish only after release review. These human approvals cannot be supplied automatically.
