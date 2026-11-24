@@ -10,13 +10,12 @@ interface ReportSummary {
   photos: string[];
 }
 
-async function reviewerFetch(photo?: string, signal?: AbortSignal) {
+async function reviewerFetch(query = "", init?: RequestInit) {
   const { data } = await neonAuthClient().getSession();
   if (!data?.session?.access_token) throw new Error("Sign in to continue.");
-  return fetch(photo ? `/api/public/neon-reviewer?photo=${encodeURIComponent(photo)}` : "/api/public/neon-reviewer", {
-    headers: { Authorization: `Bearer ${data.session.access_token}` },
-    ...(signal ? { signal } : {}),
-  });
+  const headers = new Headers(init?.headers);
+  headers.set("Authorization", `Bearer ${data.session.access_token}`);
+  return fetch("/api/public/neon-reviewer" + query, { ...init, headers });
 }
 
 export function NeonReviewerWorkspace() {
@@ -32,7 +31,7 @@ export function NeonReviewerWorkspace() {
         const { data } = await neonAuthClient().getSession();
         if (controller.signal.aborted || !data?.session?.user) return;
         setSignedIn(true);
-        const response = await reviewerFetch(undefined, controller.signal);
+        const response = await reviewerFetch("", { signal: controller.signal });
         if (!response.ok) throw new Error("A mapped reviewer account is required.");
         const result = await response.json() as { reports: ReportSummary[] };
         if (!controller.signal.aborted) setReports(result.reports);
@@ -83,11 +82,68 @@ export function NeonReviewerWorkspace() {
         <article className="card grid gap-2 p-4" key={report.id}>
           <h2>{report.category || "Fictional report"}</h2>
           <p className="hint">{report.workspace} · {report.received_at.slice(0, 10)}</p>
+          <NeonReportDetail id={report.id} />
           {report.photos.map((id) => <NeonReviewerPhoto key={id} id={id} />)}
         </article>
       ))}
     </section>
   );
+}
+
+interface ReportDetail {
+  report: { text: string | null; removal_requested_at: string | null };
+  messages: { id: string; text: string; sender: string }[];
+}
+
+function NeonReportDetail({ id }: { id: string }) {
+  const [detail, setDetail] = useState<ReportDetail>();
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function update(reply?: string) {
+    setBusy(true);
+    setError("");
+    try {
+      const response = reply === undefined
+        ? await reviewerFetch("?report=" + encodeURIComponent(id))
+        : await reviewerFetch("", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reportId: id, reply }),
+        });
+      if (response.status === 409) throw new Error("A removal request is pending.");
+      if (!response.ok) throw new Error("The report is unavailable or your access has changed.");
+      setDetail(await response.json() as ReportDetail);
+      if (reply !== undefined) setMessage("");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "The report is unavailable.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return <div className="grid gap-2">
+    <Button variant="outline" disabled={busy} onClick={() => {
+      if (detail) { setDetail(undefined); setMessage(""); setError(""); }
+      else void update();
+    }}>{detail ? "Close report" : "Read report"}</Button>
+    {detail && <>
+      <p className="whitespace-pre-wrap">{detail.report.text}</p>
+      {detail.messages.map(item => <p key={item.id} className="whitespace-pre-wrap">
+        <strong>{item.sender}:</strong> {item.text}
+      </p>)}
+      {!detail.report.removal_requested_at && <form className="grid gap-2" onSubmit={event => {
+        event.preventDefault();
+        if (message.trim() && !busy) void update(message.trim());
+      }}>
+        <label>Reply to contributor<textarea className="field mt-2" value={message}
+          onChange={event => setMessage(event.target.value)} maxLength={2000} /></label>
+        <Button type="submit" disabled={busy || !message.trim()}>Send reply</Button>
+      </form>}
+    </>}
+    {error && <p role="alert">{error}</p>}
+  </div>;
 }
 
 function NeonReviewerPhoto({ id }: { id: string }) {
@@ -100,7 +156,7 @@ function NeonReviewerPhoto({ id }: { id: string }) {
     setBusy(true);
     setFailed(false);
     try {
-      const response = await reviewerFetch(id);
+      const response = await reviewerFetch("?photo=" + encodeURIComponent(id));
       if (!response.ok || response.headers.get("content-type") !== "image/jpeg") throw new Error();
       setSource(URL.createObjectURL(await response.blob()));
     } catch {
