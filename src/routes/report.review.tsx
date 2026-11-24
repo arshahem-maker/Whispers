@@ -12,7 +12,7 @@ import { decodeImage, ImageError } from "@/lib/whispers/image";
 import { broadAreaLabel } from "@/lib/whispers/locations";
 import { ValidationError } from "@/lib/whispers/store";
 import { useServerFn } from "@tanstack/react-start";
-import { submitPilotReport } from "@/lib/whispers/pilot.functions";
+import { submitPilotReport, submitNeonPilotReport } from "@/lib/whispers/pilot.functions";
 import { pilotReportSchema } from "@/lib/whispers/pilot-schema";
 import { Button } from "@/components/ui/button";
 
@@ -47,7 +47,7 @@ function Row({ label, value, edit }: { label: string; value: string; edit: () =>
 function Review() {
   useTranslationVersion();
   const { draft, setDraft, store, submission, setSubmission, connected, setConnected } = useWhispers();
-  const submitConnected = useServerFn(submitPilotReport);
+  const submitConnected = useServerFn(import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? submitNeonPilotReport : submitPilotReport);
   const navigate = useNavigate();
   const [state, setState] = useState<"idle" | "sending" | "failed" | "timeout" | "offline">("idle");
   const [ackErr, setAckErr] = useState(false);
@@ -145,7 +145,7 @@ function Review() {
       <p className="card p-4 mt-6">{t("s3.safe")}</p>
       <section className="mt-5 border-y py-4">
         <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{tr("I confirm this contains only fictional test information.")}</label>
-        {connected && <Link to="/review/sign-in" className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
+        {connected && <Link to={import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? "/pilot" : "/review/sign-in"} className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
         <p className="hint mt-2">{connected ? tr("Invited pilot testers only. Sign in before sending. Use fictional information only.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
       </section>
 

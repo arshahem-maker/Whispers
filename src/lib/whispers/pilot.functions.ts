@@ -1,9 +1,10 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createMiddleware, createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { pilotSubmitSchema, pilotCommandSchema } from "./pilot-schema";
 
 export const submitPilotReport = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((input) => pilotSubmitSchema.parse(input)).handler(async ({ data, context }) => {
+  if (process.env["WHISPERS_PILOT_BACKEND"] === "neon") throw new Error("Use the Neon sign-in to submit a report.");
   const { submitPilot } = await import("./pilot.server");
   const { getRequest, setResponseHeader } = await import("@tanstack/react-start/server");
   setResponseHeader("Cache-Control", "no-store");
@@ -11,8 +12,28 @@ export const submitPilotReport = createServerFn({ method: "POST" }).middleware([
   if (!testerIds.includes(context.userId)) throw new Error("Connected intake is available to invited pilot testers only.");
   return submitPilot(data, getRequest());
 });
+const attachNeonSession = createMiddleware({ type: "function" }).client(async ({ next }) => {
+  const { neonAuthClient } = await import("@/integrations/neon/auth-client");
+  const { data } = await neonAuthClient().getSession();
+  if (!data.session?.access_token) throw new Error("Sign in as an invited tester.");
+  return next({ headers: { Authorization: `Bearer ${data.session.access_token}` } });
+});
+
+export const submitNeonPilotReport = createServerFn({ method: "POST" })
+  .middleware([attachNeonSession])
+  .inputValidator((input) => pilotSubmitSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { getRequest, setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "no-store");
+    if (process.env["WHISPERS_PILOT_BACKEND"] !== "neon") throw new Error("Neon reporting is unavailable.");
+    const { submitNeonPilot } = await import("./neon-citizen.server");
+    return submitNeonPilot(data, getRequest());
+  });
 export const pilotReceipt = createServerFn({ method: "POST" }).inputValidator((input) => z.object({ code: z.string().max(80), action: z.enum(["open","message","removal"]), text: z.string().max(2000).optional() }).strict().parse(input)).handler(async ({ data }) => {
   const { setResponseHeader } = await import("@tanstack/react-start/server"); setResponseHeader("Cache-Control", "no-store");
+  if (process.env["WHISPERS_PILOT_BACKEND"] === "neon") {
+    return (await import("./neon-citizen.server")).receiptNeonPilot(data);
+  }
   const { receiptPilot } = await import("./pilot.server"); return receiptPilot(data);
 });
 export const pilotStaff = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((value) => z.number().int().min(0).max(1000).parse(value)).handler(async ({ context, data }) => {
@@ -92,5 +113,8 @@ export const pilotCommand = createServerFn({ method: "POST" }).middleware([requi
   const { commandPilot } = await import("./pilot.server"); return commandPilot(context.supabase,context.userId,data);
 });
 export const pilotUpload = createServerFn({ method: "POST" }).inputValidator((input) => z.object({ code: z.string().max(80), bytes: z.array(z.number().int().min(0).max(255)).max(1500000), uploadId: z.string().min(1).max(100) }).strict().parse(input)).handler(async ({ data }) => {
+  if (process.env["WHISPERS_PILOT_BACKEND"] === "neon") {
+    return (await import("./neon-citizen.server")).uploadNeonPilot(data);
+  }
   const { uploadPilot } = await import("./pilot.server"); return uploadPilot(data);
 });

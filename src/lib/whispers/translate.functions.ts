@@ -27,6 +27,15 @@ async function translateBatch(language: string, offset: number, allowGenerate: b
   const next = offset + batch.length < all.length ? offset + batch.length : null;
   const key = normaliseLanguage(language);
   const hash = await catalogHash(all);
+  if (process.env["WHISPERS_PILOT_BACKEND"] === "neon") {
+    const { neonDatabase } = await import("@/integrations/neon/database.server");
+    const [saved] = await neonDatabase()<{ phrases: Record<string, string> | null }[]>`
+      select phrases from public.whispers_interface_translations
+      where language=${key} and catalog_hash=${hash} and batch_offset=${offset} and status='ready'
+    `;
+    if (saved?.phrases) return { phrases: saved.phrases, next, status: "ready" };
+    return { phrases: {}, next: null, status: "unavailable" };
+  }
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const saved = await supabaseAdmin.from("whispers_interface_translations").select("status,phrases").eq("language", key).eq("catalog_hash", hash).eq("batch_offset", offset).maybeSingle();
   if (saved.error) throw new Error("Translation unavailable. English is still available.");

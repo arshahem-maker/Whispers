@@ -57,3 +57,12 @@ Set the server-only `WHISPERS_PUBLIC_FEED_BACKEND=neon` to read public updates
 from the Neon PostgreSQL projection. Keep the pooled `DATABASE_URL` server-only.
 This setting affects the public feed. Connected intake, staff sign-in and
 private media still use the existing Supabase application integrations.
+
+The opt-in Neon citizen and reviewer routes use `WHISPERS_PILOT_BACKEND=neon`,
+`VITE_WHISPERS_REVIEWER_BACKEND=neon`, and `VITE_NEON_AUTH_URL`. Use those together
+during synthetic staging. Existing Lovable data is held in a restricted Neon
+migration snapshot. Preserve original attachment keys when transferring the
+Lovable Storage downloads with
+`node --env-file=.env.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.
+Verify every photo and map the existing staff identity before activating the
+copied records or switching hosted traffic.

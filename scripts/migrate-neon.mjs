@@ -11,6 +11,7 @@ const migrations = [
   "drizzle/migrations/0005_bounded_translation_and_voice_costs.sql",
   "drizzle/proposed/0006_pilot_release_blockers.sql",
   "drizzle/neon/0007_private_photo.sql",
+  "drizzle/neon/0008_record_guard.sql",
 ];
 
 const connection = process.env.DATABASE_URL_UNPOOLED;
