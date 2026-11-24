@@ -50,7 +50,10 @@ In staging Supabase, create the private `whispers-private` bucket, apply the rev
 Use `staging/neon` and fictional fixtures until hosted verification is complete.
 After `neon deploy` pulls the environment, apply the reviewed PostgreSQL
 migrations with `node --env-file=.env.local scripts/migrate-neon.mjs`. Use a
-disposable database for `bash scripts/test-neon-db.sh`.
+disposable database for `bash scripts/test-neon-db.sh`. Run
+`bash scripts/test-neon-import.sh` to rehearse missing-file rejection, atomic
+rollback, repeat activation, and PostgreSQL dump and restore with fictional
+rows and loopback storage. Rehearse private object recovery separately.
 
 Build with `VITE_WHISPERS_REVIEWER_BACKEND=neon` and `VITE_NEON_AUTH_URL` set to
 the selected branch's Auth base URL. Set `WHISPERS_PILOT_BACKEND=neon` on the

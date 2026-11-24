@@ -14,7 +14,7 @@ export const submitPilotReport = createServerFn({ method: "POST" }).middleware([
 });
 const attachNeonSession = createMiddleware({ type: "function" }).client(async ({ next }) => {
   const { neonAuthClient } = await import("@/integrations/neon/auth-client");
-  const { data } = await neonAuthClient().getSession();
+  const { data } = await (await neonAuthClient()).getSession();
   if (!data.session?.access_token) throw new Error("Sign in as an invited tester.");
   return next({ headers: { Authorization: `Bearer ${data.session.access_token}` } });
 });

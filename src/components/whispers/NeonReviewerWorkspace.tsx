@@ -14,7 +14,7 @@ interface ReportSummary {
 }
 
 async function reviewerFetch(query = "", init?: RequestInit) {
-  const { data } = await neonAuthClient().getSession();
+  const { data } = await (await neonAuthClient()).getSession();
   if (!data?.session?.access_token) throw new Error("Sign in to continue.");
   const headers = new Headers(init?.headers);
   headers.set("Authorization", `Bearer ${data.session.access_token}`);
@@ -31,7 +31,7 @@ export function NeonReviewerWorkspace() {
     const controller = new AbortController();
     async function load() {
       try {
-        const { data } = await neonAuthClient().getSession();
+        const { data } = await (await neonAuthClient()).getSession();
         if (controller.signal.aborted || !data?.session?.user) return;
         setSignedIn(true);
         const response = await reviewerFetch("", { signal: controller.signal });
@@ -55,7 +55,7 @@ export function NeonReviewerWorkspace() {
   async function signIn() {
     setError("");
     try {
-      const { error } = await neonAuthClient().signInWithOAuth({
+      const { error } = await (await neonAuthClient()).signInWithOAuth({
         provider: "google",
         options: { redirectTo: new URL("/pilot", window.location.origin).href },
       });
@@ -94,7 +94,7 @@ export function NeonReviewerWorkspace() {
     setReports([]);
     setError("");
     try {
-      const { error } = await neonAuthClient().signOut();
+      const { error } = await (await neonAuthClient()).signOut();
       if (error) throw new Error();
       setSignedIn(false);
     } catch {

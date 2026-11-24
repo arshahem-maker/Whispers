@@ -5,12 +5,18 @@ const apply = process.argv.includes("--apply");
 const databaseUrl = process.env.DATABASE_URL_UNPOOLED;
 const storageEndpoint = process.env.AWS_ENDPOINT_URL_S3;
 const authBaseUrl = process.env.NEON_AUTH_BASE_URL;
-if (!databaseUrl || !storageEndpoint || !authBaseUrl
-  || ![databaseUrl, storageEndpoint, authBaseUrl].every(value => new URL(value).hostname.endsWith(".neon.tech"))) {
-  throw new Error("Run with the same Neon branch's database, storage, and Auth configuration.");
+const rehearsal = process.argv.includes("--rehearse");
+const endpoints = [databaseUrl, storageEndpoint, authBaseUrl].map(value => value ? new URL(value) : null);
+const loopback = endpoint => endpoint?.hostname === "127.0.0.1";
+const hosted = endpoint => endpoint?.hostname.endsWith(".neon.tech");
+if (rehearsal ? !endpoints.every(loopback) : !endpoints.every(hosted)) {
+  throw new Error("Use the same Neon branch for database, storage, and Auth. Rehearsals require loopback endpoints.");
 }
-const issuer = new URL(authBaseUrl).origin;
-const db = postgres(databaseUrl, { max: 1, ssl: "require" });
+if (!rehearsal && endpoints[0].hostname.split(".")[0] !== endpoints[2].hostname.split(".")[0]) {
+  throw new Error("The direct database endpoint and Auth endpoint disagree.");
+}
+const issuer = endpoints[2].origin;
+const db = postgres(databaseUrl, { max: 1, ssl: rehearsal ? false : "require" });
 const storage = new S3Client({ endpoint: storageEndpoint, region: process.env.AWS_REGION, forcePathStyle: true });
 
 const tables = [
@@ -32,8 +38,12 @@ try {
   const manifest = new Set(payload.file_manifest.map(entry => entry.name));
   const records = payload.whispers_records;
   const reports = payload.whispers_reports;
-  const photoKeys = records.filter(record => record.kind === "photo").map(record => record.body?.key);
-  if (photoKeys.some(key => !manifest.has(key)) || photoKeys.length !== manifest.size) {
+  const photos = records.filter(record => record.kind === "photo");
+  const photoKeys = new Set(photos.map(record => record.body?.key));
+  if (manifest.size !== payload.file_manifest.length || photos.length !== photoKeys.size ||
+      photoKeys.size !== manifest.size || photos.some(record =>
+        typeof record.body?.key !== "string" || !manifest.has(record.body.key) ||
+        !record.body.key.startsWith(record.report_id + "/"))) {
     throw new Error("The snapshot photo records and storage manifest disagree.");
   }
   let missing = 0;
@@ -79,7 +89,7 @@ try {
     if (apply) throw new Error("Preflight blocked activation. Copy missing photos and verify legacy identities first.");
     process.exitCode = 2;
   } else if (apply) {
-    await db.begin(async sql => {
+    const applied = await db.begin(async sql => {
       await sql`select pg_advisory_xact_lock(521308883)`;
       await sql`create table if not exists whispers_legacy_import.activated_snapshots (
         snapshot_id uuid primary key references whispers_legacy_import.snapshots(id),
@@ -87,7 +97,7 @@ try {
       )`;
       await sql`revoke all on table whispers_legacy_import.activated_snapshots from public, anon, authenticated, service_role`;
       const [done] = await sql`select 1 from whispers_legacy_import.activated_snapshots where snapshot_id=${snapshot.id}`;
-      if (done) return;
+      if (done) return false;
       const [latest] = await sql`select id from whispers_legacy_import.snapshots order by imported_at desc limit 1`;
       if (latest?.id !== snapshot.id) throw new Error("The source snapshot changed. Run preflight again.");
       for (const name of tables) {
@@ -112,8 +122,9 @@ try {
         if (inserted.count !== rows.length) throw new Error(`Count mismatch importing ${name}.`);
       }
       await sql`insert into whispers_legacy_import.activated_snapshots (snapshot_id) values (${snapshot.id})`;
+      return true;
     });
-    console.log("Snapshot activation verified.");
+    console.log(applied ? "Snapshot activation verified." : "Snapshot already activated.");
   } else {
     console.log("Preflight passed. Use --apply to activate the verified snapshot.");
   }

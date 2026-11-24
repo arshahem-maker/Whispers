@@ -21,4 +21,5 @@ jobs:
       - run: npm test
       - run: bash scripts/test-pilot-db.sh
       - run: bash scripts/test-neon-db.sh
+      - run: bash scripts/test-neon-import.sh
       - run: npm run build
