@@ -44,3 +44,9 @@ Use a staging database and synthetic reports. The browser-tab demo can run witho
 The Render Blueprint targets one Free Node web service on the pilot branch. Use a separate Supabase Free project for PostgreSQL, Auth, and private storage. The browser and server Supabase URL and publishable key must point to that same staging project. Keep the service-role key server-only. The Blueprint generates separate secrets for intake throttling and the retention endpoint, so text intake can work without an AI gateway key.
 
 In staging Supabase, create the private `whispers-private` bucket, apply the reviewed migrations, and configure Google OAuth with the hosted `/pilot` redirect. Use a scheduled GitHub Actions job or an existing scheduler for the authenticated retention endpoint after the staging host and secret are configured. Export the database and private storage separately for restore testing.
+
+### Neon staging migration
+
+The `staging/neon` branch starts a provider-independent database migration. Run `bash scripts/test-neon-db.sh` against a disposable PostgreSQL instance to check the migration sequence and private-photo authorization. The shared transactions remain PostgreSQL. The Neon bootstrap supplies the role and identity contracts previously provided by Supabase, and the photo lookup checks the actor's active reviewer scope and the source report's current retention state.
+
+The current web application still uses Supabase. Before switching a deployment, connect Neon Auth and map verified identities to stable application user IDs, set the actor only inside a server-controlled transaction, replace the existing application queries, and stream media from a private bucket through an authenticated application endpoint. Retest sign-in, invitations, report submission, storage cleanup, and restore before pointing any hosted staging traffic at Neon.
