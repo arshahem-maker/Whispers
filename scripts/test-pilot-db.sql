@@ -9,12 +9,13 @@ INSERT INTO user_roles (user_id, role, contexts, active) VALUES
  ('00000000-0000-4000-8000-000000000002','reviewer',ARRAY['td'],true),
  ('00000000-0000-4000-8000-000000000003','reviewer',ARRAY['td'],false);
 INSERT INTO whispers_reports(id,workspace,code_hash,idempotency_key,payload_hash,body)
- VALUES ('00000000-0000-4000-8000-000000000004','ua',repeat('a',64),'fictional-db-test',repeat('b',64),'{"fictional":true}');
+ VALUES ('00000000-0000-4000-8000-000000000004','ua',repeat('a',64),'fictional-db-test',repeat('b',64),'{"fictional":true,"publicSummaryPermission":true,"sensitivity":"standard"}');
 
 DO $$
 DECLARE actor uuid := '00000000-0000-4000-8000-000000000001';
         reviewer uuid := '00000000-0000-4000-8000-000000000002';
         inactive uuid := '00000000-0000-4000-8000-000000000003';
+        update_id uuid;
         report_id uuid := '00000000-0000-4000-8000-000000000004';
 BEGIN
  IF NOT whispers_reserve_pilot_quota('upload:test',1,3600)
@@ -45,6 +46,16 @@ BEGIN
  EXCEPTION WHEN raise_exception THEN
    IF SQLERRM <> 'Select an authorised workspace' THEN RAISE; END IF;
  END;
+ PERFORM whispers_set_staff_scope(actor, inactive, 'publisher', ARRAY['ua'], true);
+ INSERT INTO whispers_updates(workspace, source_report_ids, body, author_id)
+   VALUES('ua', ARRAY[report_id], '{"title":"Fictional update"}', reviewer) RETURNING id INTO update_id;
+ PERFORM whispers_publication_transition(update_id, reviewer, 'submit_update');
+ PERFORM whispers_publication_transition(update_id, inactive, 'disclosure');
+ PERFORM whispers_publication_transition(update_id, inactive, 'approve');
+ PERFORM whispers_publication_transition(update_id, inactive, 'publish');
+ IF NOT EXISTS (SELECT 1 FROM whispers_public_updates WHERE id=update_id AND NOT withdrawn) THEN
+   RAISE EXCEPTION 'Approved fictional update was not visible';
+ END IF;
  IF NOT whispers_extend_retention(report_id,actor,now()+interval '5 days','Fictional test')
     OR NOT whispers_request_removal(report_id) OR NOT whispers_request_removal(report_id) THEN
    RAISE EXCEPTION 'Retention or removal did not record the expected outcome';
@@ -60,6 +71,10 @@ BEGIN
  END;
  IF NOT whispers_revoke_private(report_id) OR whispers_request_removal(report_id) THEN
    RAISE EXCEPTION 'Revoked report remained actionable';
+ END IF;
+ IF NOT EXISTS (SELECT 1 FROM whispers_public_updates WHERE id=update_id AND withdrawn AND summary IS NULL)
+    OR EXISTS (SELECT 1 FROM whispers_expert_requests WHERE report_id=ANY(report_ids)) THEN
+   RAISE EXCEPTION 'Revocation did not scrub derived records';
  END IF;
 END $$;
 ROLLBACK;
