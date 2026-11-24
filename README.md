@@ -50,3 +50,10 @@ In staging Supabase, create the private `whispers-private` bucket, apply the rev
 The `staging/neon` branch starts a provider-independent database migration. Run `bash scripts/test-neon-db.sh` against a disposable PostgreSQL instance to check the migration sequence and private-photo authorization. The shared transactions remain PostgreSQL. The Neon bootstrap supplies the role and identity contracts previously provided by Supabase, and the photo lookup checks the actor's active reviewer scope and the source report's current retention state.
 
 The current web application still uses Supabase. Before switching a deployment, connect Neon Auth and map verified identities to stable application user IDs, set the actor only inside a server-controlled transaction, replace the existing application queries, and stream media from a private bucket through an authenticated application endpoint. Retest sign-in, invitations, report submission, storage cleanup, and restore before pointing any hosted staging traffic at Neon.
+
+After `neon deploy` pulls the environment, apply the migrations with
+`node --env-file=.env.local scripts/migrate-neon.mjs` (use `.env` if Neon wrote there).
+Set the server-only `WHISPERS_PUBLIC_FEED_BACKEND=neon` to read public updates
+from the Neon PostgreSQL projection. Keep the pooled `DATABASE_URL` server-only.
+This setting affects the public feed. Connected intake, staff sign-in and
+private media still use the existing Supabase application integrations.

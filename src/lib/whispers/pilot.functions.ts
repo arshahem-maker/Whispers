@@ -67,16 +67,27 @@ export const acceptStaffInvitations = createServerFn({ method: "POST" }).middlew
 export const pilotPublicUpdates = createServerFn({ method: "GET" }).handler(async () => {
   const { setResponseHeader } = await import("@tanstack/react-start/server");
   setResponseHeader("Cache-Control", "no-store");
+  const rows = process.env["WHISPERS_PUBLIC_FEED_BACKEND"] === "neon"
+    ? await (await import("./neon-public-updates.server")).readNeonPublicUpdates()
+    : await readSupabasePublicUpdates();
+  return rows.map((u) => ({ id: String(u.id), title: String(u.title ?? ""), summary: String(u.summary ?? ""), known: String(u.known ?? ""), uncertain: String(u.uncertain ?? ""), sources: Array.isArray(u.sources) ? u.sources.filter((s): s is string => typeof s === "string") : [], publishedAt: String(u.published_at), withdrawn: Boolean(u.withdrawn), demo: true as const, broadContext: "Fictional connected pilot", corrections: [] }));
+});
+async function readSupabasePublicUpdates() {
   const { createClient } = await import("@supabase/supabase-js");
-  const key = process.env['SUPABASE_PUBLISHABLE_KEY']; const url = process.env['SUPABASE_URL'];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  const url = process.env["SUPABASE_URL"];
   if (!key || !url) throw new Error("Updates unavailable.");
   const client = createClient(url, key, { auth: { persistSession: false }, global: { fetch: (input, init) => {
-    const headers = new Headers(init?.headers); if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization"); headers.set("apikey", key); return fetch(input, { ...init, headers });
+    const headers = new Headers(init?.headers);
+    if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+    headers.set("apikey", key);
+    return fetch(input, { ...init, headers });
   } } });
   const result = await client.from("whispers_public_updates").select("id,title,summary,known,uncertain,sources,published_at,withdrawn").order("published_at", { ascending: false }).limit(100);
   if (result.error) throw new Error("Updates unavailable.");
-  return (result.data ?? []).map((u) => ({ id: String(u.id), title: String(u.title ?? ""), summary: String(u.summary ?? ""), known: String(u.known ?? ""), uncertain: String(u.uncertain ?? ""), sources: Array.isArray(u.sources) ? u.sources.filter((s): s is string => typeof s === "string") : [], publishedAt: String(u.published_at), withdrawn: Boolean(u.withdrawn), demo: true as const, broadContext: "Fictional connected pilot", corrections: [] }));
-});
+  return result.data ?? [];
+}
+
 export const pilotCommand = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((input) => pilotCommandSchema.parse(input)).handler(async ({ data,context }) => {
   const { commandPilot } = await import("./pilot.server"); return commandPilot(context.supabase,context.userId,data);
 });
