@@ -23,6 +23,7 @@ import { Route as ReviewExpertRequestsRouteImport } from './routes/review.expert
 import { Route as ReviewSettingsRouteImport } from './routes/review.settings'
 import { Route as ReviewSignInRouteImport } from './routes/review.sign-in'
 import { Route as ReviewUpdatesRouteImport } from './routes/review.updates'
+import { Route as ApiPublicNeonReviewerRouteImport } from './routes/api/public/neon-reviewer'
 import { Route as ApiPublicRetentionRouteImport } from './routes/api/public/retention'
 import { Route as ApiPublicVoiceRouteImport } from './routes/api/public/voice'
 import { Route as ApiPublicVoiceChallengeRouteImport } from './routes/api/public/voice-challenge'
@@ -101,6 +102,11 @@ const ReviewUpdatesRoute = ReviewUpdatesRouteImport.update({
   path: '/review/updates',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNeonReviewerRoute = ApiPublicNeonReviewerRouteImport.update({
+  id: '/api/public/neon-reviewer',
+  path: '/api/public/neon-reviewer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRetentionRoute = ApiPublicRetentionRouteImport.update({
   id: '/api/public/retention',
   path: '/api/public/retention',
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/review/sign-in': typeof ReviewSignInRoute
   '/review/updates': typeof ReviewUpdatesRoute
   '/report/': typeof ReportIndexRoute
+  '/api/public/neon-reviewer': typeof ApiPublicNeonReviewerRoute
   '/api/public/retention': typeof ApiPublicRetentionRoute
   '/api/public/voice': typeof ApiPublicVoiceRoute
   '/api/public/voice-challenge': typeof ApiPublicVoiceChallengeRoute
@@ -175,6 +182,7 @@ export interface FileRoutesByTo {
   '/review/sign-in': typeof ReviewSignInRoute
   '/review/updates': typeof ReviewUpdatesRoute
   '/report': typeof ReportIndexRoute
+  '/api/public/neon-reviewer': typeof ApiPublicNeonReviewerRoute
   '/api/public/retention': typeof ApiPublicRetentionRoute
   '/api/public/voice': typeof ApiPublicVoiceRoute
   '/api/public/voice-challenge': typeof ApiPublicVoiceChallengeRoute
@@ -199,6 +207,7 @@ export interface FileRoutesById {
   '/review/sign-in': typeof ReviewSignInRoute
   '/review/updates': typeof ReviewUpdatesRoute
   '/report/': typeof ReportIndexRoute
+  '/api/public/neon-reviewer': typeof ApiPublicNeonReviewerRoute
   '/api/public/retention': typeof ApiPublicRetentionRoute
   '/api/public/voice': typeof ApiPublicVoiceRoute
   '/api/public/voice-challenge': typeof ApiPublicVoiceChallengeRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/review/sign-in'
     | '/review/updates'
     | '/report/'
+    | '/api/public/neon-reviewer'
     | '/api/public/retention'
     | '/api/public/voice'
     | '/api/public/voice-challenge'
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/review/sign-in'
     | '/review/updates'
     | '/report'
+    | '/api/public/neon-reviewer'
     | '/api/public/retention'
     | '/api/public/voice'
     | '/api/public/voice-challenge'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/review/sign-in'
     | '/review/updates'
     | '/report/'
+    | '/api/public/neon-reviewer'
     | '/api/public/retention'
     | '/api/public/voice'
     | '/api/public/voice-challenge'
@@ -294,6 +306,7 @@ export interface RootRouteChildren {
   ReviewSignInRoute: typeof ReviewSignInRoute
   ReviewUpdatesRoute: typeof ReviewUpdatesRoute
   ReportIndexRoute: typeof ReportIndexRoute
+  ApiPublicNeonReviewerRoute: typeof ApiPublicNeonReviewerRoute
   ApiPublicRetentionRoute: typeof ApiPublicRetentionRoute
   ApiPublicVoiceRoute: typeof ApiPublicVoiceRoute
   ApiPublicVoiceChallengeRoute: typeof ApiPublicVoiceChallengeRoute
@@ -403,6 +416,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewUpdatesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/neon-reviewer': {
+      id: '/api/public/neon-reviewer'
+      path: '/api/public/neon-reviewer'
+      fullPath: '/api/public/neon-reviewer'
+      preLoaderRoute: typeof ApiPublicNeonReviewerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/retention': {
       id: '/api/public/retention'
       path: '/api/public/retention'
@@ -470,6 +490,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReviewSignInRoute: ReviewSignInRoute,
   ReviewUpdatesRoute: ReviewUpdatesRoute,
   ReportIndexRoute: ReportIndexRoute,
+  ApiPublicNeonReviewerRoute: ApiPublicNeonReviewerRoute,
   ApiPublicRetentionRoute: ApiPublicRetentionRoute,
   ApiPublicVoiceRoute: ApiPublicVoiceRoute,
   ApiPublicVoiceChallengeRoute: ApiPublicVoiceChallengeRoute,

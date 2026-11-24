@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
+import { NeonReviewerWorkspace } from "@/components/whispers/NeonReviewerWorkspace";
 import { PilotWorkspace } from "@/components/whispers/PilotWorkspace";
 import { useWhispers } from "@/lib/whispers/context";
 import { generatePrivateCode, hashCode, groupCode } from "@/lib/whispers/crypto";
@@ -9,7 +10,14 @@ import { submitPilotReport,pilotReceipt,pilotUpload } from "@/lib/whispers/pilot
 import { Button } from "@/components/ui/button";
 import { tr,useTranslationVersion } from "@/lib/whispers/translation";
 export const Route=createFileRoute("/pilot")({head:()=>({meta:[{title:"Connected fictional pilot — Whispers"},{name:"description",content:"Verify connected report storage and staff workflows with fictional information only."},{property:"og:title",content:"Connected fictional pilot — Whispers"},{property:"og:description",content:"Fictional-only connected report and review testing."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"},{name:"robots",content:"noindex"}]}),component:Pilot});
-function Pilot(){
+function Pilot() {
+  if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") {
+    return <CitizenShell sensitive><h1>Connected fictional pilot</h1><NeonReviewerWorkspace /></CitizenShell>;
+  }
+  return <LegacyPilot />;
+}
+
+function LegacyPilot(){
   useTranslationVersion();const {draft}=useWhispers();const submit=useServerFn(submitPilotReport);const receipt=useServerFn(pilotReceipt);const upload=useServerFn(pilotUpload);
   const [tab,setTab]=useState("staff");const [fictional,setFictional]=useState(false);const [code,setCode]=useState("");const [held,setHeld]=useState<{code:string;key:string}|null>(null);
   const [view,setView]=useState<Awaited<ReturnType<typeof pilotReceipt>>>(null);const [text,setText]=useState("");const [error,setError]=useState("");const [busy,setBusy]=useState(false);
