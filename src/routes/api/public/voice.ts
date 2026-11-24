@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { VOICE_MAX_BYTES } from "@/lib/whispers/voice-schema";
+import { powOk, signChallenge } from "@/lib/whispers/voice-challenge";
 
 export const Route = createFileRoute("/api/public/voice")({
   server: { handlers: { POST: async ({ request }) => {
@@ -26,6 +27,12 @@ export const Route = createFileRoute("/api/public/voice")({
       if (form.get("consent") !== "yes") throw new VoiceError(400, "Consent is required before audio processing.");
       const file = form.get("file");
       if (!(file instanceof File) || file.type !== "audio/wav" || file.size < 2048 || file.size > VOICE_MAX_BYTES) throw new VoiceError(400, "Please send a complete WAV recording.");
+      const challenge = String(form.get("challenge") ?? ""), signature = String(form.get("signature") ?? ""), counter = String(form.get("counter") ?? "");
+      const powSecret = process.env['LOVABLE_API_KEY'];
+      if (!powSecret) throw new VoiceError(401, "Voice reporting is not configured.");
+      const expires = Number(challenge.split(".")[1]);
+      if (!/^[0-9a-f]{32}\.\d+$/.test(challenge) || !(expires > Date.now()) || signature !== await signChallenge(powSecret, challenge) || !(await powOk(challenge, counter)))
+        throw new VoiceError(403, "Recording check expired. Please record again.");
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       // Hash edge-provided network identity; never persist raw addresses or audio.
       const address = request.headers.get("cf-connecting-ip") ?? "local-preview";

@@ -25,6 +25,7 @@ import { Route as ReviewSignInRouteImport } from './routes/review.sign-in'
 import { Route as ReviewUpdatesRouteImport } from './routes/review.updates'
 import { Route as ApiPublicRetentionRouteImport } from './routes/api/public/retention'
 import { Route as ApiPublicVoiceRouteImport } from './routes/api/public/voice'
+import { Route as ApiPublicVoiceChallengeRouteImport } from './routes/api/public/voice-challenge'
 import { Route as ExpertAssignmentsIndexRouteImport } from './routes/expert.assignments.index'
 import { Route as ExpertAssignmentsIdRouteImport } from './routes/expert.assignments.$id'
 import { Route as ReviewReportsIndexRouteImport } from './routes/review.reports.index'
@@ -110,6 +111,11 @@ const ApiPublicVoiceRoute = ApiPublicVoiceRouteImport.update({
   path: '/api/public/voice',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicVoiceChallengeRoute = ApiPublicVoiceChallengeRouteImport.update({
+  id: '/api/public/voice-challenge',
+  path: '/api/public/voice-challenge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExpertAssignmentsIndexRoute = ExpertAssignmentsIndexRouteImport.update({
   id: '/expert/assignments/',
   path: '/expert/assignments/',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/report/': typeof ReportIndexRoute
   '/api/public/retention': typeof ApiPublicRetentionRoute
   '/api/public/voice': typeof ApiPublicVoiceRoute
+  '/api/public/voice-challenge': typeof ApiPublicVoiceChallengeRoute
   '/expert/assignments/$id': typeof ExpertAssignmentsIdRoute
   '/review/reports/$id': typeof ReviewReportsIdRoute
   '/expert/assignments/': typeof ExpertAssignmentsIndexRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/report': typeof ReportIndexRoute
   '/api/public/retention': typeof ApiPublicRetentionRoute
   '/api/public/voice': typeof ApiPublicVoiceRoute
+  '/api/public/voice-challenge': typeof ApiPublicVoiceChallengeRoute
   '/expert/assignments/$id': typeof ExpertAssignmentsIdRoute
   '/review/reports/$id': typeof ReviewReportsIdRoute
   '/expert/assignments': typeof ExpertAssignmentsIndexRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/report/': typeof ReportIndexRoute
   '/api/public/retention': typeof ApiPublicRetentionRoute
   '/api/public/voice': typeof ApiPublicVoiceRoute
+  '/api/public/voice-challenge': typeof ApiPublicVoiceChallengeRoute
   '/expert/assignments/$id': typeof ExpertAssignmentsIdRoute
   '/review/reports/$id': typeof ReviewReportsIdRoute
   '/expert/assignments/': typeof ExpertAssignmentsIndexRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/report/'
     | '/api/public/retention'
     | '/api/public/voice'
+    | '/api/public/voice-challenge'
     | '/expert/assignments/$id'
     | '/review/reports/$id'
     | '/expert/assignments/'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/api/public/retention'
     | '/api/public/voice'
+    | '/api/public/voice-challenge'
     | '/expert/assignments/$id'
     | '/review/reports/$id'
     | '/expert/assignments'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/report/'
     | '/api/public/retention'
     | '/api/public/voice'
+    | '/api/public/voice-challenge'
     | '/expert/assignments/$id'
     | '/review/reports/$id'
     | '/expert/assignments/'
@@ -284,6 +296,7 @@ export interface RootRouteChildren {
   ReportIndexRoute: typeof ReportIndexRoute
   ApiPublicRetentionRoute: typeof ApiPublicRetentionRoute
   ApiPublicVoiceRoute: typeof ApiPublicVoiceRoute
+  ApiPublicVoiceChallengeRoute: typeof ApiPublicVoiceChallengeRoute
   ExpertAssignmentsIdRoute: typeof ExpertAssignmentsIdRoute
   ReviewReportsIdRoute: typeof ReviewReportsIdRoute
   ExpertAssignmentsIndexRoute: typeof ExpertAssignmentsIndexRoute
@@ -404,6 +417,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicVoiceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/voice-challenge': {
+      id: '/api/public/voice-challenge'
+      path: '/api/public/voice-challenge'
+      fullPath: '/api/public/voice-challenge'
+      preLoaderRoute: typeof ApiPublicVoiceChallengeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/expert/assignments/': {
       id: '/expert/assignments/'
       path: '/expert/assignments'
@@ -452,6 +472,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportIndexRoute: ReportIndexRoute,
   ApiPublicRetentionRoute: ApiPublicRetentionRoute,
   ApiPublicVoiceRoute: ApiPublicVoiceRoute,
+  ApiPublicVoiceChallengeRoute: ApiPublicVoiceChallengeRoute,
   ExpertAssignmentsIdRoute: ExpertAssignmentsIdRoute,
   ReviewReportsIdRoute: ReviewReportsIdRoute,
   ExpertAssignmentsIndexRoute: ExpertAssignmentsIndexRoute,

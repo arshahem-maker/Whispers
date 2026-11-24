@@ -1,4 +1,8 @@
 # Tasks
+- [x] Execute requested photo, report/private-code, live-voice and translation checks; passes, failures and blocked coverage recorded in TESTING-RESULTS.md.
+- [ ] Complete successful live voice and current-catalog translation checks — blocked by AI gateway HTTP 402 “Not enough credits”; voice is paused after the terminal failure.
+- [ ] Retest Cloud three-photo follow-up and repeated code opens after separating pilot limits from voice limits — confirmed shared three-request/hour limiter regression; no application fixes requested in this testing task.
+- [ ] Run comprehensive automated, browser, connected-pilot and security checks; report verified coverage and blockers without enabling real intake.
 - [x] Add authenticated private-photo preview controls, connected-pilot navigation and isolated cleanup-job failures; 31 regression tests pass, public pages checked.
 - [ ] Apply atomic removal-request and staff-retention safeguards — blocked by Lovable Cloud connection timeouts; neither migration attempt applied.
 - [ ] Verify private-photo viewing end-to-end as an authorised reviewer — awaiting reviewer account (invitations deferred).

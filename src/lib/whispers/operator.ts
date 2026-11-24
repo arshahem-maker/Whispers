@@ -1,1 +1,40 @@
-Ly8gUHVibGlzaGVkIG9wZXJhdG9yIGRldGFpbHMuIFRoaXMgaXMgdGhlIHNpbmdsZSBzb3VyY2Ugb2YgdHJ1dGg6IGNpdGl6ZW4gaGVscCBjb3B5LAovLyB0aGUgc3RhZmYgc2V0dGluZ3MgcGFuZWwgYW5kIHRoZSBjb25uZWN0ZWQgcmVsZWFzZSByZWNvcmQgYWxsIHJlYWQgZnJvbSBoZXJlLCBzbyBhCi8vIGNoYW5nZSBoZXJlIGlzIHRoZSBvbmx5IHBsYWNlIHRoZSBwdWJsaXNoZWQgY29udGFjdCBvciBwdXJwb3NlIG5lZWRzIGVkaXRpbmcuCmV4cG9ydCBjb25zdCBPUEVSQVRPUiA9IHsKICBvcmdhbmlzYXRpb246ICJXaGlzcGVycyIsCiAgbGVnYWxGb3JtOiAicHJpdmF0ZSBjb21wYW55IiwKICBjb250YWN0OiAiYXJzaGFoZW1AZ21haWwuY29tIiwKICBwdXJwb3NlOgogICAgIldoaXNwZXJzIGhlbHBzIHBlb3BsZSBhZmZlY3RlZCBieSBjb25mbGljdCBzaGFyZSB3aGF04oCZcyBoYXBwZW5pbmcgb24gdGhlIGdyb3VuZCB3aXRob3V0IGNyZWF0aW5nIGFuIGFjY291bnQsIHNvIGh1bWFuaXRhcmlhbiB0ZWFtcyBjYW4gbWFrZSBiZXR0ZXItaW5mb3JtZWQgZGVjaXNpb25zLiIsCn0gYXMgY29uc3Q7CgpleHBvcnQgY29uc3QgT1BFUkFUT1JfQ09OVEFDVF9MQUJFTCA9ICJDb250YWN0OiI7CmV4cG9ydCBjb25zdCBPUEVSQVRPUl9QVVJQT1NFX0xBQkVMID0gIlB1cnBvc2U6IjsKCmV4cG9ydCBjb25zdCBPUEVSQVRPUl9QVVJQT1NFID0gT1BFUkFUT1IucHVycG9zZTsKCmV4cG9ydCBjb25zdCBPUEVSQVRPUl9SRUNFSVBUX05PVEUgPQogIGAke09QRVJBVE9SLm9yZ2FuaXNhdGlvbn0gaXMgb3BlcmF0ZWQgYnkgJHtPUEVSQVRPUi5vcmdhbmlzYXRpb259LCBhICR7T1BFUkFUT1IubGVnYWxGb3JtfS4gYCArCiAgYCR7T1BFUkFUT1JfUFVSUE9TRV9MQUJFTH0gJHtPUEVSQVRPUi5wdXJwb3NlfSBgICsKICBgJHtPUEVSQVRPUl9DT05UQUNUX0xBQkVMfSAke09QRVJBVE9SLmNvbnRhY3R9LiBgICsKICAiUmVwb3J0cyBhcmUgcmVhZCBieSBhdXRob3Jpc2VkIHJldmlld2Vycy4gUmV2aWV3ZXJzIG1heSBzaGFyZSBhIHNob3J0ZW5lZCwgZGUtaWRlbnRpZmllZCB2ZXJzaW9uIHdpdGggYSBzbWFsbCBudW1iZXIgb2YgaW52aXRlZCBleHBlcnRzLiAiICsKICAiUmVwb3J0cyBhcmUgbm90IGZvcndhcmRlZCBhdXRvbWF0aWNhbGx5IHRvIHBvbGljZSwgYXJtZWQgZm9yY2VzLCBnb3Zlcm5tZW50cywgbWVkaWEgb3IgcGFydG5lcnMuIjsKCmV4cG9ydCBjb25zdCBPUEVSQVRPUl9BQk9VVF9OT1RFID0KICBgJHtPUEVSQVRPUi5vcmdhbmlzYXRpb259IGlzIG9wZXJhdGVkIGJ5ICR7T1BFUkFUT1Iub3JnYW5pc2F0aW9ufSwgYSAke09QRVJBVE9SLmxlZ2FsRm9ybX0uYDsKCmV4cG9ydCBjb25zdCBPUEVSQVRPUl9TRVRUSU5HU19TVU1NQVJZID0KICBgJHtPUEVSQVRPUi5vcmdhbmlzYXRpb259ICgke09QRVJBVE9SLmxlZ2FsRm9ybX0pIOKAlCAke09QRVJBVE9SX0NPTlRBQ1RfTEFCRUx9ICR7T1BFUkFUT1IuY29udGFjdH0uYDsKCi8vIFJlYWRpbmVzcyBvbmx5IGNvdW50cyBhcyBtZXQgd2hlbiBhIHJlYWNoYWJsZSBjb250YWN0IGFkZHJlc3MgYW5kIGEgcmVhbCBwdXJwb3NlCi8vIHN0YXRlbWVudCBhcmUgYm90aCBwcmVzZW50LCBzbyB0aGUgY2hlY2tsaXN0IGNhbm5vdCBiZSB0aWNrZWQgYnkgYW4gZW1wdHkgZmllbGQuCmV4cG9ydCBmdW5jdGlvbiBvcGVyYXRvckRldGFpbHNDb21wbGV0ZSgKICBvcGVyYXRvcjogeyBjb250YWN0OiBzdHJpbmc7IHB1cnBvc2U6IHN0cmluZyB9ID0gT1BFUkFUT1IsCikgewogIGNvbnN0IGNvbnRhY3QgPSBvcGVyYXRvci5jb250YWN0LnRyaW0oKTsKICBjb25zdCBwdXJwb3NlID0gb3BlcmF0b3IucHVycG9zZS50cmltKCk7CiAgY29uc3QgdmFsaWRDb250YWN0ID0gL15bXlxzQF0rQFteXHNAXStcLlteXHNAXXsyLH0kLy50ZXN0KGNvbnRhY3QpOwogIGNvbnN0IHZhbGlkUHVycG9zZSA9IHB1cnBvc2Uuc3BsaXQoL1xzKy8pLmxlbmd0aCA+PSAxMjsKICByZXR1cm4gdmFsaWRDb250YWN0ICYmIHZhbGlkUHVycG9zZTsKfQo=
+// Published operator details. This is the single source of truth: citizen help copy,
+// the staff settings panel and the connected release record all read from here, so a
+// change here is the only place the published contact or purpose needs editing.
+export const OPERATOR = {
+  organisation: "Whispers",
+  legalForm: "private company",
+  contact: "arshahem@gmail.com",
+  purpose:
+    "Whispers helps people affected by conflict share what’s happening on the ground without creating an account, so humanitarian teams can make better-informed decisions.",
+} as const;
+
+export const OPERATOR_CONTACT_LABEL = "Contact:";
+export const OPERATOR_PURPOSE_LABEL = "Purpose:";
+
+export const OPERATOR_PURPOSE = OPERATOR.purpose;
+
+export const OPERATOR_RECEIPT_NOTE =
+  `${OPERATOR.organisation} is operated by ${OPERATOR.organisation}, a ${OPERATOR.legalForm}. ` +
+  `${OPERATOR_PURPOSE_LABEL} ${OPERATOR.purpose} ` +
+  `${OPERATOR_CONTACT_LABEL} ${OPERATOR.contact}. ` +
+  "Reports are read by authorised reviewers. Reviewers may share a shortened, de-identified version with a small number of invited experts. " +
+  "Reports are not forwarded automatically to police, armed forces, governments, media or partners.";
+
+export const OPERATOR_ABOUT_NOTE =
+  `${OPERATOR.organisation} is operated by ${OPERATOR.organisation}, a ${OPERATOR.legalForm}.`;
+
+export const OPERATOR_SETTINGS_SUMMARY =
+  `${OPERATOR.organisation} (${OPERATOR.legalForm}) — ${OPERATOR_CONTACT_LABEL} ${OPERATOR.contact}.`;
+
+// Readiness only counts as met when a reachable contact address and a real purpose
+// statement are both present, so the checklist cannot be ticked by an empty field.
+export function operatorDetailsComplete(
+  operator: { contact: string; purpose: string } = OPERATOR,
+) {
+  const contact = operator.contact.trim();
+  const purpose = operator.purpose.trim();
+  const validContact = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact);
+  const validPurpose = purpose.split(/\s+/).length >= 12;
+  return validContact && validPurpose;
+}

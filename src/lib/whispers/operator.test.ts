@@ -1,1 +1,59 @@
-aW1wb3J0IHsgZGVzY3JpYmUsIGV4cGVjdCwgaXQgfSBmcm9tICJ2aXRlc3QiOwppbXBvcnQgY2F0YWxvZyBmcm9tICIuL2ludGVyZmFjZS1jYXRhbG9nLmpzb24iOwppbXBvcnQgewogIE9QRVJBVE9SLAogIE9QRVJBVE9SX0FCT1VUX05PVEUsCiAgT1BFUkFUT1JfQ09OVEFDVF9MQUJFTCwKICBPUEVSQVRPUl9QVVJQT1NFLAogIE9QRVJBVE9SX1BVUlBPU0VfTEFCRUwsCiAgT1BFUkFUT1JfUkVDRUlQVF9OT1RFLAogIE9QRVJBVE9SX1NFVFRJTkdTX1NVTU1BUlksCiAgb3BlcmF0b3JEZXRhaWxzQ29tcGxldGUsCn0gZnJvbSAiLi9vcGVyYXRvciI7CgovLyBDb25jcmV0ZSB2YWx1ZXMgdGFrZW4gZnJvbSB0aGUgb3BlcmF0b3IncyBvd24gd29yZHM6IHRoZSBwdWJsaXNoZWQgY29udGFjdCBhZGRyZXNzCi8vIGFuZCB0aGUgcHVycG9zZSBzdGF0ZW1lbnQgbXVzdCBzdGF5IHdvcmQtZm9yLXdvcmQsIGFuZCBtdXN0IGJlIHRyYW5zbGF0YWJsZS4KZGVzY3JpYmUoInB1Ymxpc2hlZCBvcGVyYXRvciBkZXRhaWxzIiwgKCkgPT4gewogIGl0KCJuYW1lcyBXaGlzcGVycyBhcyBhIHByaXZhdGUgY29tcGFueSBhbmQgcHVibGlzaGVzIG5vIENFTyBsaW5lIiwgKCkgPT4gewogICAgZXhwZWN0KE9QRVJBVE9SLm9yZ2FuaXNhdGlvbikudG9CZSgiV2hpc3BlcnMiKTsKICAgIGV4cGVjdChPUEVSQVRPUi5sZWdhbEZvcm0pLnRvQmUoInByaXZhdGUgY29tcGFueSIpOwogICAgZXhwZWN0KCJjZW8iIGluIE9QRVJBVE9SKS50b0JlKGZhbHNlKTsKICAgIGZvciAoY29uc3Qgc2VudGVuY2Ugb2YgW09QRVJBVE9SX1JFQ0VJUFRfTk9URSwgT1BFUkFUT1JfQUJPVVRfTk9URSwgT1BFUkFUT1JfU0VUVElOR1NfU1VNTUFSWV0pIHsKICAgICAgZXhwZWN0KHNlbnRlbmNlKS5ub3QudG9Db250YWluKCJDRU8iKTsKICAgICAgZXhwZWN0KHNlbnRlbmNlKS5ub3QudG9Db250YWluKCJBcnNoIEFobWVkIik7CiAgICB9CiAgfSk7CgogIGl0KCJwdWJsaXNoZXMgdGhlIGNvbnRhY3QgYWRkcmVzcyB0aGUgb3BlcmF0b3IgZ2F2ZSIsICgpID0+IHsKICAgIGV4cGVjdChPUEVSQVRPUi5jb250YWN0KS50b0JlKCJhcnNoYWhlbUBnbWFpbC5jb20iKTsKICAgIGV4cGVjdChPUEVSQVRPUl9SRUNFSVBUX05PVEUpLnRvQ29udGFpbigiQ29udGFjdDogYXJzaGFoZW1AZ21haWwuY29tLiIpOwogICAgZXhwZWN0KE9QRVJBVE9SX1NFVFRJTkdTX1NVTU1BUlkpLnRvQ29udGFpbigiQ29udGFjdDogYXJzaGFoZW1AZ21haWwuY29tLiIpOwogIH0pOwoKICBpdCgicHVibGlzaGVzIHRoZSBwdXJwb3NlIHN0YXRlbWVudCB3b3JkIGZvciB3b3JkIiwgKCkgPT4gewogICAgZXhwZWN0KE9QRVJBVE9SX1BVUlBPU0UpLnRvQmUoCiAgICAgICJXaGlzcGVycyBoZWxwcyBwZW9wbGUgYWZmZWN0ZWQgYnkgY29uZmxpY3Qgc2hhcmUgd2hhdOKAmXMgaGFwcGVuaW5nIG9uIHRoZSBncm91bmQgd2l0aG91dCBjcmVhdGluZyBhbiBhY2NvdW50LCBzbyBodW1hbml0YXJpYW4gdGVhbXMgY2FuIG1ha2UgYmV0dGVyLWluZm9ybWVkIGRlY2lzaW9ucy4iLAogICAgKTsKICAgIGV4cGVjdChPUEVSQVRPUl9SRUNFSVBUX05PVEUpLnRvQ29udGFpbihPUEVSQVRPUl9QVVJQT1NFKTsKICB9KTsKCiAgaXQoImtlZXBzIGV2ZXJ5IHB1Ymxpc2hlZCBzZW50ZW5jZSBpbiB0aGUgdHJhbnNsYXRhYmxlIHdvcmRpbmcgbGlzdCIsICgpID0+IHsKICAgIGZvciAoY29uc3Qgc2VudGVuY2Ugb2YgWwogICAgICBPUEVSQVRPUl9QVVJQT1NFLAogICAgICBPUEVSQVRPUl9SRUNFSVBUX05PVEUsCiAgICAgIE9QRVJBVE9SX0FCT1VUX05PVEUsCiAgICAgIE9QRVJBVE9SX1NFVFRJTkdTX1NVTU1BUlksCiAgICAgIE9QRVJBVE9SX0NPTlRBQ1RfTEFCRUwsCiAgICAgIE9QRVJBVE9SX1BVUlBPU0VfTEFCRUwsCiAgICBdKSB7CiAgICAgIGV4cGVjdChjYXRhbG9nKS50b0NvbnRhaW4oc2VudGVuY2UpOwogICAgfQogIH0pOwoKICBpdCgiY291bnRzIG9wZXJhdG9yIGRldGFpbHMgYXMgcmVhZHkgb25seSB3aXRoIGEgcmVhY2hhYmxlIGNvbnRhY3QgYW5kIGEgcmVhbCBwdXJwb3NlIiwgKCkgPT4gewogICAgZXhwZWN0KG9wZXJhdG9yRGV0YWlsc0NvbXBsZXRlKCkpLnRvQmUodHJ1ZSk7CiAgICBleHBlY3Qob3BlcmF0b3JEZXRhaWxzQ29tcGxldGUoeyBjb250YWN0OiAiIiwgcHVycG9zZTogT1BFUkFUT1JfUFVSUE9TRSB9KSkudG9CZShmYWxzZSk7CiAgICBleHBlY3Qob3BlcmF0b3JEZXRhaWxzQ29tcGxldGUoeyBjb250YWN0OiAibm90LWFuLWVtYWlsIiwgcHVycG9zZTogT1BFUkFUT1JfUFVSUE9TRSB9KSkudG9CZShmYWxzZSk7CiAgICBleHBlY3Qob3BlcmF0b3JEZXRhaWxzQ29tcGxldGUoeyBjb250YWN0OiBPUEVSQVRPUi5jb250YWN0LCBwdXJwb3NlOiAiIiB9KSkudG9CZShmYWxzZSk7CiAgfSk7Cn0pOwo=
+import { describe, expect, it } from "vitest";
+import catalog from "./interface-catalog.json";
+import {
+  OPERATOR,
+  OPERATOR_ABOUT_NOTE,
+  OPERATOR_CONTACT_LABEL,
+  OPERATOR_PURPOSE,
+  OPERATOR_PURPOSE_LABEL,
+  OPERATOR_RECEIPT_NOTE,
+  OPERATOR_SETTINGS_SUMMARY,
+  operatorDetailsComplete,
+} from "./operator";
+
+// Concrete values taken from the operator's own words: the published contact address
+// and the purpose statement must stay word-for-word, and must be translatable.
+describe("published operator details", () => {
+  it("names Whispers as a private company and publishes no CEO line", () => {
+    expect(OPERATOR.organisation).toBe("Whispers");
+    expect(OPERATOR.legalForm).toBe("private company");
+    expect("ceo" in OPERATOR).toBe(false);
+    for (const sentence of [OPERATOR_RECEIPT_NOTE, OPERATOR_ABOUT_NOTE, OPERATOR_SETTINGS_SUMMARY]) {
+      expect(sentence).not.toContain("CEO");
+      expect(sentence).not.toContain("Arsh Ahmed");
+    }
+  });
+
+  it("publishes the contact address the operator gave", () => {
+    expect(OPERATOR.contact).toBe("arshahem@gmail.com");
+    expect(OPERATOR_RECEIPT_NOTE).toContain("Contact: arshahem@gmail.com.");
+    expect(OPERATOR_SETTINGS_SUMMARY).toContain("Contact: arshahem@gmail.com.");
+  });
+
+  it("publishes the purpose statement word for word", () => {
+    expect(OPERATOR_PURPOSE).toBe(
+      "Whispers helps people affected by conflict share what’s happening on the ground without creating an account, so humanitarian teams can make better-informed decisions.",
+    );
+    expect(OPERATOR_RECEIPT_NOTE).toContain(OPERATOR_PURPOSE);
+  });
+
+  it("keeps every published sentence in the translatable wording list", () => {
+    for (const sentence of [
+      OPERATOR_PURPOSE,
+      OPERATOR_RECEIPT_NOTE,
+      OPERATOR_ABOUT_NOTE,
+      OPERATOR_SETTINGS_SUMMARY,
+      OPERATOR_CONTACT_LABEL,
+      OPERATOR_PURPOSE_LABEL,
+    ]) {
+      expect(catalog).toContain(sentence);
+    }
+  });
+
+  it("counts operator details as ready only with a reachable contact and a real purpose", () => {
+    expect(operatorDetailsComplete()).toBe(true);
+    expect(operatorDetailsComplete({ contact: "", purpose: OPERATOR_PURPOSE })).toBe(false);
+    expect(operatorDetailsComplete({ contact: "not-an-email", purpose: OPERATOR_PURPOSE })).toBe(false);
+    expect(operatorDetailsComplete({ contact: OPERATOR.contact, purpose: "" })).toBe(false);
+  });
+});
