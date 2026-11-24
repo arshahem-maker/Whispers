@@ -38,3 +38,9 @@ Use a staging database and synthetic reports. The browser-tab demo can run witho
 4. Keep `WHISPERS_VOICE_ENABLED` and `VITE_WHISPERS_VOICE_ENABLED` unset for a text-first pilot. Enable both only after reviewing audio processing and confirming provider funding and recovery. Public language selection reads prepared translations. Have native speakers review safety-critical wording and validate the current catalog before offering a language in the pilot.
 5. Use distinct tester, reviewer, expert, publisher and retention administrator accounts. Test report submission, retry, three attachments, repeat receipt opens, replies, expert assessment, publication and withdrawal, and removal under interrupted network and concurrent actions.
 6. Verify the hosting scheduler calls the authenticated retention endpoint and alert on overdue cleanup jobs, failed runs and public feed outages. Rehearse restore in a disposable environment, including database and private storage. Record the responsible operator and escalation contact before any move toward real intake.
+
+### Free hosted staging
+
+The Render Blueprint targets one Free Node web service on the pilot branch. Use a separate Supabase Free project for PostgreSQL, Auth, and private storage. The browser and server Supabase URL and publishable key must point to that same staging project. Keep the service-role key server-only. The Blueprint generates separate secrets for intake throttling and the retention endpoint, so text intake can work without an AI gateway key.
+
+In staging Supabase, create the private `whispers-private` bucket, apply the reviewed migrations, and configure Google OAuth with the hosted `/pilot` redirect. Use a scheduled GitHub Actions job or an existing scheduler for the authenticated retention endpoint after the staging host and secret are configured. Export the database and private storage separately for restore testing.

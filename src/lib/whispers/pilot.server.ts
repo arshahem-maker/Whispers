@@ -46,7 +46,7 @@ async function update(r:Row,body:Record<string,unknown>) {
   if(!success) throw new Error("This report changed. Refresh before saving.");
 }
 export async function submitPilot(input: z.infer<typeof pilotSubmitSchema>, request: Request) {
-  const secret = process.env['LOVABLE_API_KEY'];
+  const secret = process.env['WHISPERS_INTAKE_SECRET'] ?? process.env['LOVABLE_API_KEY'];
   if (!secret) throw new Error("Connected reporting unavailable.");
   const signingKey = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const signature = await crypto.subtle.sign("HMAC", signingKey, new TextEncoder().encode(":intake:" + (request.headers.get("cf-connecting-ip") ?? "local-preview")));

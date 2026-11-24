@@ -31,8 +31,17 @@ function SignIn() {
   const cache = useQueryClient();
   const session = useQuery({ queryKey: ["staff-session"], queryFn: async () => (await supabase.auth.getUser()).data.user, retry: false });
   const signOut = async () => { await cache.cancelQueries(); cache.clear(); await supabase.auth.signOut(); await navigate({ to: "/review/sign-in", replace: true }); };
+  const externalAuth = import.meta.env["VITE_WHISPERS_EXTERNAL_AUTH"] === "true";
   const signIn = async (provider: "google" | "lovable") => {
     setError("");
+    if (externalAuth && provider === "google") {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/pilot` },
+      });
+      if (error) setError(error.message);
+      return;
+    }
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: `${window.location.origin}/pilot` });
     if (result.error) setError(result.error.message);
     else if (!result.redirected) await navigate({ to: "/pilot" });
@@ -44,7 +53,7 @@ function SignIn() {
         <h1 className="mt-6 text-2xl">{tr("Staff sign-in")}</h1>
         <div className="card p-5 mt-5">
           <p className="font-semibold">{tr("Connected pilot staff sign-in")}</p>
-          {session.data ? <div className="grid gap-2 mt-4"><p>{tr("Signed in")}</p><Button onClick={() => void navigate({ to: "/pilot" })}>{tr("Open connected pilot")}</Button><Button variant="outline" onClick={() => void signOut()}>{tr("Sign out")}</Button></div> : <div className="grid gap-2 mt-4"><Button onClick={() => void signIn("google")}>{tr("Sign in with Google")}</Button><Button variant="secondary" onClick={() => void signIn("lovable")}>{tr("Sign in with Lovable")}</Button></div>}
+          {session.data ? <div className="grid gap-2 mt-4"><p>{tr("Signed in")}</p><Button onClick={() => void navigate({ to: "/pilot" })}>{tr("Open connected pilot")}</Button><Button variant="outline" onClick={() => void signOut()}>{tr("Sign out")}</Button></div> : <div className="grid gap-2 mt-4"><Button onClick={() => void signIn("google")}>{tr("Sign in with Google")}</Button>{!externalAuth && <Button variant="secondary" onClick={() => void signIn("lovable")}>{tr("Sign in with Lovable")}</Button>}</div>}
           {error && <p role="alert" className="text-destructive mt-3">{error}</p>}
           <Link to="/pilot" className="text-primary underline mt-3 inline-block">{tr("Open connected pilot")}</Link>
           <p className="hint mt-2">{tr("Nobody can give themselves reviewer or admin access.")}</p>
