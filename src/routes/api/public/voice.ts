@@ -4,7 +4,7 @@ import { powOk, signChallenge } from "@/lib/whispers/voice-challenge";
 
 export const Route = createFileRoute("/api/public/voice")({
   server: { handlers: { POST: async ({ request }) => {
-    if (process.env["WHISPERS_VOICE_ENABLED"] !== "true") {
+    if (process.env["WHISPERS_PILOT_BACKEND"] === "neon" || process.env["WHISPERS_VOICE_ENABLED"] !== "true") {
       return Response.json({ message: "Voice is unavailable. You can type your report." }, { status: 503, headers: { "Cache-Control": "no-store" } });
     }
     const origin = request.headers.get("origin");

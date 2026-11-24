@@ -47,22 +47,39 @@ In staging Supabase, create the private `whispers-private` bucket, apply the rev
 
 ### Neon staging migration
 
-The `staging/neon` branch starts a provider-independent database migration. Run `bash scripts/test-neon-db.sh` against a disposable PostgreSQL instance to check the migration sequence and private-photo authorization. The shared transactions remain PostgreSQL. The Neon bootstrap supplies the role and identity contracts previously provided by Supabase, and the photo lookup checks the actor's active reviewer scope and the source report's current retention state.
+Use `staging/neon` and fictional fixtures until hosted verification is complete.
+After `neon deploy` pulls the environment, apply the reviewed PostgreSQL
+migrations with `node --env-file=.env.local scripts/migrate-neon.mjs`. Use a
+disposable database for `bash scripts/test-neon-db.sh`.
 
-The current web application still uses Supabase. Before switching a deployment, connect Neon Auth and map verified identities to stable application user IDs, set the actor only inside a server-controlled transaction, replace the existing application queries, and stream media from a private bucket through an authenticated application endpoint. Retest sign-in, invitations, report submission, storage cleanup, and restore before pointing any hosted staging traffic at Neon.
+Build with `VITE_WHISPERS_REVIEWER_BACKEND=neon` and `VITE_NEON_AUTH_URL` set to
+the selected branch's Auth base URL. Set `WHISPERS_PILOT_BACKEND=neon` on the
+server. This also selects the Neon public feed and translation cache. Keep
+`DATABASE_URL`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY` server-only.
+The server also needs `NEON_AUTH_BASE_URL`, `NEON_AUTH_JWKS_URL`,
+`AWS_ENDPOINT_URL_S3` and `AWS_REGION`. When using a Node host, build with
+`NITRO_PRESET=node-server` and start with `node .output/server/index.mjs`.
+The existing Render Blueprint above describes the legacy deployment.
 
-After `neon deploy` pulls the environment, apply the migrations with
-`node --env-file=.env.local scripts/migrate-neon.mjs` (use `.env` if Neon wrote there).
-Set the server-only `WHISPERS_PUBLIC_FEED_BACKEND=neon` to read public updates
-from the Neon PostgreSQL projection. Keep the pooled `DATABASE_URL` server-only.
-This setting affects the public feed. Connected intake, staff sign-in and
-private media still use the existing Supabase application integrations.
+Hosted staff sign-in requires the host's exact trusted origin in Neon Auth.
+Invited staff sign in with the matching verified Google account and select
+**Accept staff invitations** on `/pilot`. The reviewer page supports workspace
+scoped reports, private photos, private notes, status changes, and replies.
+Workspace administrators can manage invitations and private report retention.
+Expert assessment and publication interfaces still need Neon equivalents.
+Voice is disabled in Neon mode until its transcription and moderation path is
+ported and verified. Keep real intake disabled.
 
-The opt-in Neon citizen and reviewer routes use `WHISPERS_PILOT_BACKEND=neon`,
-`VITE_WHISPERS_REVIEWER_BACKEND=neon`, and `VITE_NEON_AUTH_URL`. Use those together
-during synthetic staging. Existing Lovable data is held in a restricted Neon
-migration snapshot. Preserve original attachment keys when transferring the
-Lovable Storage downloads with
-`node --env-file=.env.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.
-Verify every photo and map the existing staff identity before activating the
-copied records or switching hosted traffic.
+For automated cleanup, call `POST /api/public/retention` with a bearer token
+matching the server-only `WHISPERS_RETENTION_SECRET`. Optionally keep the
+outgoing secret as `WHISPERS_RETENTION_SECRET_PREVIOUS` during a rotation, then
+remove it. Verify that successful runs are monitored before opening intake.
+
+Legacy data is held in a restricted Neon snapshot. Transfer private files
+with `node --env-file=.env.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.
+Run `node --env-file=.env.local scripts/import-neon-legacy.mjs` to check
+photo completeness, staff identity, and record eligibility. Reconcile the final
+source snapshot before running the same command with `--apply`. After activation,
+verify report and attachment counts, replay the staff and receipt checks, and
+rehearse restore with a disposable environment. Set an explicit access and
+retention policy for the restricted snapshot and downloaded files after cutover.

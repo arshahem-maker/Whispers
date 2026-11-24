@@ -20,4 +20,5 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: bash scripts/test-pilot-db.sh
+      - run: bash scripts/test-neon-db.sh
       - run: npm run build

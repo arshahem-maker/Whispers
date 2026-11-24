@@ -88,11 +88,19 @@ try {
       await sql`revoke all on table whispers_legacy_import.activated_snapshots from public, anon, authenticated, service_role`;
       const [done] = await sql`select 1 from whispers_legacy_import.activated_snapshots where snapshot_id=${snapshot.id}`;
       if (done) return;
+      const [latest] = await sql`select id from whispers_legacy_import.snapshots order by imported_at desc limit 1`;
+      if (latest?.id !== snapshot.id) throw new Error("The source snapshot changed. Run preflight again.");
       for (const name of tables) {
+        await sql`lock table ${sql("public." + name)} in share row exclusive mode`;
         const [occupied] = await sql`select exists(select 1 from ${sql("public." + name)}) as present`;
         if (occupied.present) throw new Error(`Target table ${name} already contains records. Reconcile before importing.`);
       }
-      for (const identity of mappings) await sql`insert into auth.users ${sql(identity)}`;
+      for (const identity of mappings) {
+        const [verified] = await sql`select id from neon_auth."user" where id::text=${identity.subject}
+          and lower(email)=lower(${identity.email}) and "emailVerified" is true for share`;
+        if (!verified) throw new Error("A verified staff identity changed. Run preflight again.");
+        await sql`insert into auth.users ${sql(identity)}`;
+      }
       for (const name of tables) {
         const rows = name === "whispers_reports"
           ? payload[name].map(report => ({ ...report, photo_count: 0 }))

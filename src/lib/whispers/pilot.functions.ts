@@ -88,7 +88,8 @@ export const acceptStaffInvitations = createServerFn({ method: "POST" }).middlew
 export const pilotPublicUpdates = createServerFn({ method: "GET" }).handler(async () => {
   const { setResponseHeader } = await import("@tanstack/react-start/server");
   setResponseHeader("Cache-Control", "no-store");
-  const rows = process.env["WHISPERS_PUBLIC_FEED_BACKEND"] === "neon"
+  const rows = process.env["WHISPERS_PILOT_BACKEND"] === "neon"
+    || process.env["WHISPERS_PUBLIC_FEED_BACKEND"] === "neon"
     ? await (await import("./neon-public-updates.server")).readNeonPublicUpdates()
     : await readSupabasePublicUpdates();
   return rows.map((u) => ({ id: String(u.id), title: String(u.title ?? ""), summary: String(u.summary ?? ""), known: String(u.known ?? ""), uncertain: String(u.uncertain ?? ""), sources: Array.isArray(u.sources) ? u.sources.filter((s): s is string => typeof s === "string") : [], publishedAt: String(u.published_at), withdrawn: Boolean(u.withdrawn), demo: true as const, broadContext: "Fictional connected pilot", corrections: [] }));

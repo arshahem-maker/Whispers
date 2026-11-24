@@ -32,7 +32,8 @@ function Home() {
         </div>
         <div className="mt-4 grid gap-2">
           <Link to="/report" className="btn btn-primary btn-sm w-full">{t("home.make")}</Link>
-          {import.meta.env["VITE_WHISPERS_VOICE_ENABLED"] === "true" && <VoiceRecorder />}
+          {import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] !== "neon"
+            && import.meta.env["VITE_WHISPERS_VOICE_ENABLED"] === "true" && <VoiceRecorder />}
           <Link to="/check" className="btn btn-secondary btn-sm w-full">{t("home.check")}</Link>
         </div>
         <ol className="mt-6 grid gap-2.5 text-sm">

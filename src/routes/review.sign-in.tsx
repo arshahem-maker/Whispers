@@ -1,5 +1,5 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { Wordmark } from "@/components/whispers/Brand";
 import { DEMO_MODE, useWhispers } from "@/lib/whispers/context";
 import { useState } from "react";
@@ -20,6 +20,9 @@ export const Route = createFileRoute("/review/sign-in")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  beforeLoad: () => {
+    if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") throw redirect({ to: "/pilot" });
+  },
   component: SignIn,
 });
 

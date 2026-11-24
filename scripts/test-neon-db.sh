@@ -8,7 +8,7 @@ for attempt in {1..60}; do
   sleep 1
 done
 run_sql() { docker exec -i "$container" psql -X -q -v ON_ERROR_STOP=1 -U postgres; }
-for migration in drizzle/neon/0000_platform.sql drizzle/migrations/000{0,1}_*.sql drizzle/neon/0002_retention.sql drizzle/migrations/000{3,4,5}_*.sql drizzle/proposed/0006_pilot_release_blockers.sql drizzle/neon/0007_private_photo.sql drizzle/neon/0008_record_guard.sql; do
+for migration in drizzle/neon/0000_platform.sql drizzle/migrations/000{0,1}_*.sql drizzle/neon/0002_retention.sql drizzle/migrations/000{3,4,5}_*.sql drizzle/proposed/0006_pilot_release_blockers.sql drizzle/neon/0007_private_photo.sql drizzle/neon/000{8,9}_*.sql; do
   { printf "BEGIN;\n"; cat "$migration"; printf "\nCOMMIT;\n"; } | run_sql
 done
 run_sql <<'SQL'
@@ -52,5 +52,29 @@ DO $$ BEGIN
  END IF;
 END $$;
 ROLLBACK;
+INSERT INTO user_roles(user_id,role,contexts) VALUES
+ ('00000000-0000-4000-8000-000000000001','admin',ARRAY['ua']);
+UPDATE user_roles SET active=false
+ WHERE user_id='00000000-0000-4000-8000-000000000002' AND role='reviewer';
+UPDATE auth.users SET email='invitee@example.invalid',email_confirmed_at=now()
+ WHERE id='00000000-0000-4000-8000-000000000002';
+INSERT INTO whispers_staff_invitations(email,role,workspace,invited_by) VALUES
+ ('invitee@example.invalid','reviewer','ua','00000000-0000-4000-8000-000000000001'),
+ ('invitee@example.invalid','expert','td','00000000-0000-4000-8000-000000000001');
+BEGIN;
+SET LOCAL ROLE authenticated;
+SET LOCAL whispers.actor_id = '00000000-0000-4000-8000-000000000002';
+DO $$ BEGIN
+ IF whispers_accept_staff_invitations() <> 1 THEN
+   RAISE EXCEPTION 'Only the in-scope invitation should be accepted';
+ END IF;
+ IF NOT whispers_access('ua','reviewer') OR whispers_access('td','reviewer') OR whispers_access('td','expert') THEN
+   RAISE EXCEPTION 'Invitation reopened historical or unauthorized workspace access';
+ END IF;
+ IF whispers_accept_staff_invitations() <> 0 THEN
+   RAISE EXCEPTION 'Invitation acceptance was not idempotent';
+ END IF;
+END $$;
+ROLLBACK;
 SQL
-echo 'Neon-compatible PostgreSQL photo authorization checks passed'
+echo 'Neon-compatible PostgreSQL photo authorization and staff invitation checks passed'

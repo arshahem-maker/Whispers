@@ -1,28 +1,73 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { neonInvitationCommandSchema } from "@/lib/whispers/staff-invitations";
 
 const idSchema = z.string().uuid();
-const replySchema = z.object({ reportId: idSchema, reply: z.string().trim().min(1).max(2000) }).strict();
+const commandSchema = z.union([
+  z.object({ reportId: idSchema, reply: z.string().trim().min(1).max(2000) }).strict(),
+  z.object({ reportId: idSchema, note: z.string().trim().min(1).max(2000) }).strict(),
+  z.object({ reportId: idSchema, state: z.enum(["in_review", "awaiting_contributor", "awaiting_expert", "complete"]) }).strict(),
+  z.object({ acceptInvitations: z.literal(true) }).strict(),
+  neonInvitationCommandSchema,
+  z.object({ removalId: idSchema }).strict(),
+  z.object({
+    extensionId: idSchema, nextReview: z.string().datetime().refine(value => {
+      const delay = Date.parse(value) - Date.now();
+      return delay > 0 && delay <= 30 * 86_400_000;
+    }), reason: z.string().trim().min(1).max(2000),
+  }).strict(),
+]);
 
 export const Route = createFileRoute("/api/public/neon-reviewer")({
   server: {
     handlers: {
       GET: async ({ request }) => {
+        if (process.env["WHISPERS_PILOT_BACKEND"] !== "neon") {
+          return new Response(null, { status: 404, headers: { "Cache-Control": "no-store" } });
+        }
         const query = new URL(request.url).searchParams;
         const photoId = query.get("photo");
         const reportId = query.get("report");
-        if ((photoId && reportId) || [photoId, reportId].some(id => id !== null && !idSchema.safeParse(id).success)) {
+        const invitations = query.has("invitations");
+        const retention = query.has("retention");
+        if ([invitations, retention, photoId !== null, reportId !== null].filter(Boolean).length > 1 || [photoId, reportId].some(id => id !== null && !idSchema.safeParse(id).success)) {
           return new Response(null, { status: 404, headers: { "Cache-Control": "no-store" } });
         }
         const { neonReviewer } = await import("@/integrations/neon/reviewer.server");
-        return neonReviewer(request, photoId ? { photoId } : reportId ? { reportId } : undefined);
+        return neonReviewer(request, retention ? { retention } : invitations ? { invitations } : photoId ? { photoId } : reportId ? { reportId } : undefined);
       },
       POST: async ({ request }) => {
         const headers = { "Cache-Control": "no-store" };
+        if (process.env["WHISPERS_PILOT_BACKEND"] !== "neon") return new Response(null, { status: 404, headers });
         if (request.headers.get("origin") !== new URL(request.url).origin) {
           return new Response(null, { status: 403, headers });
         }
-        const body = replySchema.safeParse(await request.json().catch(() => null));
+        const reader = request.body?.getReader();
+        if (!reader) return new Response(null, { status: 400, headers });
+        const decoder = new TextDecoder();
+        let size = 0;
+        let json = "";
+        try {
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            size += value.byteLength;
+            if (size > 16_384) {
+              await reader.cancel();
+              return new Response(null, { status: 413, headers });
+            }
+            json += decoder.decode(value, { stream: true });
+          }
+          json += decoder.decode();
+        } catch {
+          return new Response(null, { status: 400, headers });
+        } finally {
+          reader.releaseLock();
+        }
+        let input: unknown;
+        try { input = JSON.parse(json); }
+        catch { return new Response(null, { status: 400, headers }); }
+        const body = commandSchema.safeParse(input);
         if (!body.success) return new Response(null, { status: 400, headers });
         const { neonReviewer } = await import("@/integrations/neon/reviewer.server");
         return neonReviewer(request, body.data);
