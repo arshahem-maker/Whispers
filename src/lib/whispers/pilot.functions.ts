@@ -3,26 +3,70 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { pilotSubmitSchema, pilotCommandSchema } from "./pilot-schema";
 
-export const submitPilotReport = createServerFn({ method: "POST" }).inputValidator((input) => pilotSubmitSchema.parse(input)).handler(async ({ data }) => {
+export const submitPilotReport = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((input) => pilotSubmitSchema.parse(input)).handler(async ({ data, context }) => {
   const { submitPilot } = await import("./pilot.server");
   const { getRequest, setResponseHeader } = await import("@tanstack/react-start/server");
   setResponseHeader("Cache-Control", "no-store");
+  const testerIds = (process.env["WHISPERS_PILOT_TESTER_IDS"] ?? "").split(",").map((id) => id.trim());
+  if (!testerIds.includes(context.userId)) throw new Error("Connected intake is available to invited pilot testers only.");
   return submitPilot(data, getRequest());
 });
 export const pilotReceipt = createServerFn({ method: "POST" }).inputValidator((input) => z.object({ code: z.string().max(80), action: z.enum(["open","message","removal"]), text: z.string().max(2000).optional() }).strict().parse(input)).handler(async ({ data }) => {
   const { setResponseHeader } = await import("@tanstack/react-start/server"); setResponseHeader("Cache-Control", "no-store");
   const { receiptPilot } = await import("./pilot.server"); return receiptPilot(data);
 });
-export const pilotStaff = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+export const pilotStaff = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((value) => z.number().int().min(0).max(1000).parse(value)).handler(async ({ context, data }) => {
   const { setResponseHeader } = await import("@tanstack/react-start/server"); setResponseHeader("Cache-Control", "no-store");
-  const { readPilot } = await import("./pilot.server"); return readPilot(context.supabase,context.userId);
+  const { readPilot } = await import("./pilot.server"); return readPilot(context.supabase, context.userId, data);
 });
+export const pilotReportDetail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((value) => z.string().uuid().parse(value))
+  .handler(async ({ context, data }) => {
+    const { setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "no-store");
+    const { readPilotReport } = await import("./pilot.server");
+    return readPilotReport(context.supabase, context.userId, data);
+  });
+
+export const pilotAssessments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((value) => z.string().uuid().parse(value))
+  .handler(async ({ context, data }) => {
+    const { setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "no-store");
+    const { readPilotAssessments } = await import("./pilot.server");
+    return readPilotAssessments(context.supabase, context.userId, data);
+  });
+
+export const pilotRetentionQueue = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "no-store");
+    const { data: memberships, error } = await context.supabase.from("user_roles")
+      .select("contexts").eq("user_id", context.userId).eq("role", "admin").eq("active", true);
+    if (error) throw new Error("Retention queue unavailable.");
+    const scopes = [...new Set((memberships ?? []).flatMap((membership) => membership.contexts))];
+    if (!scopes.length) return [];
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const result = await supabaseAdmin.from("whispers_reports")
+      .select("id,workspace,expires_at,removal_requested_at").in("workspace", scopes)
+      .is("revoked_at", null).gt("expires_at", new Date().toISOString())
+      .order("removal_requested_at", { ascending: true, nullsFirst: false })
+      .order("expires_at").limit(100);
+    if (result.error) throw new Error("Retention queue unavailable.");
+    return result.data ?? [];
+  });
+
 export const acceptStaffInvitations = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const result = await context.supabase.rpc("whispers_accept_staff_invitations");
   if(result.error) throw new Error("A verified invited account is required.");
   return { accepted: result.data };
 });
 export const pilotPublicUpdates = createServerFn({ method: "GET" }).handler(async () => {
+  const { setResponseHeader } = await import("@tanstack/react-start/server");
+  setResponseHeader("Cache-Control", "no-store");
   const { createClient } = await import("@supabase/supabase-js");
   const key = process.env['SUPABASE_PUBLISHABLE_KEY']; const url = process.env['SUPABASE_URL'];
   if (!key || !url) throw new Error("Updates unavailable.");

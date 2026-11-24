@@ -4,11 +4,15 @@ import { powOk, signChallenge } from "@/lib/whispers/voice-challenge";
 
 export const Route = createFileRoute("/api/public/voice")({
   server: { handlers: { POST: async ({ request }) => {
+    if (process.env["WHISPERS_VOICE_ENABLED"] !== "true") {
+      return Response.json({ message: "Voice is unavailable. You can type your report." }, { status: 503, headers: { "Cache-Control": "no-store" } });
+    }
     const origin = request.headers.get("origin");
     if (!origin || origin !== new URL(request.url).origin) return Response.json({ message: "This request must come from Whispers." }, { status: 403 });
     if (!request.headers.get("content-type")?.startsWith("multipart/form-data")) return Response.json({ message: "An audio upload is required." }, { status: 400 });
-    const { processVoice, voiceFailure, VoiceError } = await import("@/lib/whispers/ai/voice.server");
+    const { checkVoiceAvailability, processVoice, voiceFailure, VoiceError } = await import("@/lib/whispers/ai/voice.server");
     try {
+      await checkVoiceAvailability();
       const maximum = VOICE_MAX_BYTES + 64 * 1024;
       if (Number(request.headers.get("content-length")) > maximum) throw new VoiceError(413, "Recording is too large.");
       if (!request.body) throw new VoiceError(400, "Recording is missing.");

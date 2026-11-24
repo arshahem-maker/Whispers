@@ -143,7 +143,8 @@ function Review() {
       <p className="card p-4 mt-6">{t("s3.safe")}</p>
       <section className="mt-5 border-y py-4">
         <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{tr("I confirm this contains only fictional test information.")}</label>
-        <p className="hint mt-2">{connected ? tr("Fictional information only. No live humanitarian review team is connected.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
+        {connected && <Link to="/review/sign-in" className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
+        <p className="hint mt-2">{connected ? tr("Invited pilot testers only. Sign in before sending. Use fictional information only.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
       </section>
 
       <div className="mt-6 grid gap-3">

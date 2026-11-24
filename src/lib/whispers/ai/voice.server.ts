@@ -16,7 +16,8 @@ export async function voiceFailure(error: unknown) {
       message = body.message ?? body.error?.message ?? message;
     } catch { /* Do not expose raw provider bodies. */ }
   } else if (error instanceof VoiceError) { status = error.status; message = error.message; }
-  if (status === 402 || status === 403) {
+  const providerFailure = APICallError.isInstance(error) || error instanceof VoiceProviderError;
+  if (providerFailure && (status === 402 || status === 403)) {
     const { error: saveError } = await supabaseAdmin.from("voice_service_controls").upsert({ id: "voice", paused: true, reason: message, status });
     if (saveError) throw new Error("Unable to save voice-service access state.");
   }
@@ -26,17 +27,22 @@ export class VoiceError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
 
-export async function processVoice(file: File, request: Request) {
-  const apiKey = process.env['LOVABLE_API_KEY'];
-  if (!apiKey) throw new VoiceError(401, "Voice reporting is not configured.");
+class VoiceProviderError extends VoiceError {}
+
+export async function checkVoiceAvailability() {
   const { data: control, error: controlError } = await supabaseAdmin.from("voice_service_controls").select("paused,reason,status").eq("id", "voice").maybeSingle();
   if (controlError) throw new VoiceError(503, "Unable to check voice-service availability.");
   if (control?.paused) throw new VoiceError(control.status ?? 403, control.reason ?? "Voice reporting is paused pending owner action.");
+}
+
+export async function processVoice(file: File, request: Request) {
+  const apiKey = process.env["LOVABLE_API_KEY"];
+  if (!apiKey) throw new VoiceError(503, "Voice reporting is not configured.");
   const transcription = await transcribe({ apiKey, baseURL: "https://ai.gateway.lovable.dev", model: "openai/gpt-transcribe", maxFileBytes: 12 * 1024 * 1024, audioOnly: true }, file, { signal: request.signal });
   if (!transcription.ok) {
     let message = "The recording could not be transcribed.";
     try { const body = await transcription.json(); message = body.message ?? body.error?.message ?? message; } catch { /* safe fallback */ }
-    throw new VoiceError(transcription.status, message);
+    throw new VoiceProviderError(transcription.status, message);
   }
   if (!transcription.body) throw new VoiceError(502, "The speech service returned no transcript.");
   let transcript = "";

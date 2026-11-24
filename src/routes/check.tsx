@@ -63,7 +63,13 @@ function CheckPage() {
   const act = async (action: "open" | "message" | "removal") => {
     if (!active) return;
     setBusy(true); setErr(false);
-    try { setView(await read(active, action)); if (action === "message") setReply(""); setConfirmRemove(false); }
+    try {
+      const refreshed = await read(active, action);
+      if (!refreshed) { setView(null); setCode(active); setActive(null); setErr(true); return; }
+      setView(refreshed);
+      if (action === "message") setReply("");
+      setConfirmRemove(false);
+    }
     catch { setErr(true); } finally { setBusy(false); }
   };
 

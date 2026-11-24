@@ -4,12 +4,11 @@ import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { useWhispers } from "@/lib/whispers/context";
 import { t } from "@/lib/whispers/i18n";
 import { pilotPublicUpdates } from "@/lib/whispers/pilot.functions";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
-const publicUpdatesQuery = queryOptions({ queryKey: ["pilot-public-updates"], queryFn: () => pilotPublicUpdates() });
+const publicUpdatesQuery = queryOptions({ queryKey: ["pilot-public-updates"], queryFn: () => pilotPublicUpdates(), retry: false, refetchInterval: 30_000 });
 
 export const Route = createFileRoute("/updates")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(publicUpdatesQuery),
   head: () => ({
     meta: [
       { title: "Updates — Whispers" },
@@ -28,12 +27,16 @@ const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "n
 function Updates() {
   useTranslationVersion();
   const { store } = useWhispers();
-  const { data: connectedUpdates } = useSuspenseQuery(publicUpdatesQuery);
-  const updates = [...connectedUpdates, ...store.listPublicUpdates()]; // public projection only
+  const feed = useQuery(publicUpdatesQuery);
+  const updates = [...(feed.isError ? [] : feed.data ?? []), ...store.listPublicUpdates()];
   return (
     <CitizenShell>
       <h1>{t("updates.title")}</h1>
       <p className="mt-2 text-muted-foreground">{t("updates.lede")}</p>
+      {feed.isError && <div role="status" className="card p-5 mt-4">
+        <p>{tr("Connected updates are temporarily unavailable.")}</p>
+        <button className="btn btn-secondary mt-3" disabled={feed.isFetching} onClick={() => void feed.refetch()}>{tr("Retry")}</button>
+      </div>}
       {updates.length === 0 ? <p className="card p-5 mt-6">{t("updates.empty")}</p> : (
         <ul className="mt-6 grid gap-4">
           {updates.map((u) => (
