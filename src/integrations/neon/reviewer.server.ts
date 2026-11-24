@@ -1,4 +1,6 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
+import type { EditorialCommand } from "@/lib/whispers/editorial";
+import { neonEditorial } from "./editorial.server";
 import { neonDatabase } from "./database.server";
 import { neonRetentionAdmin, type RetentionCommand } from "./retention-admin.server";
 import { neonIdentity } from "./identity.server";
@@ -15,7 +17,7 @@ type ReviewSelection = { reportId: string } & (
 
 export async function neonReviewer(
   request: Request,
-  selection?: { photoId: string } | ReviewSelection | { acceptInvitations: true } | { invitations: true } | NeonInvitationCommand | { retention: true } | RetentionCommand,
+  selection?: { photoId: string } | ReviewSelection | { acceptInvitations: true } | { invitations: true } | NeonInvitationCommand | { retention: true } | RetentionCommand | { editorial: true | EditorialCommand },
 ) {
   const headers = { "Cache-Control": "no-store" };
   const reply = (status: number) => Response.json({ ok: false }, { status, headers });
@@ -31,6 +33,10 @@ export async function neonReviewer(
     }
     if (selection && ("retention" in selection || "removalId" in selection || "extensionId" in selection)) {
       const result = await neonRetentionAdmin(identity, "retention" in selection ? undefined : selection);
+      return result ? Response.json(result, { headers }) : reply(403);
+    }
+    if (selection && "editorial" in selection) {
+      const result = await neonEditorial(identity, selection.editorial === true ? undefined : selection.editorial);
       return result ? Response.json(result, { headers }) : reply(403);
     }
     const database = neonDatabase();
@@ -107,7 +113,11 @@ export async function neonReviewer(
     return new Response(image.Body.transformToWebStream() as ReadableStream, {
       headers: { ...headers, "Content-Type": "image/jpeg", "X-Content-Type-Options": "nosniff" },
     });
-  } catch {
+  } catch (error) {
+    if (selection && "editorial" in selection && typeof error === "object" && error
+      && "code" in error && error.code === "P0001") {
+      return reply(409);
+    }
     return reply(503);
   }
 }

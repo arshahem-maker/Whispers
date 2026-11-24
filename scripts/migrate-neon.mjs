@@ -13,6 +13,7 @@ const migrations = [
   "drizzle/neon/0007_private_photo.sql",
   "drizzle/neon/0008_record_guard.sql",
   "drizzle/neon/0009_staff_invitation_scope.sql",
+  "drizzle/neon/0010_public_projection.sql",
 ];
 
 const connection = process.env.DATABASE_URL_UNPOOLED;

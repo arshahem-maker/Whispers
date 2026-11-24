@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { editorialCommandSchema } from "@/lib/whispers/editorial";
 import { neonInvitationCommandSchema } from "@/lib/whispers/staff-invitations";
 
 const idSchema = z.string().uuid();
@@ -9,6 +10,7 @@ const commandSchema = z.union([
   z.object({ reportId: idSchema, state: z.enum(["in_review", "awaiting_contributor", "awaiting_expert", "complete"]) }).strict(),
   z.object({ acceptInvitations: z.literal(true) }).strict(),
   neonInvitationCommandSchema,
+  editorialCommandSchema,
   z.object({ removalId: idSchema }).strict(),
   z.object({
     extensionId: idSchema, nextReview: z.string().datetime().refine(value => {
@@ -30,11 +32,12 @@ export const Route = createFileRoute("/api/public/neon-reviewer")({
         const reportId = query.get("report");
         const invitations = query.has("invitations");
         const retention = query.has("retention");
-        if ([invitations, retention, photoId !== null, reportId !== null].filter(Boolean).length > 1 || [photoId, reportId].some(id => id !== null && !idSchema.safeParse(id).success)) {
+        const editorial = query.has("editorial");
+        if ([editorial, invitations, retention, photoId !== null, reportId !== null].filter(Boolean).length > 1 || [photoId, reportId].some(id => id !== null && !idSchema.safeParse(id).success)) {
           return new Response(null, { status: 404, headers: { "Cache-Control": "no-store" } });
         }
         const { neonReviewer } = await import("@/integrations/neon/reviewer.server");
-        return neonReviewer(request, retention ? { retention } : invitations ? { invitations } : photoId ? { photoId } : reportId ? { reportId } : undefined);
+        return neonReviewer(request, editorial ? { editorial } : retention ? { retention } : invitations ? { invitations } : photoId ? { photoId } : reportId ? { reportId } : undefined);
       },
       POST: async ({ request }) => {
         const headers = { "Cache-Control": "no-store" };
@@ -52,7 +55,7 @@ export const Route = createFileRoute("/api/public/neon-reviewer")({
             const { done, value } = await reader.read();
             if (done) break;
             size += value.byteLength;
-            if (size > 16_384) {
+            if (size > 48_000) {
               await reader.cancel();
               return new Response(null, { status: 413, headers });
             }

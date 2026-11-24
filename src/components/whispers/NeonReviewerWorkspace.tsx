@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { RetentionCommand } from "@/integrations/neon/retention-admin.server";
 import type { NeonInvitationCommand } from "@/lib/whispers/staff-invitations";
+import { NeonEditorialWorkspace } from "./NeonEditorialWorkspace";
 import { neonAuthClient } from "@/integrations/neon/auth-client";
 
 interface ReportSummary {
@@ -109,6 +110,7 @@ export function NeonReviewerWorkspace() {
         : <Button onClick={() => void signIn()}>Sign in with Google</Button>}
       {signedIn && <Button variant="outline" onClick={() => void acceptInvitations()}>Accept staff invitations</Button>}
       {signedIn && <><NeonInvitationAdmin /><NeonRetentionAdmin onRemoved={id => setReports(items => items.filter(item => item.id !== id))} /></>}
+      {signedIn && <NeonEditorialWorkspace fetchStaff={reviewerFetch} reports={reports} />}
       {error && <p role="alert">{error}</p>}
       {signedIn && !error && reports.length === 0 && <p>No reports are available in your assigned workspaces.</p>}
       {reports.map((report) => (
@@ -125,6 +127,7 @@ export function NeonReviewerWorkspace() {
 
 interface InvitationAdminData {
   scopes: Extract<NeonInvitationCommand, { action: "invite_staff" }>["invitation"]["workspace"][];
+  staff: { id: string; email: string }[];
   invitations: {
     id: string; email: string; role: string; workspace: string;
     expires_at: string; accepted_at: string | null; revoked_at: string | null;
@@ -189,6 +192,34 @@ function NeonInvitationAdmin() {
       </select></label>
       <Button disabled={busy} type="submit">Create invitation</Button>
     </form>
+    {data.staff.length > 0 && <details>
+      <summary>Change staff workspace access</summary>
+      <form className="grid gap-2" onSubmit={event => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        const userId = data.staff.find(user => user.id === form.get("user"))?.id;
+        const workspace = data.scopes.find(scope => scope === form.get("workspace"));
+        const role = form.get("role");
+        if (!busy && userId && workspace && (role === "reviewer" || role === "expert" || role === "publisher" || role === "admin")) {
+          void update({ action: "staff_role", userId, workspace, role, active: form.get("access") === "grant" });
+        }
+      }}>
+        <label>Staff account<select name="user" className="field">
+          {data.staff.map(user => <option key={user.id} value={user.id}>{user.email || user.id}</option>)}
+        </select></label>
+        <label>Role<select name="role" className="field">
+          <option value="reviewer">Reviewer</option><option value="expert">Expert</option>
+          <option value="publisher">Publisher</option><option value="admin">Administrator</option>
+        </select></label>
+        <label>Workspace<select name="workspace" className="field">
+          {data.scopes.map(scope => <option key={scope} value={scope}>{scope}</option>)}
+        </select></label>
+        <label>Access<select name="access" className="field">
+          <option value="grant">Grant</option><option value="revoke">Revoke</option>
+        </select></label>
+        <Button type="submit" disabled={busy}>Save workspace access</Button>
+      </form>
+    </details>}
     {data.invitations.map(invitation => {
       const state = invitation.accepted_at ? "Accepted" : invitation.revoked_at ? "Revoked"
         : Date.parse(invitation.expires_at) <= Date.now() ? "Expired" : "Pending";

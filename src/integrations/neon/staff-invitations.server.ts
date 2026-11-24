@@ -51,10 +51,30 @@ export async function manageNeonInvitations({ issuer, subject }: Identity, comma
         from public.whispers_staff_invitations where workspace=any(${admin.contexts}::text[])
         order by created_at desc, id desc limit 100
       `;
-      return { scopes: admin.contexts, invitations };
+      const staff = await sql`
+        select distinct a.id, coalesce(a.email,'') as email from public.user_roles r
+        join auth.users a on a.id=r.user_id
+        where r.active and r.contexts && ${admin.contexts}::text[]
+          and a.issuer=${issuer} and a.email_confirmed_at is not null
+        order by email, a.id limit 100
+      `;
+      return { scopes: admin.contexts, invitations, staff };
     }
 
-    if (command.action === "invite_staff") {
+    if (command.action === "staff_role") {
+      if (!admin.contexts.includes(command.workspace) || (admin.id === command.userId && command.role === "admin")) {
+        return null;
+      }
+      const [target] = await sql<{ id: string }[]>`
+        select a.id from auth.users a join neon_auth."user" u on u.id::text=a.subject
+        where a.id=${command.userId} and a.issuer=${issuer} and u."emailVerified" is true
+          and exists (select 1 from public.user_roles r where r.user_id=a.id and r.active
+            and r.contexts && ${admin.contexts}::text[])
+      `;
+      if (!target) return null;
+      await sql`select public.whispers_set_staff_scope(${admin.id}::uuid, ${target.id}::uuid,
+        ${command.role}, array[${command.workspace}::text], ${command.active})`;
+    } else if (command.action === "invite_staff") {
       const { email, role, workspace } = command.invitation;
       if (!admin.contexts.includes(workspace)) return null;
       await sql`select pg_advisory_xact_lock(hashtextextended(${JSON.stringify([email, role, workspace])}, 0))`;

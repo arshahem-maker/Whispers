@@ -65,8 +65,10 @@ Hosted staff sign-in requires the host's exact trusted origin in Neon Auth.
 Invited staff sign in with the matching verified Google account and select
 **Accept staff invitations** on `/pilot`. The reviewer page supports workspace
 scoped reports, private photos, private notes, status changes, and replies.
-Workspace administrators can manage invitations and private report retention.
-Expert assessment and publication interfaces still need Neon equivalents.
+Workspace administrators can manage invitations, staff roles, and private
+report retention. Editorial workflows include redacted expert requests,
+assigned assessments, moderator interpretation, and independent publication
+review. Hidden updates expose only a withdrawal record in the public feed.
 Voice is disabled in Neon mode until its transcription and moderation path is
 ported and verified. Keep real intake disabled.
 

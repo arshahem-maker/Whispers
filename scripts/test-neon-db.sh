@@ -8,7 +8,7 @@ for attempt in {1..60}; do
   sleep 1
 done
 run_sql() { docker exec -i "$container" psql -X -q -v ON_ERROR_STOP=1 -U postgres; }
-for migration in drizzle/neon/0000_platform.sql drizzle/migrations/000{0,1}_*.sql drizzle/neon/0002_retention.sql drizzle/migrations/000{3,4,5}_*.sql drizzle/proposed/0006_pilot_release_blockers.sql drizzle/neon/0007_private_photo.sql drizzle/neon/000{8,9}_*.sql; do
+for migration in drizzle/neon/0000_platform.sql drizzle/migrations/000{0,1}_*.sql drizzle/neon/0002_retention.sql drizzle/migrations/000{3,4,5}_*.sql drizzle/proposed/0006_pilot_release_blockers.sql drizzle/neon/0007_private_photo.sql drizzle/neon/000{8,9}_*.sql drizzle/neon/0010_public_projection.sql; do
   { printf "BEGIN;\n"; cat "$migration"; printf "\nCOMMIT;\n"; } | run_sql
 done
 run_sql <<'SQL'
@@ -76,5 +76,28 @@ DO $$ BEGIN
  END IF;
 END $$;
 ROLLBACK;
+INSERT INTO whispers_reports(id,workspace,body,code_hash,idempotency_key,payload_hash) VALUES
+ ('00000000-0000-4000-8000-000000000005','ua',
+  '{"fictional":true,"publicSummaryPermission":true,"sensitivity":"standard"}',repeat('c',64),'projection',repeat('d',64));
+INSERT INTO whispers_updates(id,workspace,source_report_ids,body,state,author_id,published_at) VALUES
+ ('00000000-0000-4000-8000-000000000006','ua',ARRAY['00000000-0000-4000-8000-000000000005'::uuid],
+  '{"title":"Fictional public test","summary":"Public detail","sources":["https://example.invalid/"]}',
+  'published','00000000-0000-4000-8000-000000000001',now());
+SET ROLE anon;
+DO $$ BEGIN
+ IF NOT EXISTS (SELECT 1 FROM whispers_public_updates WHERE title='Fictional public test' AND NOT withdrawn) THEN
+   RAISE EXCEPTION 'Eligible public update missing';
+ END IF;
+END $$;
+RESET ROLE;
+SELECT whispers_request_removal('00000000-0000-4000-8000-000000000005');
+SET ROLE anon;
+DO $$ BEGIN
+ IF NOT EXISTS (SELECT 1 FROM whispers_public_updates WHERE id='00000000-0000-4000-8000-000000000006'
+   AND withdrawn AND title='Withdrawn update' AND summary='' AND sources='[]'::jsonb) THEN
+   RAISE EXCEPTION 'Removal request did not redact the public projection';
+ END IF;
+END $$;
+RESET ROLE;
 SQL
-echo 'Neon-compatible PostgreSQL photo authorization and staff invitation checks passed'
+echo 'Neon-compatible PostgreSQL photo authorization, staff invitation, and public projection checks passed'
