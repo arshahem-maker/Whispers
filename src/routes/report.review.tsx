@@ -1,6 +1,6 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { ActionBar, StepHeader } from "@/components/whispers/Form";
@@ -53,7 +53,6 @@ function Review() {
   const [ackErr, setAckErr] = useState(false);
   const [photoErr, setPhotoErr] = useState<string | null>(null);
   const [editing, setEditing] = useState<ImageBitmap | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { document.getElementById("step-title")?.focus(); }, []);
   if (draft.text.trim().length < 10 || !draft.basis) {
@@ -69,7 +68,6 @@ function Review() {
     setPhotoErr(null);
     if (!f) return;
     try { setEditing(await decodeImage(f)); } catch (e) { setPhotoErr(e instanceof ImageError ? e.message : "This photo couldn’t be opened."); }
-    if (fileRef.current) fileRef.current.value = "";
   };
 
   const send = async () => {
@@ -132,7 +130,11 @@ function Review() {
         )}
         {draft.photos.length < 3 && (
           <>
-            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" id="photo" onChange={(e) => pick(e.target.files?.[0])} />
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" id="photo" onChange={(event) => {
+              const file = event.currentTarget.files?.[0];
+              event.currentTarget.value = "";
+              void pick(file);
+            }} />
             <label htmlFor="photo" className="btn btn-secondary btn-sm cursor-pointer"><ImagePlus className="h-4 w-4" aria-hidden /> {t("s3.addPhoto")}</label>
           </>
         )}
