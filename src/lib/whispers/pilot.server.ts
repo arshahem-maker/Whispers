@@ -228,18 +228,12 @@ export async function commandPilot(client:Client,user:string,d:z.infer<typeof pi
     }
     await audit(user,d.action,r.workspace,r.id);return {ok:true};
   }
-  if(d.action==="expert_response"||d.action==="interpret"){
-    const member=await roles(client,user);
-    const scope=member.filter((m)=>m.role===(d.action==="expert_response"?"expert":"reviewer")).flatMap((m)=>m.contexts);
-    if(!scope.length)throw new Error("Access required.");
-    const x=checked(await admin.from("whispers_expert_requests").select("*").eq("id",d.id).in("workspace",scope).maybeSingle());
-    if(!x)throw new Error("Assignment unavailable.");
-    if(d.action==="expert_response"){
-      const assignment=checked(await client.from("whispers_expert_assignments").select("request_id").eq("request_id",x.id).eq("expert_id",user).maybeSingle());
-      if(!assignment||x.state!=="open"||!d.choice||!d.text?.trim()||d.text.length>600)throw new Error("Cannot submit this assessment.");
-      checked(await admin.from("whispers_expert_responses").insert({request_id:x.id,expert_id:user,choice:d.choice,explanation:d.text}));
-    }else{if(!d.text?.trim())throw new Error("Interpretation required.");checked(await admin.from("whispers_expert_requests").update({interpretation:d.text,state:"closed"}).eq("id",x.id));}
-    await audit(user,d.action,x.workspace,x.id);return {ok:true};
+  if (d.action === "expert_response" || d.action === "interpret") {
+    const saved = checked(await rpc("whispers_resolve_expert_request", {
+      p_id: d.id, p_actor: user, p_action: d.action, p_text: d.text?.trim() ?? "", p_choice: d.choice ?? null,
+    }));
+    if (saved !== true) throw new Error("The assessment could not be saved. Refresh the request and check your access.");
+    return { ok: true };
   }
   const transitioned=checked(await admin.rpc("whispers_publication_transition",{p_id:d.id,p_actor:user,p_action:d.action}));
   if(!transitioned)throw new Error("Publication state changed. Refresh before retrying.");

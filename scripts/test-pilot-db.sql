@@ -39,6 +39,17 @@ BEGIN
       OR (SELECT count(*) FROM whispers_expert_assignments WHERE request_id=first_request) <> 1 THEN
      RAISE EXCEPTION 'Expert request or assignment was duplicated or lost';
    END IF;
+   IF NOT whispers_resolve_expert_request(first_request, inactive, 'expert_response', 'Fictional assessment', 'consistent') THEN
+     RAISE EXCEPTION 'Assigned expert could not respond';
+   END IF;
+   IF NOT whispers_resolve_expert_request(first_request, reviewer, 'interpret', 'Fictional interpretation', NULL) THEN
+     RAISE EXCEPTION 'Reviewer could not close request';
+   END IF;
+   IF NOT whispers_resolve_expert_request(first_request, inactive, 'expert_response', 'Fictional assessment', 'consistent')
+      OR whispers_resolve_expert_request(first_request, inactive, 'expert_response', 'Changed assessment', 'conflicting')
+      OR (SELECT count(*) FROM whispers_audit WHERE action='expert_response' AND target_id=first_request) <> 1 THEN
+     RAISE EXCEPTION 'Closed request mishandled an expert response or retry';
+   END IF;
  END;
  BEGIN
    PERFORM whispers_set_staff_scope(actor,reviewer,'reviewer',ARRAY['td'],false);

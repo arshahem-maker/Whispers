@@ -106,3 +106,41 @@ GRANT EXECUTE ON FUNCTION public.whispers_create_expert_request(uuid,uuid,jsonb)
 
 -- Advance the queue version if revocation overlaps an existing cleanup job.
 CREATE OR REPLACE FUNCTION public.whispers_revoke_private(p_id uuid) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN PERFORM 1 FROM public.whispers_reports WHERE id=p_id FOR UPDATE; IF NOT FOUND THEN RETURN false; END IF; UPDATE public.whispers_reports SET body=jsonb_build_object('fictional',true,'removed',true),revoked_at=coalesce(revoked_at,now()),version=version+1 WHERE id=p_id; INSERT INTO public.whispers_media_cleanup(report_id) VALUES(p_id) ON CONFLICT(report_id) DO UPDATE SET queued_at=clock_timestamp(); DELETE FROM public.whispers_records WHERE report_id=p_id; DELETE FROM public.whispers_expert_requests WHERE p_id=ANY(report_ids); UPDATE public.whispers_updates SET state='withdrawn',body=jsonb_build_object('title','Withdrawn update','summary','','known','','uncertain','','sources','[]'::jsonb) WHERE p_id=ANY(source_report_ids); RETURN true; END $$;
+
+-- Serialize assessments and closure so a closed request cannot gain late responses.
+CREATE FUNCTION public.whispers_resolve_expert_request(
+  p_id uuid, p_actor uuid, p_action text, p_text text, p_choice text
+) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+DECLARE request public.whispers_expert_requests;
+        prior public.whispers_expert_responses;
+        required_role text;
+BEGIN
+  required_role := CASE p_action WHEN 'interpret' THEN 'reviewer' WHEN 'expert_response' THEN 'expert' END;
+  IF required_role IS NULL OR nullif(btrim(p_text), '') IS NULL THEN RETURN false; END IF;
+  SELECT * INTO request FROM public.whispers_expert_requests WHERE id=p_id FOR UPDATE;
+  IF NOT FOUND OR NOT EXISTS (
+    SELECT 1 FROM public.user_roles WHERE user_id=p_actor AND role=required_role
+      AND active AND request.workspace=ANY(contexts)
+  ) THEN RETURN false; END IF;
+  IF p_action='expert_response' THEN
+    IF p_choice IS NULL OR p_choice NOT IN ('consistent','conflicting','cannot_assess')
+       OR length(p_text)>600 OR NOT EXISTS (
+      SELECT 1 FROM public.whispers_expert_assignments WHERE request_id=p_id AND expert_id=p_actor
+    ) THEN RETURN false; END IF;
+    SELECT * INTO prior FROM public.whispers_expert_responses WHERE request_id=p_id AND expert_id=p_actor;
+    IF FOUND THEN RETURN prior.choice=p_choice AND prior.explanation=p_text; END IF;
+    IF request.state<>'open' THEN RETURN false; END IF;
+    INSERT INTO public.whispers_expert_responses(request_id,expert_id,choice,explanation)
+      VALUES(p_id,p_actor,p_choice,p_text);
+  ELSE
+    IF length(p_text)>2000 THEN RETURN false; END IF;
+    IF request.state='closed' THEN RETURN coalesce(request.interpretation=p_text,false); END IF;
+    IF request.state<>'open' THEN RETURN false; END IF;
+    UPDATE public.whispers_expert_requests SET interpretation=p_text,state='closed' WHERE id=p_id;
+  END IF;
+  INSERT INTO public.whispers_audit(actor_id,action,workspace,target_id)
+    VALUES(p_actor,p_action,request.workspace,p_id);
+  RETURN true;
+END $$;
+REVOKE ALL ON FUNCTION public.whispers_resolve_expert_request(uuid,uuid,text,text,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.whispers_resolve_expert_request(uuid,uuid,text,text,text) TO service_role;

@@ -37,6 +37,7 @@ export function PilotWorkspace() {
     enabled: admin,
     retry: false,
   });
+  const [expertDrafts, setExpertDrafts] = useState<Record<string, string>>({});
   const [requestId, setRequestId] = useState("");
   const [interpretation, setInterpretation] = useState("");
   const loadReport = useServerFn(pilotReportDetail);
@@ -62,6 +63,7 @@ export function PilotWorkspace() {
         cache.clear();
         setSelected("");
         setRequestId("");
+        setExpertDrafts({});
         if (event === "SIGNED_OUT") void navigate({ to: "/review/sign-in", replace: true });
       }
     });
@@ -78,7 +80,7 @@ export function PilotWorkspace() {
     setReportPage(page);
   };
   const signOut=async()=>{await cache.cancelQueries();cache.clear();await supabase.auth.signOut();await navigate({to:"/review/sign-in",replace:true});};
-  const act=async(data:z.infer<typeof pilotCommandSchema>)=>{setBusy(true);setError("");try{await command({data});await Promise.all([cache.invalidateQueries({queryKey:["pilot-staff"]}), cache.invalidateQueries({queryKey:["pilot-retention"]}), cache.invalidateQueries({queryKey:["pilot-report"]}), cache.invalidateQueries({queryKey:["pilot-assessments"]})]);setText("");}catch(e){setError(e instanceof Error?e.message:"Operation failed.");}finally{setBusy(false);}};
+  const act=async(data:z.infer<typeof pilotCommandSchema>)=>{setBusy(true);setError("");try{await command({data});if(data.action==="expert_response"&&data.id){const id=data.id;setExpertDrafts((drafts)=>{const next={...drafts};delete next[id];return next;});}await Promise.all([cache.invalidateQueries({queryKey:["pilot-staff"]}), cache.invalidateQueries({queryKey:["pilot-retention"]}), cache.invalidateQueries({queryKey:["pilot-report"]}), cache.invalidateQueries({queryKey:["pilot-assessments"]})]);setText("");}catch(e){setError(e instanceof Error?e.message:"Operation failed.");}finally{setBusy(false);}};
   if(query.isPending)return <p role="status">{tr("Loading…")}</p>;
   if(query.error)return <div><p role="alert">{tr("Sign in to open the connected pilot workspace.")}</p><Link to="/review/sign-in" className="text-primary underline">{tr("Go to sign-in")}</Link></div>;
   const data=query.data;if(!data)return null;
@@ -139,7 +141,7 @@ export function PilotWorkspace() {
       </section>
     </>}
     {detail.data&&<section><h2>{tr("Redacted expert request")}</h2><div className="grid gap-3 mt-3">{Object.keys(packet).map((key)=><label key={key} className="label">{tr(key)}<textarea className="field mt-1" value={packet[key as keyof typeof packet]} onChange={(e)=>setPacket({...packet,[key]:e.target.value})}/></label>)}</div><Button className="mt-3" disabled={busy||!packet.claim||!packet.question} onClick={()=>void act({action:"request_experts",id:selected,packet})}>{tr("Send redacted packet")}</Button></section>}
-    <section><h2>{tr("Expert assignments")}</h2>{data.packets.map((p)=><div key={p.id} className="border-b py-4"><h3>{String(obj(p.packet)['claim'])}</h3>{(["context", "period", "materials", "question"] as const).map((field) => <p className="mt-2 whitespace-pre-wrap" key={field}><strong>{tr(field)} </strong>{String(obj(p.packet)[field] ?? "")}</p>)}{p.mine?<><p className="mt-2">{p.mine.choice}: {p.mine.explanation}</p>{p.aggregate&&<p className="hint mt-2">{tr("Panel counts")}: {JSON.stringify(p.aggregate)}</p>}</>:<><textarea aria-label={tr("Independent explanation")} className="field mt-3" value={text} maxLength={600} onChange={(e)=>setText(e.target.value)}/><div className="flex flex-wrap gap-2 mt-2">{(["consistent","conflicting","cannot_assess"] as const).map((choice)=><Button key={choice} disabled={busy||!text.trim()||p.state!=="open"} variant="secondary" onClick={()=>void act({action:"expert_response",id:p.id,choice,text})}>{tr(choice)}</Button>)}</div></>}</div>)}</section>
+    <section><h2>{tr("Expert assignments")}</h2>{data.packets.map((p)=><div key={p.id} className="border-b py-4"><h3>{String(obj(p.packet)['claim'])}</h3>{(["context", "period", "materials", "question"] as const).map((field) => <p className="mt-2 whitespace-pre-wrap" key={field}><strong>{tr(field)} </strong>{String(obj(p.packet)[field] ?? "")}</p>)}{p.mine?<><p className="mt-2">{p.mine.choice}: {p.mine.explanation}</p>{p.aggregate&&<p className="hint mt-2">{tr("Panel counts")}: {JSON.stringify(p.aggregate)}</p>}</>:<><textarea aria-label={tr("Independent explanation")} className="field mt-3" value={expertDrafts[p.id] ?? ""} maxLength={600} onChange={(e)=>{const value=e.target.value;setExpertDrafts((drafts)=>({...drafts,[p.id]:value}));}}/><div className="flex flex-wrap gap-2 mt-2">{(["consistent","conflicting","cannot_assess"] as const).map((choice)=><Button key={choice} disabled={busy||!expertDrafts[p.id]?.trim()||p.state!=="open"} variant="secondary" onClick={()=>void act({action:"expert_response",id:p.id,choice,text:expertDrafts[p.id]})}>{tr(choice)}</Button>)}</div></>}</div>)}</section>
     {data.requests.length > 0 && <section>
       <h2>{tr("Moderator interpretation")}</h2>
       <label className="label block mt-3">{tr("Expert request")}
