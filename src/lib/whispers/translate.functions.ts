@@ -77,12 +77,12 @@ async function translateBatch(language: string, offset: number, allowGenerate: b
 }
 
 export const translateInterface = createServerFn({ method: "POST" })
-  .inputValidator((value) => input.parse(value))
+  .validator((value) => input.parse(value))
   .handler(({ data }) => translateBatch(data.language, data.offset, false));
 
 export const prepareInterfaceTranslation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((value) => input.parse(value))
+  .validator((value) => input.parse(value))
   .handler(async ({ data, context }) => {
     const role = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").eq("active", true).maybeSingle();
     if (role.error || !role.data) throw new Error("This language hasn't been prepared yet. Please choose a listed language.");
