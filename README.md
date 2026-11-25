@@ -17,7 +17,10 @@ review, private media, and reviewed public updates.
   still enabled. Do not disable it until the data and private-file migration
   has been reconciled and restored successfully.
 - Real-source intake remains disabled. The hosted `workers.dev` site is a
-  staging preview; an HTTP 200 response does not verify sign-in or report flows.
+  public staging preview at
+  <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+  Cloudflare marks it `noindex`; anyone with the URL can visit it. The home and
+  `/pilot` return HTTP 200, but this does not verify sign-in or report flows.
 
 ## Local development
 
@@ -99,12 +102,23 @@ review. Hidden updates expose only a withdrawal record in the public feed.
 Voice is disabled in Neon mode until its transcription and moderation path is
 ported and verified. Keep real intake disabled.
 
-The Cloudflare pilot delegates staff operations, connected submission, and
-receipt actions and uploads to the `whispersapi` Neon Function. Configure the Function
-with the exact `WHISPERS_APP_ORIGIN` and a generated
-`WHISPERS_BACKEND_SECRET`. Pass that same secret and the deployed
-`WHISPERS_BACKEND_URL` to the Worker as server-only secrets. The function
-still verifies the user's Neon Auth session and workspace permissions.
+The Cloudflare staging pilot delegates staff operations, connected submission,
+and receipt actions and uploads to the `whispersapi` Neon Function. The staging
+Function is deployed to the staging branch with the exact preview URL as
+`WHISPERS_APP_ORIGIN`; Neon Auth trusts that same origin. The Worker forwards
+through server-only `WHISPERS_BACKEND_URL` and `WHISPERS_BACKEND_SECRET`
+settings. The function still verifies the user's Neon Auth session and
+workspace permissions. These settings apply to staging only; production
+configuration remains untouched. The preview URL is public, so keep real
+intake disabled and do not put real or sensitive data in it.
+
+The latest hosted guard checks returned HTTP 200 for `/`, `/pilot`, the staging
+database health Function, and the Neon Auth JWKS endpoint. The unauthenticated
+reviewer API returned HTTP 401, and forwarding with the staging backend secret
+but without a user session also returned HTTP 401. This confirms service
+connectivity and the unauthenticated guard, but does not verify Google sign-in,
+an authenticated submission, or reviewer workflows; those need a Whispers-owned
+Google OAuth client and staging tester accounts.
 
 Neon serves only prepared translations whose catalog hash matches the current
 interface. Staging has no matching cache: the eight legacy Swahili cache rows
