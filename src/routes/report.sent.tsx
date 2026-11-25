@@ -85,7 +85,7 @@ function Sent() {
 
   return (
     <CitizenShell sensitive>
-      <h1 tabIndex={-1} ref={(el) => el?.focus()}>{DEMO_MODE ? t("sent.titleDemo") : t("sent.title")}</h1>
+      <h1 tabIndex={-1} ref={(el) => el?.focus()}>{submission.provider === "demo" ? t("sent.titleDemo") : t("sent.title")}</h1>
       <p className="mt-2 text-muted-foreground">{t("sent.keep")}</p>
 
       <div className="card p-5 mt-6">

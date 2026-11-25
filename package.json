@@ -7,6 +7,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "deploy:staging": "npm run build -- --mode staging && npx wrangler@latest preview --config wrangler.preview.jsonc --name staging-neon --worker-name whispers-neon-pilot",
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

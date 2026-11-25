@@ -167,7 +167,7 @@ function Review() {
         {state === "failed" && <p role="alert" className="text-destructive">⚠ {t("s3.failed")}</p>}
         {state === "timeout" && <p role="alert" className="text-warning">⚠ {t("s3.timeout")}</p>}
         {state === "offline" && <p role="alert" className="text-warning">⚠ {t("s3.offline")}</p>}
-        {DEMO_MODE && <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>}
+        {DEMO_MODE && !connected && <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>}
       </div>
 
       <ActionBar>

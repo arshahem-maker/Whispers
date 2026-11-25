@@ -19,12 +19,9 @@ interface Report {
 export async function submitNeonPilot(input: z.infer<typeof pilotSubmitSchema>, request: Request) {
   const identity = await neonIdentity(request);
   if (!identity) throw new Error("Sign in as an invited tester.");
-  const db = neonDatabase();
-  const [actor] = await db<{ id: string }[]>`
-    select id from auth.users where issuer=${identity.issuer} and subject=${identity.subject}
-  `;
   const testers = (process.env["WHISPERS_PILOT_TESTER_IDS"] ?? "").split(",").map((id) => id.trim());
-  if (!actor || !testers.includes(actor.id)) throw new Error("Connected intake is available to invited testers only.");
+  if (!testers.includes(identity.subject)) throw new Error("Connected intake is available to invited testers only.");
+  const db = neonDatabase();
 
   const payload = input.payload;
   const area = PILOT_COUNTRIES.find((country) => country.code === payload.countryCode);
@@ -33,6 +30,16 @@ export async function submitNeonPilot(input: z.infer<typeof pilotSubmitSchema>, 
   }
   const payloadHash = await sha256Hex(JSON.stringify(payload) + input.codeHash);
   const accepted = await db.begin(async (sql) => {
+    const [actor] = await sql<{ id: string }[]>`
+      insert into auth.users (issuer, subject, email, email_confirmed_at)
+      select ${identity.issuer}, id::text, lower(email), now()
+      from neon_auth."user"
+      where id::text=${identity.subject} and "emailVerified" is true and email is not null
+      on conflict (issuer, subject) do update
+        set email=excluded.email, email_confirmed_at=excluded.email_confirmed_at
+      returning id
+    `;
+    if (!actor) throw new Error("A verified Neon Auth account is required.");
     await sql`select pg_advisory_xact_lock(hashtextextended(${input.idempotencyKey}, 0))`;
     const [prior] = await sql<{ payload_hash: string }[]>`
       select payload_hash from public.whispers_reports where idempotency_key=${input.idempotencyKey}
