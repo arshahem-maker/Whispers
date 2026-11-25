@@ -23,7 +23,7 @@ const tables = [
   "user_roles", "whispers_reports", "whispers_records", "whispers_expert_requests",
   "whispers_expert_assignments", "whispers_expert_responses", "whispers_updates",
   "whispers_release", "whispers_release_reviews", "whispers_staff_invitations",
-  "whispers_audit", "whispers_media_cleanup",
+  "whispers_audit", "whispers_media_cleanup", "whispers_interface_translations",
 ];
 
 try {

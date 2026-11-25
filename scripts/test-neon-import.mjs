@@ -31,10 +31,6 @@ const importer = (...args) => run(process.execPath, ["scripts/import-neon-legacy
 try {
   await db`create schema neon_auth`;
   await db`create table neon_auth."user" (id text primary key, email text not null, "emailVerified" boolean not null)`;
-  await db`create schema whispers_legacy_import`;
-  await db`create table whispers_legacy_import.snapshots (
-    id uuid primary key, source_payload jsonb not null, imported_at timestamptz not null default now()
-  )`;
   const received = new Date().toISOString();
   const expires = new Date(Date.now() + 86_400_000).toISOString();
   await db`insert into neon_auth."user" values ('fixture','user@example.invalid',true)`;
@@ -53,6 +49,8 @@ try {
     whispers_expert_requests: [], whispers_expert_assignments: [], whispers_expert_responses: [],
     whispers_updates: [], whispers_release: [], whispers_release_reviews: [],
     whispers_staff_invitations: [], whispers_audit: [], whispers_media_cleanup: [],
+    whispers_interface_translations: [{ language: "fr", catalog_hash: "c".repeat(32), batch_offset: 0,
+      phrases: { "Updates": "Mises à jour" }, status: "ready", claimed_at: received }],
   };
   await db`insert into whispers_legacy_import.snapshots (id, source_payload) values (${snapshotId},${db.json(payload)})`;
   await assert.rejects(importer(), error => error.code === 2 && error.stdout.includes('"privatePhotosFound":0'));
@@ -67,12 +65,16 @@ try {
   await assert.rejects(importer("--apply"), /null value|not-null constraint/);
   const [rolledBack] = await db`select
     (select count(*)::int from public.whispers_reports) as reports,
-    (select count(*)::int from auth.users) as users`;
-  assert.deepEqual(rolledBack, { reports: 0, users: 0 });
+    (select count(*)::int from auth.users) as users,
+    (select count(*)::int from public.whispers_interface_translations) as translations`;
+  assert.deepEqual(rolledBack, { reports: 0, users: 0, translations: 0 });
   payload.whispers_audit = [];
   await db`update whispers_legacy_import.snapshots set source_payload=${db.json(payload)} where id=${snapshotId}`;
   assert.match((await importer("--apply")).stdout, /Snapshot activation verified/);
   assert.match((await importer("--apply")).stdout, /Snapshot already activated/);
+  const [translation] = await db`select phrases from public.whispers_interface_translations
+    where language='fr' and catalog_hash=${"c".repeat(32)} and batch_offset=0`;
+  assert.deepEqual(translation.phrases, { Updates: "Mises à jour" });
 
   await run("docker", ["exec", container, "pg_dump", "-U", "postgres", "-Fc", "-f", "/tmp/whispers.dump", "postgres"]);
   await run("docker", ["exec", container, "createdb", "-U", "postgres", "whispers_restore"]);
@@ -88,6 +90,9 @@ try {
     assert.deepEqual(row, { photo_count: 1, subject: "fixture", key });
     const [ledger] = await restored`select snapshot_id from whispers_legacy_import.activated_snapshots`;
     assert.equal(ledger.snapshot_id, snapshotId);
+    const [savedTranslation] = await restored`select phrases from public.whispers_interface_translations
+      where language='fr' and catalog_hash=${"c".repeat(32)} and batch_offset=0`;
+    assert.deepEqual(savedTranslation.phrases, { Updates: "Mises à jour" });
   } finally {
     await restored.end();
   }

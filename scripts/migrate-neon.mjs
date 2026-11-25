@@ -15,6 +15,7 @@ const migrations = [
   "drizzle/neon/0009_staff_invitation_scope.sql",
   "drizzle/neon/0010_public_projection.sql",
   "drizzle/neon/0011_retention_status.sql",
+  "drizzle/neon/0012_legacy_snapshot.sql",
 ];
 
 const connection = process.env.DATABASE_URL_UNPOOLED;
