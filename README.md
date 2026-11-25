@@ -6,13 +6,12 @@ review, private media, and reviewed public updates.
 
 ## Current release status — 25 November 2026
 
-- `staging/neon` is the current Neon implementation branch. The Neon project
-  currently has only its `production` branch, and the local Neon checkout is
-  linked to it. Do not run migration, import, retention, or destructive test
-  commands with the current `.env.local`.
-- Create a separate persistent staging environment from a verified
-  schema-only/synthetic baseline before connected testing. Do not clone
-  production until its data is confirmed safe to copy.
+- `staging/neon` is the current Neon implementation branch. The production
+  Neon project remains separate. A second Free-plan project, `Whispers Staging`,
+  now provides an empty `main` database with the app's schema and Neon services.
+  It contains no copied production or legacy records. The local `.neon` and
+  `.env.local` still point to production; use the ignored `.env.staging.local`
+  for staging-only work.
 - The Lovable project is not published, and its managed Supabase database is
   still enabled. Do not disable it until the data and private-file migration
   has been reconciled and restored successfully.
@@ -38,9 +37,10 @@ npm run dev
 ## Archived Supabase pilot instructions
 
 The following Supabase and Render configuration is retained only as a record
-of the earlier pilot. It is not the active Neon deployment path. In particular,
-`drizzle/proposed/0006_pilot_release_blockers.sql` targets the legacy Supabase
-backend and must not be applied to Neon.
+of the earlier pilot. It is not the active Neon deployment path. The file
+`drizzle/proposed/0006_pilot_release_blockers.sql` is included in the checked-in
+Neon migration runner and has been applied successfully to the empty staging
+database. Do not apply it separately or through the legacy Supabase workflow.
 
 Use a staging database and synthetic reports. The browser-tab demo can run without Cloud credentials.
 
@@ -59,17 +59,20 @@ In staging Supabase, create the private `whispers-private` bucket, apply the rev
 
 ### Neon setup and staging safeguards
 
-The Git branch `staging/neon` is not a Neon database branch. At the time of this
-status, the Neon project has only `production`; the local `.neon` link and
-`.env.local` point to that branch. First create and verify a separate persistent
-staging environment using only schema and fictional fixtures. Neon branches
-copy their parent's data, so do not branch from production until its contents
-are confirmed safe to duplicate.
+The Git branch `staging/neon` is not a Neon database branch. The production
+Neon project has only `production`; its `.neon` link and `.env.local` remain
+unchanged. A separate Free-plan `Whispers Staging` project has an empty `main`
+branch, and the 13 checked-in migrations have been applied there. Its Auth,
+Object Storage, Functions, Realtime, and AI Gateway are provisioned. Schema-only
+branch creation was rejected for the production project's legacy database
+role, so staging was isolated in a separate project without copying production
+rows or private files.
 
-Only after confirming that `.neon` and `.env.local` target the isolated staging
-branch, apply the reviewed `drizzle/neon/` migrations with
-`node --env-file=.env.local scripts/migrate-neon.mjs`. Use a disposable database
-for `bash scripts/test-neon-db.sh`. Run
+Staging credentials are in the ignored `.env.staging.local`; do not replace the
+production `.neon` or `.env.local` link for routine staging work. The staging
+migrations were applied with `node --env-file=.env.staging.local
+scripts/migrate-neon.mjs`. Use a disposable database for
+`bash scripts/test-neon-db.sh`. Run
 `bash scripts/test-neon-import.sh` to rehearse missing-file rejection, atomic
 rollback, repeat activation, and PostgreSQL dump and restore with fictional
 rows and loopback storage. Rehearse private object recovery separately.

@@ -1,4 +1,5 @@
--- PROPOSED, NOT APPLIED. Review, then apply via the migration tool before deploying the matching pilot.server.ts.
+-- Release-gate migration: applied in the isolated Neon staging project through scripts/migrate-neon.mjs.
+-- Keep it in that runner (not the legacy Supabase workflow) and validate it against staging before production rollout.
 -- 1. Pilot quotas separate from voice.
 CREATE TABLE public.whispers_pilot_limits (bucket text PRIMARY KEY, started_at timestamptz NOT NULL DEFAULT now(), requests integer NOT NULL DEFAULT 0);
 GRANT ALL ON public.whispers_pilot_limits TO service_role;
