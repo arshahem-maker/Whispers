@@ -11,7 +11,10 @@ export async function neonIdentity(request: Request) {
   const issuer = new URL(authUrl).origin;
   try {
     keys ??= createRemoteJWKSet(new URL(jwksUrl));
-    const { payload } = await jwtVerify(token, keys, { issuer, audience: issuer, requiredClaims: ["sub", "exp"] });
+    // Neon Auth's Managed JWT contract validates the branch issuer and signature.
+    // Do not pin `aud`: Neon-issued user tokens do not promise the branch URL as
+    // their audience, so that extra check can reject an otherwise valid session.
+    const { payload } = await jwtVerify(token, keys, { issuer, requiredClaims: ["sub", "exp"] });
     return payload.sub ? { issuer, subject: payload.sub } : null;
   } catch {
     return null;
