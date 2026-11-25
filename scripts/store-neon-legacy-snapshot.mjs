@@ -1,3 +1,4 @@
+import { requireStagingTarget } from "./staging-target.mjs";
 import { readFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import postgres from "postgres";
@@ -15,6 +16,7 @@ if (!connection || !new URL(connection).hostname.endsWith(".neon.tech")) {
   throw new Error("A Neon staging database connection is required.");
 }
 
+requireStagingTarget("database", connection);
 const contents = await readFile(path, "utf8");
 if (Buffer.byteLength(contents, "utf8") > 10_000_000) throw new Error("Legacy snapshot exceeds the 10 MB limit.");
 const payload = JSON.parse(contents);

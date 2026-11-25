@@ -1,3 +1,4 @@
+import { requireStagingTarget } from "./staging-target.mjs";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
@@ -13,6 +14,8 @@ if (!databaseUrl || !storageEndpoint || !new URL(databaseUrl).hostname.endsWith(
     || !new URL(storageEndpoint).hostname.endsWith(".neon.tech")) {
   throw new Error("The Neon database and private object storage endpoint are required.");
 }
+requireStagingTarget("database", databaseUrl);
+requireStagingTarget("storage", storageEndpoint);
 const database = postgres(databaseUrl, { max: 1, ssl: "require" });
 const storage = new S3Client({ endpoint: storageEndpoint, region: process.env.AWS_REGION, forcePathStyle: true });
 

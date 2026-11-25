@@ -1,3 +1,4 @@
+import { requireStagingTarget } from "./staging-target.mjs";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import postgres from "postgres";
 
@@ -15,6 +16,11 @@ if (rehearsal ? !endpoints.every(loopback) : !endpoints.every(hosted)) {
 }
 if (!rehearsal && endpoints[0].hostname.split(".")[0] !== endpoints[2].hostname.split(".")[0]) {
   throw new Error("The direct database endpoint and Auth endpoint disagree.");
+}
+if (!rehearsal) {
+  requireStagingTarget("database", databaseUrl);
+  requireStagingTarget("storage", storageEndpoint);
+  requireStagingTarget("auth", authBaseUrl);
 }
 const issuer = endpoints[2].origin;
 const db = postgres(databaseUrl, { max: 1, ssl: rehearsal ? false : "require" });

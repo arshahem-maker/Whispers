@@ -1,3 +1,4 @@
+import { requireStagingTarget } from "./staging-target.mjs";
 import { readFile } from "node:fs/promises";
 import postgres from "postgres";
 
@@ -24,6 +25,7 @@ const host = new URL(connection).hostname;
 if (!host.endsWith(".neon.tech") && host !== "127.0.0.1" && host !== "localhost") {
   throw new Error("Expected a Neon or loopback PostgreSQL database.");
 }
+if (host.endsWith(".neon.tech")) requireStagingTarget("database", connection);
 const sql = postgres(connection, { max: 1, ...(host.endsWith(".neon.tech") ? { ssl: "require" } : {}) });
 
 try {
