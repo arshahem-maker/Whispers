@@ -58,14 +58,19 @@ and the React lint fixes. Verification on the updated working tree:
 
 - GitHub Verify passed on the synchronized `staging/neon` head after updating
   `actions/checkout` and `actions/setup-node` to their Node 24-compatible v7
-  releases and enabling manual workflow runs. The run checked out the exact
-  branch commit and passed dependency audit, typecheck, lint, 42 unit tests,
+  releases and enabling manual workflow runs. After the Neon language-control
+  fix, the latest run checked out the exact branch commit and passed dependency
+  audit, typecheck, lint, 44 unit tests,
   isolated pilot and Neon database suites, import rehearsal, and production
-  build: [run 45657947994](https://github.com/arshahem-maker/Whispers/actions/runs/45657947994).
+  build: [run 45659433038](https://github.com/arshahem-maker/Whispers/actions/runs/45659433038).
 - The prior Node 20 runtime deprecation annotation is gone. Lint still reports
   11 Fast Refresh export-pattern warnings and no errors.
 - The branch and PR #2 now point to the same commit. The older open draft PR #1
   was closed as superseded because its commits are included in PR #2.
+- Two focused `LanguageButton` tests verify that Neon displays a non-interactive
+  English-only status and the legacy backend retains its selector. The staging
+  preview deployed successfully, and the public home page displayed that
+  status. No production configuration or data was changed.
 
 ## Earlier local Neon verification — 25 November 2026
 

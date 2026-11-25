@@ -35,7 +35,8 @@ marked historical there.
   401. Google sign-in reached the Neon-backed workspace; the signed-in account
   loaded administrator invitation and retention panels. That account has no
   reviewer role, so reviewer report access and citizen submission remain
-  unverified.
+  unverified. The public interface now labels the Neon pilot English-only
+  instead of presenting a translation control with no working Neon catalog.
 - The Lovable project is unpublished and its managed Supabase database remains
   enabled. Supabase must not be disabled until a verified data cutover.
 - Real-source intake is not approved or enabled.
