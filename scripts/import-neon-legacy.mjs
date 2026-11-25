@@ -38,6 +38,9 @@ try {
   const manifest = new Set(payload.file_manifest.map(entry => entry.name));
   const records = payload.whispers_records;
   const reports = payload.whispers_reports;
+  if (reports.some(report => report.body?.fictional !== true)) {
+    throw new Error("Legacy snapshot contains a report not marked fictional; no records were imported.");
+  }
   const photos = records.filter(record => record.kind === "photo");
   const photoKeys = new Set(photos.map(record => record.body?.key));
   if (manifest.size !== payload.file_manifest.length || photos.length !== photoKeys.size ||

@@ -53,6 +53,11 @@ try {
       phrases: { "Updates": "Mises à jour" }, status: "ready", claimed_at: received }],
   };
   await db`insert into whispers_legacy_import.snapshots (id, source_payload) values (${snapshotId},${db.json(payload)})`;
+  payload.whispers_reports[0].body.fictional = false;
+  await db`update whispers_legacy_import.snapshots set source_payload=${db.json(payload)} where id=${snapshotId}`;
+  await assert.rejects(importer(), /not marked fictional; no records were imported/);
+  payload.whispers_reports[0].body.fictional = true;
+  await db`update whispers_legacy_import.snapshots set source_payload=${db.json(payload)} where id=${snapshotId}`;
   await assert.rejects(importer(), error => error.code === 2 && error.stdout.includes('"privatePhotosFound":0'));
   await assert.rejects(importer("--apply"), /Preflight blocked activation/);
   photoPresent = true;
@@ -94,7 +99,7 @@ try {
   } finally {
     await restored.end();
   }
-  console.log("Neon import rehearsal passed: missing photo rejection, atomic rollback, verified owner mapping, idempotent activation, database backup and restore.");
+  console.log("Neon import rehearsal passed: fictional-only gate, missing photo rejection, stale cache skip, atomic rollback, verified owner mapping, idempotent activation, and backup/restore.");
 } finally {
   await db.end();
   storage.close();
