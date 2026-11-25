@@ -8,25 +8,30 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 
-## What Lovable manages
+## External services and data
 
-Rules outside this block are the project's own. Change the pieces below in
-Lovable, not by hand. With the [Lovable MCP](https://mcp.lovable.dev)
-connected, `send_message` asks Lovable to do it; otherwise ask the user to
-use the editor.
+The current migration target is Neon. Lovable Cloud/Supabase is a legacy
+integration and must not be treated as the active backend for Neon work.
 
-- **Database.** Do not add or edit `supabase/migrations/` or `drizzle/`.
-  Ask Lovable to change the schema.
+- **Neon schema.** Checked-in SQL under `drizzle/neon/` is the Neon schema
+  source. Review schema changes and migration ordering carefully. Never run
+  migrations against `production` during routine development; use an isolated
+  staging branch with synthetic data. Do not assume that a Neon branch is
+  isolated until its branch name and connection are verified.
+- **Legacy Supabase schema.** `supabase/` and `drizzle/proposed/` contain legacy
+  Supabase work. Do not apply those migrations to Neon. Preserve legacy data
+  until its export, import, counts, private files, identity mapping, and restore
+  have been reconciled.
+- **AI services.** Neon-mode features must not depend on Lovable's AI gateway.
+  Use Neon AI Gateway or an explicitly approved provider, with server-only
+  credentials and bounded usage. Keep secrets out of browser code and Git.
+- **Lovable sync.** Never rewrite published history. A push to one Git branch
+  does not prove it is Lovable's connected branch; verify the project's latest
+  revision and branch before claiming sync.
 - **Generated files.** Do not edit a file whose header says it is automatically
   generated.
-- **AI gateway.** Keep model calls on Lovable's gateway, and keep
-  `LOVABLE_API_KEY` out of browser code.
-- **Connectors.** Lovable provides native connectors. `list_connectors` shows
-  which are enabled; `add_connector` only returns the dashboard link. When a
-  connector is enabled, calls go through the connector gateway and need
-  `LOVABLE_API_KEY`. When Lovable does not provide one, users can bring their
-  own key and store it in Secrets.
-- **Secrets.** Lovable manages them. Do not put secret values in the repo.
+- **Secrets.** Keep all credentials in the relevant service's secret store or
+  ignored local environment files. Never put secret values in the repository.
 <!-- LOVABLE:END -->
 
 ## Whispers architecture

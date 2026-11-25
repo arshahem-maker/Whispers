@@ -1,23 +1,62 @@
-# Tasks
-- [x] Execute requested photo, report/private-code, live-voice and translation checks; passes, failures and blocked coverage recorded in TESTING-RESULTS.md.
-- [ ] Complete successful live voice and current-catalog translation checks — blocked by AI gateway HTTP 402 “Not enough credits”; voice is paused after the terminal failure.
-- [ ] Retest Cloud three-photo follow-up and repeated code opens after separating pilot limits from voice limits — confirmed shared three-request/hour limiter regression; no application fixes requested in this testing task.
-- [ ] Run comprehensive automated, browser, connected-pilot and security checks; report verified coverage and blockers without enabling real intake.
-- [x] Add authenticated private-photo preview controls, connected-pilot navigation and isolated cleanup-job failures; 31 regression tests pass, public pages checked.
-- [ ] Apply atomic removal-request and staff-retention safeguards — blocked by Lovable Cloud connection timeouts; neither migration attempt applied.
-- [ ] Verify private-photo viewing end-to-end as an authorised reviewer — awaiting reviewer account (invitations deferred).
-- [ ] Complete deep security review — scan result pending; basic checks reported no issues.
-- [x] Add verified-email reviewer/expert invitations scoped to one workspace; administrator creation and revocation verified through the UI, with three invitation-rule tests.
-- [x] Connect the main three-step citizen flow and follow-up to the fictional Cloud pilot without enabling real-source intake; save, message and refresh verified through the UI.
-- [x] Add database-atomic photo quotas and publication transitions, revoke-before-cleanup, durable media retries and limited pilot submission access; release verification remains below.
-- [x] Add staff access management, operator details and human-review reference forms plus safe connected public-update reads; authenticated forms remain unverified pending owner sign-in.
-- [x] Connect Lovable Cloud for interface translation; keep report intake visibly in demo until server access controls exist.
-- [x] Add home-page language selection and app-wide interface translation with priority crisis-region languages and custom language entry.
-- [x] Verify translation, right-to-left layout, navigation, and privacy boundaries (live Arabic, English restore, unchanged draft, 15 passing tests).
-- [x] Add consent-based voice recording, language detection, English transcription, uncertain sound observations, and editable report prefill; verified English and Spanish recordings.
-- [x] Add a separate fictional-only connected pilot with persisted reports, server-scoped roles, social staff sign-in, private-code follow-up, and reviewer/expert/publication commands. Main report experience remains demo-only.
-- [x] Add private photo re-encoding, three-photo enforcement, audit records and daily retention cleanup; full operational verification still required.
-- [x] Verify connected citizen save and follow-up through the UI, signed-out private-data exclusion, and automated release restrictions (24 tests).
-- [ ] Authenticated reviewer, expert and independent publication verification — owner administrator access verified; awaiting invited staff sign-in and an independent publisher account.
-- [ ] Complete connected staff integration and release verification, including private media/retention under failure and concurrency, removal-request races, cleanup-tombstone lifecycle and abuse controls — blocked on authorised staff accounts for end-to-end verification; connected pilot is not production-ready.
-- [ ] Human translation, security/legal/operational review and named operator/contact before real-source intake; publish only after release review. These human approvals cannot be supplied automatically.
+# Whispers release roadmap
+
+Status checked 25 November 2026. This roadmap supersedes the earlier mixed
+Supabase/Lovable checklist. Historical test results remain in
+`TESTING-RESULTS.md` and are not proof of the current Neon build.
+
+## Confirmed
+
+- `staging/neon` is pushed to GitHub; `main` does not yet include it.
+- Neon project `Whispers` and its `whispersapi` and `hello` Functions are
+  provisioned. The scheduled retention trigger is enabled.
+- The hosted `workers.dev` home and `/pilot` respond, but full sign-in and
+  report workflows have not been verified on the current deployment.
+- The Lovable project is unpublished and its managed Supabase database remains
+  enabled. Supabase must not be disabled until a verified data cutover.
+- Real-source intake is not approved or enabled.
+
+## Next work, in order
+
+1. **Isolate staging.** Create a persistent Neon staging environment from a
+   schema-only or synthetic baseline. The Neon project currently has only its
+   `production` branch, and the local checkout points to production. Do not
+   duplicate production data until its contents are confirmed safe to copy.
+   Check that the staging branch does not inherit a short TTL.
+2. **Finish staff sign-in setup.** Configure a Whispers-owned Google Web OAuth
+   client, the branch-specific Neon callback and trusted application origin.
+   Add test accounts and verify invitations, role scoping, and workspace access.
+3. **Choose and sync the release source.** Verify which Git branch Lovable
+   tracks. Open a review PR for `staging/neon` to `main`; the existing draft PR
+   targets the older `pilot/launch-hardening` branch. Require fresh CI results
+   before merging.
+4. **Complete and prove the Neon-only path.** Verify Worker environment flags
+   and Function configuration. Port translation preparation to Neon Auth,
+   Neon Postgres, and an approved AI provider, or keep it unavailable. Keep
+   voice disabled until its Neon path and cost controls are implemented and
+   reviewed. Identify and remove runtime Supabase dependencies only after each
+   route has a tested Neon replacement.
+5. **Reconcile legacy data.** Inventory the Lovable/Supabase tables, users, and
+   private files; export and import only data that must be retained. Compare
+   record and attachment counts, verify staff identity mapping, and rehearse a
+   restore. The repository's import procedure exists, but this audit did not
+   verify a snapshot or imported-data reconciliation.
+6. **Run current staging verification.** With fictional fixtures and separate
+   citizen, reviewer, expert, publisher, and administrator accounts, verify
+   submissions, private-code follow-up, photo retry/viewing, removal, retention,
+   invitations, editorial review, publication withdrawal, scheduled cleanup,
+   and restore. Update `TESTING-RESULTS.md` with exact revision and results.
+7. **Complete human release gates.** Obtain named native-language, security,
+   legal/privacy, safeguarding, and operational reviews; confirm the operator,
+   incident escalation, retention policy, and monitoring. Keep real intake
+   disabled until these reviews and the technical checks are complete.
+
+## Current blockers
+
+- The Neon Auth provider is still Google's shared development credential; no
+  Whispers OAuth client is configured.
+- Lovable still reports Supabase enabled. Translation preparation and voice
+  still depend on Lovable/Supabase code paths; neither is Neon-complete.
+- GitHub has no PR for `staging/neon`; the open draft PR still targets the
+  older `pilot/launch-hardening` branch.
+- Current Neon end-to-end tests, production data migration, private-media
+  restore, and human release reviews are not verified.

@@ -27,18 +27,21 @@ export default defineConfig({
       functionPath: "/scheduled-retention",
     },
   },
-  // Branch policy: per-branch tuning
+  // Keep the named staging branch durable. Only short-lived dev branches expire.
   branch: (branch) => {
     if (branch.isDefault) {
       // Default branch: no overrides, uses project defaults
       return {};
     }
-    if (!branch.exists) {
-      // New non-default branches: auto-expire
-      // Run `neon checkout <name>` to create a new branch with these settings
+    if (branch.name === "staging") {
+      // Staging is a persistent environment; do not apply a TTL.
+      return {};
+    }
+    if (!branch.exists && branch.name.startsWith("dev-")) {
+      // Short-lived development branches expire after one week.
       return { ttl: "7d" };
     }
-    // Existing branch: no changes
+    // Other branches use project defaults unless explicitly configured.
     return {};
   },
 });

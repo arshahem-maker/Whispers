@@ -1,23 +1,30 @@
 # Whispers
 
-This project was built with [Lovable](https://lovable.dev).
+Whispers is an independent humanitarian reporting and review application. It
+supports a fictional demonstration, private report follow-up, workspace-scoped
+review, private media, and reviewed public updates.
 
-## Build with Lovable
+## Current release status — 25 November 2026
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+- `staging/neon` is the current Neon implementation branch. The Neon project
+  currently has only its `production` branch, and the local Neon checkout is
+  linked to it. Do not run migration, import, retention, or destructive test
+  commands with the current `.env.local`.
+- Create a separate persistent staging environment from a verified
+  schema-only/synthetic baseline before connected testing. Do not clone
+  production until its data is confirmed safe to copy.
+- The Lovable project is not published, and its managed Supabase database is
+  still enabled. Do not disable it until the data and private-file migration
+  has been reconciled and restored successfully.
+- Real-source intake remains disabled. The hosted `workers.dev` site is a
+  staging preview; an HTTP 200 response does not verify sign-in or report flows.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Local development
 
 ```sh
 git clone <this-repository-url>
 cd <repository-name>
-npm i
+npx bun@1.4.5 install --frozen-lockfile
 npm run dev
 ```
 
@@ -28,7 +35,12 @@ npm run dev
 - React
 - Tailwind CSS
 
-## Connected fictional pilot
+## Archived Supabase pilot instructions
+
+The following Supabase and Render configuration is retained only as a record
+of the earlier pilot. It is not the active Neon deployment path. In particular,
+`drizzle/proposed/0006_pilot_release_blockers.sql` targets the legacy Supabase
+backend and must not be applied to Neon.
 
 Use a staging database and synthetic reports. The browser-tab demo can run without Cloud credentials.
 
@@ -39,18 +51,25 @@ Use a staging database and synthetic reports. The browser-tab demo can run witho
 5. Use distinct tester, reviewer, expert, publisher and retention administrator accounts. Test report submission, retry, three attachments, repeat receipt opens, replies, expert assessment, publication and withdrawal, and removal under interrupted network and concurrent actions.
 6. Verify the hosting scheduler calls the authenticated retention endpoint and alert on overdue cleanup jobs, failed runs and public feed outages. Rehearse restore in a disposable environment, including database and private storage. Record the responsible operator and escalation contact before any move toward real intake.
 
-### Free hosted staging
+### Legacy Render and Supabase configuration — do not use for new deployments
 
 The Render Blueprint targets one Free Node web service on the pilot branch. Use a separate Supabase Free project for PostgreSQL, Auth, and private storage. The browser and server Supabase URL and publishable key must point to that same staging project. Keep the service-role key server-only. The Blueprint generates separate secrets for intake throttling and the retention endpoint, so text intake can work without an AI gateway key.
 
 In staging Supabase, create the private `whispers-private` bucket, apply the reviewed migrations, and configure Google OAuth with the hosted `/pilot` redirect. Use a scheduled GitHub Actions job or an existing scheduler for the authenticated retention endpoint after the staging host and secret are configured. Export the database and private storage separately for restore testing.
 
-### Neon staging migration
+### Neon setup and staging safeguards
 
-Use `staging/neon` and fictional fixtures until hosted verification is complete.
-After `neon deploy` pulls the environment, apply the reviewed PostgreSQL
-migrations with `node --env-file=.env.local scripts/migrate-neon.mjs`. Use a
-disposable database for `bash scripts/test-neon-db.sh`. Run
+The Git branch `staging/neon` is not a Neon database branch. At the time of this
+status, the Neon project has only `production`; the local `.neon` link and
+`.env.local` point to that branch. First create and verify a separate persistent
+staging environment using only schema and fictional fixtures. Neon branches
+copy their parent's data, so do not branch from production until its contents
+are confirmed safe to duplicate.
+
+Only after confirming that `.neon` and `.env.local` target the isolated staging
+branch, apply the reviewed `drizzle/neon/` migrations with
+`node --env-file=.env.local scripts/migrate-neon.mjs`. Use a disposable database
+for `bash scripts/test-neon-db.sh`. Run
 `bash scripts/test-neon-import.sh` to rehearse missing-file rejection, atomic
 rollback, repeat activation, and PostgreSQL dump and restore with fictional
 rows and loopback storage. Rehearse private object recovery separately.
@@ -100,7 +119,11 @@ the two timestamps to detect a failed attempt and check that scheduled
 successes continue hourly. The table contains no report IDs or text.
 Verify that successful runs are monitored before opening intake.
 
-Legacy data is held in a restricted Neon snapshot. Transfer private files
+The repository contains scripts for a legacy-data import, but the existence,
+contents, and completeness of a restricted Neon snapshot have not been verified
+in this release audit. Do not describe legacy data as migrated until the source
+snapshot, imported records, identities, and private files have been reconciled.
+If a verified export is available, transfer private files
 with `node --env-file=.env.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.
 Run `node --env-file=.env.local scripts/import-neon-legacy.mjs` to check
 photo completeness, staff identity, and record eligibility. Reconcile the final
