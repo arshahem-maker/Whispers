@@ -106,6 +106,12 @@ with the exact `WHISPERS_APP_ORIGIN` and a generated
 `WHISPERS_BACKEND_URL` to the Worker as server-only secrets. The function
 still verifies the user's Neon Auth session and workspace permissions.
 
+Neon serves only prepared translations whose catalog hash matches the current
+interface. Staging has no matching cache: the eight legacy Swahili cache rows
+are stale and excluded from import, so the interface remains in English until
+current translations are prepared and reviewed. AI translation preparation is
+not enabled on the Neon path; do not promise non-English UI during this phase.
+
 `neon.ts` schedules hourly cleanup through the authenticated Neon Function
 Trigger on `/scheduled-retention`. For local or alternate hosts,
 `POST /api/public/retention` accepts the server-only

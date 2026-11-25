@@ -76,6 +76,9 @@ Supabase/Lovable checklist. Historical test results remain in
   provider/account setup.
 - Lovable still reports Supabase enabled. Translation preparation and voice
   still depend on Lovable/Supabase code paths; neither is Neon-complete.
+- Neon staging has no current-hash translation cache. The eight legacy Swahili
+  entries are stale and deliberately skipped, so non-English interface choices
+  remain unavailable until reviewed translations are prepared for Neon.
 - AI Gateway is provisioned but no model calls are available until credits are
   purchased. No credits were purchased; voice remains disabled.
 - Realtime is provisioned but not used by app flows; the public feed currently
