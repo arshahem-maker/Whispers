@@ -12,6 +12,24 @@ for migration in drizzle/neon/0000_platform.sql drizzle/migrations/000{0,1}_*.sq
   { printf "BEGIN;\n"; cat "$migration"; printf "\nCOMMIT;\n"; } | run_sql
 done
 run_sql <<'SQL'
+DO $$ BEGIN
+ IF NOT public.whispers_reserve_pilot_quota('receipt:fixture', 2, 3600)
+   OR NOT public.whispers_reserve_pilot_quota('receipt:fixture', 2, 3600) THEN
+   RAISE EXCEPTION 'Receipt quota rejected a permitted request';
+ END IF;
+ IF public.whispers_reserve_pilot_quota('receipt:fixture', 2, 3600) THEN
+   RAISE EXCEPTION 'Receipt quota did not enforce its limit';
+ END IF;
+ IF NOT public.whispers_reserve_pilot_quota('message:fixture', 1, 3600)
+   OR NOT public.whispers_reserve_pilot_quota('upload:fixture', 1, 3600) THEN
+   RAISE EXCEPTION 'Message or upload quota was coupled to receipt quota';
+ END IF;
+ UPDATE public.whispers_pilot_limits SET started_at=now()-interval '2 hours'
+   WHERE bucket='receipt:fixture';
+ IF NOT public.whispers_reserve_pilot_quota('receipt:fixture', 2, 3600) THEN
+   RAISE EXCEPTION 'Expired receipt quota did not reset';
+ END IF;
+END $$;
 INSERT INTO auth.users(id,issuer,subject) VALUES
  ('00000000-0000-4000-8000-000000000001','fixture','reviewer-a'),
  ('00000000-0000-4000-8000-000000000002','fixture','reviewer-b');
@@ -100,4 +118,4 @@ DO $$ BEGIN
 END $$;
 RESET ROLE;
 SQL
-echo 'Neon-compatible PostgreSQL photo authorization, staff invitation, and public projection checks passed'
+echo 'Neon-compatible PostgreSQL pilot quota, photo authorization, staff invitation, and public projection checks passed'

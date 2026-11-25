@@ -16,6 +16,8 @@ Google OAuth client and tester accounts.
   unchanged.
 - Isolated PostgreSQL photo authorization, workspace invitation, and public
   projection checks passed in `scripts/test-neon-db.sh`.
+- The Neon pilot quota check also passed: receipt limits enforce their cap,
+  message and upload limits remain independent, and an expired window resets.
 - The isolated import rehearsal passed fictional-only gating, missing-photo
   rejection, stale translation skip, atomic rollback, verified owner mapping,
   idempotent activation, and backup/restore checks in
