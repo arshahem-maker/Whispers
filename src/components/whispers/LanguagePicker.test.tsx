@@ -1,6 +1,6 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { LanguageButton } from "./LanguagePicker";
+import { LanguageButton, LanguageProvider } from "./LanguagePicker";
 
 afterEach(() => {
   cleanup();
@@ -17,11 +17,21 @@ describe("LanguageButton", () => {
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
-  it("keeps the selector available for the legacy backend", () => {
+  it("keeps the selector available for the legacy backend", async () => {
     vi.stubEnv("VITE_WHISPERS_REVIEWER_BACKEND", "supabase");
 
-    render(<LanguageButton tiny />);
+    render(<LanguageProvider><LanguageButton tiny /></LanguageProvider>);
 
-    expect(screen.getByRole("button", { name: "Change language" })).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "Change language" }));
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the Neon provider lightweight and leaves its children available", () => {
+    vi.stubEnv("VITE_WHISPERS_REVIEWER_BACKEND", "neon");
+
+    render(<LanguageProvider><p>Report content</p></LanguageProvider>);
+
+    expect(screen.getByText("Report content")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });
