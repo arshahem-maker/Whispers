@@ -85,8 +85,11 @@ still verifies the user's Neon Auth session and workspace permissions.
 `neon.ts` schedules hourly cleanup through the authenticated Neon Function
 Trigger on `/scheduled-retention`. For local or alternate hosts,
 `POST /api/public/retention` accepts the server-only
-`WHISPERS_RETENTION_SECRET` as a bearer token. Verify that successful runs
-are monitored before opening intake.
+`WHISPERS_RETENTION_SECRET` as a bearer token. The deployed Function records the latest attempt and latest success separately
+for manual and scheduled runs in `public.whispers_retention_status`. Compare
+the two timestamps to detect a failed attempt and check that scheduled
+successes continue hourly. The table contains no report IDs or text.
+Verify that successful runs are monitored before opening intake.
 
 Legacy data is held in a restricted Neon snapshot. Transfer private files
 with `node --env-file=.env.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.
