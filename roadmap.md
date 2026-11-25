@@ -1,8 +1,9 @@
 # Whispers release roadmap
 
 Status checked 25 November 2026. This roadmap supersedes the earlier mixed
-Supabase/Lovable checklist. Historical test results remain in
-`TESTING-RESULTS.md` and are not proof of the current Neon build.
+Supabase/Lovable checklist. Current local and hosted guard checks are recorded
+at the top of `TESTING-RESULTS.md`; the older Supabase pilot results are clearly
+marked historical there.
 
 ## Confirmed
 
@@ -19,8 +20,11 @@ Supabase/Lovable checklist. Historical test results remain in
 - Realtime accepted a live `SELECT 1` subscription. It rejected a query against
   an RLS-protected Whispers table; the app currently polls public updates and
   does not use Realtime, so no table policy was weakened to force the test.
-- GitHub draft PR #2 contains the Neon implementation. CI passed typecheck,
-  lint, tests, disposable Postgres/Neon migration checks, and production build.
+- GitHub draft PR #2 contains the Neon implementation. GitHub Verify passed on
+  code commit `91260ab`. Local checks were rerun at `226a57c`: typecheck/build
+  passed, 42 tests passed, and lint had 0 errors with 11 Fast Refresh warnings.
+  Neon disposable DB and import rehearsals passed. GitHub did not report a
+  check result for `226a57c`.
 - The public staging preview is
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev> and
   Cloudflare marks it `noindex`. The staging Neon Function is deployed with
@@ -34,28 +38,26 @@ Supabase/Lovable checklist. Historical test results remain in
 
 ## Next work, in order
 
-1. **Finish staff sign-in setup.** Configure a Whispers-owned Google Web OAuth
-   client for the staging Auth URL and local/hosted staging origins. Add
-   authorized test accounts, then verify invitations, role scoping, and
-   workspace access. The current Neon Auth provider is Google's shared
-   development credential and is not suitable for hosted release.
-2. **Complete hosted authenticated verification.** The staging Cloudflare
-   preview and Neon Function origin are connected, and Neon Auth trusts the
-   preview origin. Configure a Whispers-owned Google OAuth client, add staging
-   tester accounts, and verify sign-in, invitations, and authenticated report
-   flows. Keep the production Worker and secrets intact. The workers.dev
-   preview is public to anyone with its URL; keep real intake disabled.
-3. **Choose and sync the release source.** Verify which Git branch Lovable
-   tracks. Review draft PR #2 (which overlaps pilot-hardening PR #1), resolve
-   any review findings, and keep it draft until staging workflows and human
-   gates are complete. CI passed on its current head.
-4. **Complete and prove the Neon-only path.** Verify Worker environment flags
+1. **Finish hosted authenticated verification.** Configure a Whispers-owned
+   Google Web OAuth client for the staging Auth URL and add authorized test
+   accounts. Then verify sign-in, invitations, role scoping, workspace access,
+   submission, private-code follow-up and reviewer workflows. The current
+   provider uses Google's shared development credential. The staging preview
+   is public to anyone with its URL; keep real intake disabled.
+2. **Review the release source.** Lovable's latest revision
+   (`db4290a`) only renamed its planning file; no application code was changed
+   in that update. Draft PR #2 is based directly on pilot-hardening PR #1's
+   head (`7516901`), so it includes those hardening changes plus the Neon
+   migration. Do not merge both branches independently. Keep PR #2 draft until
+   hosted workflows and human gates are complete. The Lovable project is
+   unpublished; its managed Supabase database is still enabled.
+3. **Complete and prove the Neon-only path.** Verify Worker environment flags
    and Function configuration. Port translation preparation to Neon Auth,
    Neon Postgres, and an approved AI provider, or keep it unavailable. Keep
    voice disabled until its Neon path and cost controls are implemented and
    reviewed. Identify and remove runtime Supabase dependencies only after each
    route has a tested Neon replacement.
-5. **Reconcile legacy data.** The restricted source snapshot currently contains
+4. **Reconcile legacy data.** The restricted source snapshot currently contains
    five reports, six records, eight Swahili translation-cache entries, one
    legacy account, and references to three private photos. The cached
    translations have an obsolete catalog hash and are excluded from activation
@@ -67,12 +69,12 @@ Supabase/Lovable checklist. Historical test results remain in
    complete staff sign-in, then compare counts and rehearse restore before
    activating any report data; the importer requires an explicit confirmation
    flag for activation.
-6. **Run current staging verification.** With fictional fixtures and separate
+5. **Run current staging verification.** With fictional fixtures and separate
    citizen, reviewer, expert, publisher, and administrator accounts, verify
    submissions, private-code follow-up, photo retry/viewing, removal, retention,
    invitations, editorial review, publication withdrawal, scheduled cleanup,
-   and restore. Update `TESTING-RESULTS.md` with exact revision and results.
-7. **Complete human release gates.** Obtain named native-language, security,
+   and restore. Record the exact revision and results in `TESTING-RESULTS.md`.
+6. **Complete human release gates.** Obtain named native-language, security,
    legal/privacy, safeguarding, and operational reviews; confirm the operator,
    incident escalation, retention policy, and monitoring. Keep real intake
    disabled until these reviews and the technical checks are complete.
@@ -80,11 +82,12 @@ Supabase/Lovable checklist. Historical test results remain in
 ## Current blockers
 
 - The Neon Auth provider is still Google's shared development credential; no
-  Whispers OAuth client is configured.
-- Staging currently uses Google's shared development OAuth credential and has
-  no tester accounts. A Whispers-owned OAuth client and test identities require
-  manual provider/account setup. Legacy records are held only in a restricted
-  preflight snapshot; none are active.
+  Whispers OAuth client or tester accounts are configured. Authenticated
+  staging workflows require manual provider/account setup.
+- Legacy records are held only in a restricted preflight snapshot; none are
+  active. Their source content has not been reviewed, three private photos have
+  not been copied, and no verified Neon user has been mapped to the legacy
+  account.
 - Lovable still reports Supabase enabled. Translation preparation and voice
   still depend on Lovable/Supabase code paths; neither is Neon-complete.
 - Neon staging has no current-hash translation cache. The eight legacy Swahili

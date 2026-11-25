@@ -1,6 +1,35 @@
-# Whispers targeted test results
+# Whispers verification results
 
-Tested November 16–17, 2026, against the running preview and its connected fictional Cloud pilot. No real-source intake was enabled. No application fixes or staff role changes were made.
+## Current Neon verification — 25 November 2026
+
+Tested at commit `226a57c` (application code is unchanged since `91260ab`).
+These results cover local code and isolated fixtures;
+hosted authenticated user workflows are still blocked on a Whispers-owned
+Google OAuth client and tester accounts.
+
+- TypeScript typecheck passed.
+- ESLint passed with 0 errors and 11 Fast Refresh export-pattern warnings.
+- Vitest passed: 42 tests across 11 files.
+- Production build passed. Vite emitted a notice that the Lovable-provided
+  `vite-tsconfig-paths` plugin can be replaced by native path resolution;
+  the app configuration comes from the Lovable Vite wrapper, so this was left
+  unchanged.
+- Isolated PostgreSQL photo authorization, workspace invitation, and public
+  projection checks passed in `scripts/test-neon-db.sh`.
+- The isolated import rehearsal passed fictional-only gating, missing-photo
+  rejection, stale translation skip, atomic rollback, verified owner mapping,
+  idempotent activation, and backup/restore checks in
+  `scripts/test-neon-import.sh`.
+- Hosted staging checks from 25 November returned HTTP 200 for the public home,
+  `/pilot`, database health Function, and Neon Auth JWKS. The unauthenticated
+  reviewer endpoint and a forwarded reviewer request without a user session
+  returned HTTP 401. This does not prove sign-in or authenticated reporting.
+
+## Historical Supabase pilot test — 16–17 November 2026
+
+Tested against the running preview and its connected fictional Cloud pilot. No
+real-source intake was enabled. These findings describe the earlier Supabase
+pilot and should not be read as a current Neon test result.
 
 ## Passed
 - All 38 existing automated tests (10 files), repeated successfully.
