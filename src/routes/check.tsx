@@ -1,6 +1,6 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Eye, EyeOff, CheckCircle2, Circle } from "lucide-react";
 import { CitizenShell, useLeave } from "@/components/whispers/CitizenShell";
 import { useWhispers } from "@/lib/whispers/context";
@@ -40,23 +40,23 @@ function CheckPage() {
   const [busy, setBusy] = useState(false);
   const [reply, setReply] = useState("");
   const [confirmRemove, setConfirmRemove] = useState(false);
-  const read = async (c: string, action: "open" | "message" | "removal" = "open") => {
+  const read = useCallback(async (c: string, action: "open" | "message" | "removal" = "open") => {
     if (connected) return pilotContributorView(await receipt({ data: { code: c, action, ...(action === "message" ? { text: reply } : {}) } }));
     if (action === "message") return store.addContributorMessage(c, reply);
     if (action === "removal") return store.requestRemoval(c);
     return store.openReceipt(c);
-  };
+  }, [connected, receipt, reply, store]);
 
-  const open = async (c: string) => {
+  const open = useCallback(async (c: string) => {
     setBusy(true); setErr(false);
     try {
       const v = await read(c);
       if (!v) { setErr(true); return; }
       setView(v); setActive(c); setCode("");
     } catch { setErr(true); } finally { setBusy(false); }
-  };
+  }, [read]);
 
-  useEffect(() => { if (heldCode) { const c = heldCode; setHeldCode(null); void open(c); } /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+  useEffect(() => { if (heldCode) { const c = heldCode; setHeldCode(null); void open(c); } }, [heldCode, open, setHeldCode]);
   // Refresh when the store changes (e.g. demo reviewer reply).
   useWhispers();
   useEffect(() => { if (active && !connected) store.openReceipt(active).then((v) => (v ? setView(v) : (setView(null), setActive(null)))); }, [store.version, active, store, connected]);

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Mic, Square, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ export function VoiceRecorder() {
     const current = recorder.current; recorder.current = null;
     if (current) void current.stop().catch(() => {});
   }; }, []);
-  const finish = async () => {
+  const finish = useCallback(async () => {
     const current = recorder.current; if (!current) return;
     const token = operation.current;
     recorder.current = null; setPhase("processing");
@@ -62,12 +62,12 @@ export function VoiceRecorder() {
       if (!mounted.current || (e instanceof Error && e.name === "AbortError")) return;
       setError(e instanceof Error ? e.message : t("voice.failed")); setPhase("idle");
     }
-  };
+  }, [navigate, setDraft]);
   useEffect(() => {
     if (phase !== "recording") return;
     const timer = setInterval(() => { elapsed.current += 1; setSeconds(elapsed.current); if (elapsed.current >= VOICE_MAX_SECONDS) void finish(); }, 1000);
     return () => clearInterval(timer);
-  }, [phase]);
+  }, [finish, phase]);
   const start = async () => {
     if (!consent) return;
     const token = ++operation.current;
