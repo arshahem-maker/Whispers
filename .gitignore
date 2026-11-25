@@ -36,3 +36,6 @@ dist-ssr
 .env.*
 !.env.example
 .neon
+
+# Supabase CLI local metadata for legacy migration tooling
+supabase/.temp/
