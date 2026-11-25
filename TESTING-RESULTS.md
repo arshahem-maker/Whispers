@@ -54,6 +54,19 @@ and the React lint fixes. Verification on the updated working tree:
   only migration check after the migration-file cleanup reported 0 new
   migrations; the existing staging ledger remains at 14 recorded migrations.
 
+## Current GitHub verification — 25 November 2026
+
+- GitHub Verify passed on the synchronized `staging/neon` head after updating
+  `actions/checkout` and `actions/setup-node` to their Node 24-compatible v7
+  releases and enabling manual workflow runs. The run checked out the exact
+  branch commit and passed dependency audit, typecheck, lint, 42 unit tests,
+  isolated pilot and Neon database suites, import rehearsal, and production
+  build: [run 45657947994](https://github.com/arshahem-maker/Whispers/actions/runs/45657947994).
+- The prior Node 20 runtime deprecation annotation is gone. Lint still reports
+  11 Fast Refresh export-pattern warnings and no errors.
+- The branch and PR #2 now point to the same commit. The older open draft PR #1
+  was closed as superseded because its commits are included in PR #2.
+
 ## Earlier local Neon verification — 25 November 2026
 
 Tested at commit `226a57c` (application code is unchanged since `91260ab`).

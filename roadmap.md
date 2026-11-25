@@ -20,11 +20,12 @@ marked historical there.
 - Realtime accepted a live `SELECT 1` subscription. It rejected a query against
   an RLS-protected Whispers table; the app currently polls public updates and
   does not use Realtime, so no table policy was weakened to force the test.
-- GitHub draft PR #2 contains the Neon implementation and current staging
-  hardening commit `1eeced7`. GitHub Verify succeeded on that code commit, and
-  the updated public staging Preview returned the expected security headers.
-  Current local typecheck, build, lint, audit, unit test and hosted Preview
-  results are listed at the top of `TESTING-RESULTS.md`.
+- GitHub draft PR #2 contains the consolidated Neon implementation and pilot
+  hardening. Its current branch head is synchronized with `staging/neon`, and
+  GitHub Verify passed on the latest workflow changes. The earlier pilot
+  hardening PR #1 is closed as superseded, so there is one consolidated draft
+  to review. Current typecheck, build, lint, audit, unit test, database and
+  hosted Preview results are listed in `TESTING-RESULTS.md`.
 - The public staging preview is
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev> and
   Cloudflare marks it `noindex`. The staging Neon Function is deployed with
@@ -58,11 +59,11 @@ marked historical there.
    preview is public to anyone with its URL; keep real intake disabled.
 2. **Review the release source.** Lovable's current revision (`2c422d9`) only
    updated its planning file; its previous application-code edit changed one
-   test line. Draft PR #2 is based directly on pilot-hardening PR #1's head
-   (`7516901`), so it includes those hardening changes plus the Neon migration.
-   Do not merge both branches independently. Keep PR #2 draft until hosted
-   workflows and human gates are complete. The Lovable project is unpublished;
-   its managed Supabase database is still enabled.
+   test line. Draft PR #2 includes the pilot-hardening commits from PR #1 plus
+   the Neon migration. PR #1 is now closed as superseded; review only the
+   consolidated PR #2. Keep it draft until authenticated staging workflows and
+   human release gates are complete. The Lovable project is unpublished; its
+   managed Supabase database is still enabled.
 3. **Complete and prove the Neon-only path.** Verify Worker environment flags
    and Function configuration. Port translation preparation to Neon Auth,
    Neon Postgres, and an approved AI provider, or keep it unavailable. Keep
