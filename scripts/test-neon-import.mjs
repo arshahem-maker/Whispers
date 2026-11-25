@@ -72,9 +72,8 @@ try {
   await db`update whispers_legacy_import.snapshots set source_payload=${db.json(payload)} where id=${snapshotId}`;
   assert.match((await importer("--apply")).stdout, /Snapshot activation verified/);
   assert.match((await importer("--apply")).stdout, /Snapshot already activated/);
-  const [translation] = await db`select phrases from public.whispers_interface_translations
-    where language='fr' and catalog_hash=${"c".repeat(32)} and batch_offset=0`;
-  assert.deepEqual(translation.phrases, { Updates: "Mises à jour" });
+  const [translationCount] = await db`select count(*)::int as count from public.whispers_interface_translations`;
+  assert.equal(translationCount.count, 0, "stale, rebuildable translation cache is not activated");
 
   await run("docker", ["exec", container, "pg_dump", "-U", "postgres", "-Fc", "-f", "/tmp/whispers.dump", "postgres"]);
   await run("docker", ["exec", container, "createdb", "-U", "postgres", "whispers_restore"]);
@@ -90,9 +89,8 @@ try {
     assert.deepEqual(row, { photo_count: 1, subject: "fixture", key });
     const [ledger] = await restored`select snapshot_id from whispers_legacy_import.activated_snapshots`;
     assert.equal(ledger.snapshot_id, snapshotId);
-    const [savedTranslation] = await restored`select phrases from public.whispers_interface_translations
-      where language='fr' and catalog_hash=${"c".repeat(32)} and batch_offset=0`;
-    assert.deepEqual(savedTranslation.phrases, { Updates: "Mises à jour" });
+    const [restoredTranslationCount] = await restored`select count(*)::int as count from public.whispers_interface_translations`;
+    assert.equal(restoredTranslationCount.count, 0);
   } finally {
     await restored.end();
   }

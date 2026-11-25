@@ -49,11 +49,13 @@ Supabase/Lovable checklist. Historical test results remain in
    reviewed. Identify and remove runtime Supabase dependencies only after each
    route has a tested Neon replacement.
 5. **Reconcile legacy data.** The restricted source snapshot currently contains
-   five reports, six records, eight translations, one legacy account, and
-   references to three private photos. Import preflight blocks safely because
-   no photo bytes are in Neon and no verified Neon Auth user is mapped to the
+   five reports, six records, eight Swahili translation-cache entries, one
+   legacy account, and references to three private photos. The cached
+   translations have an obsolete catalog hash and are excluded from activation
+   because the cache is rebuildable. Import preflight blocks safely because no
+   photo bytes are in Neon and no verified Neon Auth user is mapped to the
    legacy account. Obtain the private-file export and complete staff sign-in,
-   then compare counts and rehearse restore before activating any data.
+   then compare counts and rehearse restore before activating any report data.
 6. **Run current staging verification.** With fictional fixtures and separate
    citizen, reviewer, expert, publisher, and administrator accounts, verify
    submissions, private-code follow-up, photo retry/viewing, removal, retention,

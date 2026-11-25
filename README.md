@@ -116,8 +116,10 @@ successes continue hourly. The table contains no report IDs or text.
 Verify that successful runs are monitored before opening intake.
 
 The restricted source snapshot is available for preflight, but it is not an
-active app data import. The importer currently finds five reports, six records,
-eight translations, one legacy account, and three private photo references; it
+active app data import. The source snapshot has five reports, six records,
+eight Swahili translation-cache entries, one legacy account, and three private
+photo references. Those cached translations use an obsolete catalog hash and
+are excluded from activation because this cache is rebuildable. Import preflight
 refuses activation because the three private photo objects are missing in Neon
 and the legacy account is not mapped to a verified Neon Auth user. Do not
 activate rows until both checks pass and the export is reconciled. To stage a
