@@ -2,9 +2,10 @@ import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { StaffShell } from "@/components/whispers/StaffShell";
-import { useWhispers } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import type { PublicUpdate } from "@/lib/whispers/types";
-import { Panel, useAct } from "@/components/whispers/Panel";
+import { Panel } from "@/components/whispers/Panel";
+import { useAct } from "@/components/whispers/use-act";
 
 export const Route = createFileRoute("/review/updates")({
   head: () => ({

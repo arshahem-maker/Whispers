@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Shield, Home as HomeIcon, Droplets, Stethoscope, Radio, AlertTriangle, MoreHorizontal } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { ActionBar, MultiToggle, RadioGroup, StepHeader } from "@/components/whispers/Form";
-import { useWhispers } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { BASIS_LABEL, CATEGORY_LABEL, IMPACT_LABEL, TIME_LABEL, t } from "@/lib/whispers/i18n";
 import { PILOT_COUNTRIES } from "@/lib/whispers/locations";
 import type { Category, Impact, KnowledgeBasis, TimeBucket } from "@/lib/whispers/types";

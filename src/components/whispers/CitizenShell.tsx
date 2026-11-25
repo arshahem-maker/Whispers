@@ -1,21 +1,13 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { FileText, Newspaper, LifeBuoy, LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { Wordmark } from "./Brand";
-import { DEMO_MODE, useWhispers } from "@/lib/whispers/context";
+import { DEMO_MODE } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { t } from "@/lib/whispers/i18n";
 import { LanguageButton } from "./LanguagePicker";
-
-export function useLeave() {
-  const { wipe } = useWhispers();
-  const navigate = useNavigate();
-  return () => {
-    wipe();
-    document.querySelectorAll("dialog[open]").forEach((d) => (d as HTMLDialogElement).close());
-    navigate({ to: "/closed", replace: true });
-  };
-}
+import { useLeave } from "./use-leave";
 
 export function CitizenShell({ children, sensitive = false, hideNav = false }: { children: ReactNode; sensitive?: boolean; hideNav?: boolean }) {
   useTranslationVersion();

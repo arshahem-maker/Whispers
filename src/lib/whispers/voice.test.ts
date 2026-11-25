@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyVoiceDraft, type VoiceResult } from "./voice-schema";
-import { emptyDraft } from "./context";
+import { emptyDraft } from "./draft";
 const result: VoiceResult = { language: "Arabic", originalTranscript: "رأيت العيادة مغلقة", englishTranscript: "I saw the clinic closed today in Ukraine.", sounds: [], category: "health", basis: "saw", country: "UA", area: "ua-kyiv", time: "today", impacts: ["healthcare"] };
 describe("voice report prefill", () => {
   it("fills the relevant report answers from the English result", () => {

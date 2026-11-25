@@ -1,7 +1,7 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute } from "@tanstack/react-router";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
-import { useWhispers } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { t } from "@/lib/whispers/i18n";
 import { pilotPublicUpdates } from "@/lib/whispers/pilot.functions";
 import { queryOptions, useQuery } from "@tanstack/react-query";

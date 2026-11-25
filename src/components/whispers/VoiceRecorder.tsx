@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { recordWav } from "@/lib/whispers/record-wav";
 import { solvePow } from "@/lib/whispers/voice-challenge";
 import { applyVoiceDraft, voiceResultSchema, VOICE_MAX_BYTES, VOICE_MAX_SECONDS } from "@/lib/whispers/voice-schema";
-import { useWhispers } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { t } from "@/lib/whispers/i18n";
 import { useTranslationVersion } from "@/lib/whispers/translation";
 

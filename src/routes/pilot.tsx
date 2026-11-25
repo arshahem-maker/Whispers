@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { NeonReviewerWorkspace } from "@/components/whispers/NeonReviewerWorkspace";
 import { PilotWorkspace } from "@/components/whispers/PilotWorkspace";
-import { useWhispers } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { generatePrivateCode, hashCode, groupCode } from "@/lib/whispers/crypto";
 import { submitPilotReport,pilotReceipt,pilotUpload } from "@/lib/whispers/pilot.functions";
 import { Button } from "@/components/ui/button";

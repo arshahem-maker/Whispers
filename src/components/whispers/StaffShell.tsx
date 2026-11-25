@@ -2,7 +2,8 @@ import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Wordmark } from "./Brand";
-import { DEMO_MODE, useWhispers } from "@/lib/whispers/context";
+import { DEMO_MODE } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import type { Role } from "@/lib/whispers/types";
 import { LanguageButton } from "./LanguagePicker";
 
@@ -58,6 +59,3 @@ export function StaffShell({ children, need, title }: { children: ReactNode; nee
     </div>
   );
 }
-
-export const fmtTime = (iso: string) =>
-  new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC";

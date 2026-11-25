@@ -1,7 +1,8 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
-import { DEMO_MODE, useWhispers } from "@/lib/whispers/context";
+import { DEMO_MODE } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { groupCode } from "@/lib/whispers/crypto";
 import { FIXTURE_CODES } from "@/lib/whispers/demo-data";
 
