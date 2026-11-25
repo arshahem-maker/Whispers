@@ -20,12 +20,11 @@ marked historical there.
 - Realtime accepted a live `SELECT 1` subscription. It rejected a query against
   an RLS-protected Whispers table; the app currently polls public updates and
   does not use Realtime, so no table policy was weakened to force the test.
-- GitHub draft PR #2 contains the Neon implementation. GitHub Verify passed on
-  code commit `91260ab`. Local checks were rerun at `226a57c`: typecheck/build
-  passed, 42 tests passed, and lint had 0 errors with 11 Fast Refresh warnings.
-  Neon disposable DB and import rehearsals passed. GitHub did not report a
-  check result for `226a57c`; Verify run #54 passed on documentation head
-  `da5e9e9`.
+- GitHub draft PR #2 contains the Neon implementation and current staging
+  hardening commit `1eeced7`. GitHub Verify succeeded on that code commit, and
+  the updated public staging Preview returned the expected security headers.
+  Current local typecheck, build, lint, audit, unit test and hosted Preview
+  results are listed at the top of `TESTING-RESULTS.md`.
 - The public staging preview is
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev> and
   Cloudflare marks it `noindex`. The staging Neon Function is deployed with

@@ -21,8 +21,18 @@ and the React lint fixes. Verification on the updated working tree:
   0 new migrations and initialized checksums for already-recorded staging
   migrations. The database returned a benign notice that the migration ledger
   already existed.
-- The isolated database suites were not rerun for this change set. The current
-  hosted Worker was not replaced in this verification.
+- The staging migration ledger reports 14 records and all 14 have checksums.
+- `npm run deploy:staging` updated only the public staging Preview. The live
+  home, `/report`, and `/pilot` returned HTTP 200; the unauthenticated reviewer
+  endpoint returned 401 and the wrong-method photo request returned 405.
+  These responses included the new security headers. The home showed the new
+  fictional-demo wording. A static JavaScript asset also returned the security
+  headers and retained its immutable cache policy.
+- GitHub Verify completed successfully on commit `1eeced736a121b685068588e1fbcada5900d39a9`:
+  [run 45642222658](https://github.com/arshahem-maker/Whispers/actions/runs/45642222658),
+  [run 45642208743](https://github.com/arshahem-maker/Whispers/actions/runs/45642208743).
+- The isolated database suites ran in GitHub CI; no authenticated Google OAuth
+  or human reviewer workflows were exercised by this change set.
 
 ## Current Neon verification — 25 November 2026
 
