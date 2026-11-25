@@ -24,7 +24,8 @@ marked historical there.
   code commit `91260ab`. Local checks were rerun at `226a57c`: typecheck/build
   passed, 42 tests passed, and lint had 0 errors with 11 Fast Refresh warnings.
   Neon disposable DB and import rehearsals passed. GitHub did not report a
-  check result for `226a57c`.
+  check result for `226a57c`; Verify run #54 passed on documentation head
+  `da5e9e9`.
 - The public staging preview is
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev> and
   Cloudflare marks it `noindex`. The staging Neon Function is deployed with
