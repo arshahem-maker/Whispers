@@ -45,6 +45,7 @@ export async function manageNeonInvitations({ issuer, subject }: Identity, comma
       for share of r
     `;
     if (!admin?.contexts.length) return null;
+    const releaseAdmin = ["ua", "td", "general"].every(scope => admin.contexts.includes(scope));
     if (!command) {
       const invitations = await sql`
         select id, email, role, workspace, expires_at, accepted_at, revoked_at
@@ -58,10 +59,22 @@ export async function manageNeonInvitations({ issuer, subject }: Identity, comma
           and a.issuer=${issuer} and a.email_confirmed_at is not null
         order by email, a.id limit 100
       `;
-      return { scopes: admin.contexts, invitations, staff };
+      const releaseReviews = releaseAdmin ? await sql`
+        select distinct kind from public.whispers_release_reviews order by kind
+      ` : null;
+      return { scopes: admin.contexts, invitations, staff, releaseReviews };
     }
 
-    if (command.action === "staff_role") {
+    if (command.action === "release_review") {
+      if (!releaseAdmin) return null;
+      const [review] = await sql<{ id: string }[]>`
+        insert into public.whispers_release_reviews (kind,reference,reviewer_id)
+        values (${command.kind},${command.reference},${admin.id}) returning id
+      `;
+      if (!review) throw new Error("Review was not recorded.");
+      await sql`insert into public.whispers_audit(actor_id,action,workspace,target_id)
+        values (${admin.id},'release_review','general',${review.id})`;
+    } else if (command.action === "staff_role") {
       if (!admin.contexts.includes(command.workspace) || (admin.id === command.userId && command.role === "admin")) {
         return null;
       }

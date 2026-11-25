@@ -65,6 +65,15 @@ The server also needs `NEON_AUTH_BASE_URL`, `NEON_AUTH_JWKS_URL`,
 The existing Render Blueprint above describes the legacy deployment.
 
 Hosted staff sign-in requires the host's exact trusted origin in Neon Auth.
+For production, configure a Google OAuth Web application owned by Whispers,
+with the Neon Auth base URL followed by `/callback/google` as the authorized
+redirect URI. Keep the OAuth client secret in provider settings. After
+changing credentials, retest hosted sign-in and the existing staff mapping.
+
+Administrators with all three workspaces can record completed human reviews
+under **Manage staff invitations → Release reviews** on the pilot. The
+record stores the review type, reference, recording administrator and date.
+The panel does not enable real intake.
 Invited staff sign in with the matching verified Google account and select
 **Accept staff invitations** on `/pilot`. The reviewer page supports workspace
 scoped reports, private photos, private notes, status changes, and replies.

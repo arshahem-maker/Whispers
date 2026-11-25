@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { RetentionCommand } from "@/integrations/neon/retention-admin.server";
-import type { NeonInvitationCommand } from "@/lib/whispers/staff-invitations";
+import { releaseReviewKinds, type NeonInvitationCommand } from "@/lib/whispers/staff-invitations";
 import { NeonEditorialWorkspace } from "./NeonEditorialWorkspace";
 import { neonAuthClient } from "@/integrations/neon/auth-client";
 
@@ -134,6 +134,7 @@ export function NeonReviewerWorkspace() {
 }
 
 interface InvitationAdminData {
+  releaseReviews: { kind: string }[] | null;
   scopes: Extract<NeonInvitationCommand, { action: "invite_staff" }>["invitation"]["workspace"][];
   staff: { id: string; email: string }[];
   invitations: {
@@ -226,6 +227,29 @@ function NeonInvitationAdmin() {
           <option value="grant">Grant</option><option value="revoke">Revoke</option>
         </select></label>
         <Button type="submit" disabled={busy}>Save workspace access</Button>
+      </form>
+    </details>}
+    {data.releaseReviews && <details className="grid gap-2">
+      <summary>Release reviews</summary>
+      <p>Record a completed human review. Real intake stays disabled.</p>
+      <ul>{releaseReviewKinds.map(kind => <li key={kind}>
+        {kind}: {data.releaseReviews?.some(review => review.kind === kind) ? "Recorded" : "Pending"}
+      </li>)}</ul>
+      <form className="grid gap-2" onSubmit={event => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        const kind = releaseReviewKinds.find(value => value === form.get("kind"));
+        const reference = String(form.get("reference") ?? "").trim();
+        if (kind && reference.length >= 5 && form.get("completed") === "on") {
+          void update({ action: "release_review", kind, reference, completed: true });
+        }
+      }}>
+        <label>Review type<select name="kind" className="field">
+          {releaseReviewKinds.map(kind => <option key={kind}>{kind}</option>)}
+        </select></label>
+        <label>Review reference<input name="reference" className="field" minLength={5} maxLength={500} required /></label>
+        <label><input type="checkbox" name="completed" required /> A human reviewer completed this review.</label>
+        <Button type="submit" disabled={busy}>Record review</Button>
       </form>
     </details>}
     {data.invitations.map(invitation => {
