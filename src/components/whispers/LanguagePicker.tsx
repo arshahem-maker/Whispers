@@ -89,8 +89,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 export function LanguageButton({ compact = false, tiny = false }: { compact?: boolean; tiny?: boolean }) {
   useTranslationVersion();
   const { open, name, busy } = useContext(LanguageContext);
-  if (tiny) {
-    return <button className="btn btn-secondary btn-sm !min-h-9 !px-2.5 !text-xs" onClick={open} aria-label={tr("Change language")}><Languages className="h-4 w-4 shrink-0" aria-hidden />{name}</button>;
+  if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") {
+    return <span
+      className="text-xs text-muted-foreground whitespace-nowrap"
+      aria-label="Language: English only"
+      title="Language translation is unavailable in this Neon pilot; English remains available."
+    >English only</span>;
   }
-  return <button className={`btn btn-secondary ${compact ? "btn-sm !px-3" : "w-full"}`} onClick={open} aria-label={tr("Change language")}><Languages className="h-5 w-5 shrink-0" aria-hidden />{compact ? name : tr("Change language")}</button>;
+  if (tiny) {
+    return <button className="btn btn-secondary btn-sm !min-h-9 !px-2.5 !text-xs" disabled={busy} onClick={open} aria-label={tr("Change language")}><Languages className="h-4 w-4 shrink-0" aria-hidden />{name}</button>;
+  }
+  return <button className={`btn btn-secondary ${compact ? "btn-sm !px-3" : "w-full"}`} disabled={busy} onClick={open} aria-label={tr("Change language")}><Languages className="h-5 w-5 shrink-0" aria-hidden />{compact ? name : tr("Change language")}</button>;
 }
