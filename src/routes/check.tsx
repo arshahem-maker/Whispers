@@ -56,7 +56,14 @@ function CheckPage() {
     } catch { setErr(true); } finally { setBusy(false); }
   }, [read]);
 
-  useEffect(() => { if (heldCode) { const c = heldCode; setHeldCode(null); void open(c); } }, [heldCode, open, setHeldCode]);
+  useEffect(() => {
+    if (!heldCode) return;
+    const timeout = window.setTimeout(() => {
+      setHeldCode(null);
+      void open(heldCode);
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [heldCode, open, setHeldCode]);
   // Refresh when the store changes (e.g. demo reviewer reply).
   useWhispers();
   useEffect(() => { if (active && !connected) store.openReceipt(active).then((v) => (v ? setView(v) : (setView(null), setActive(null)))); }, [store.version, active, store, connected]);

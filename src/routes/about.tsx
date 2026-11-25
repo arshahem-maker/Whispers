@@ -51,9 +51,9 @@ function About() {
         <h2 className="mb-3">{tr("Simulate conditions")}</h2>
         <div className="grid gap-2">
           {([["normal", "Normal sending"], ["fail", "Next send fails (draft kept)"], ["timeout_after_accept", "Next send times out after the server accepted it"]] as const).map(([v, l]) => (
-            <button key={v} className="choice" aria-pressed={store.network === v} onClick={() => { store.network = v; store.setDemoActor(store.actorId); }}>{l}</button>
+            <button key={v} className="choice" aria-pressed={store.network === v} onClick={() => store.setNetworkSimulation(v)}>{l}</button>
           ))}
-          <button className="choice" aria-pressed={store.photoSim === "fail_next"} onClick={() => { store.photoSim = store.photoSim === "fail_next" ? "normal" : "fail_next"; store.setDemoActor(store.actorId); }}>
+          <button className="choice" aria-pressed={store.photoSim === "fail_next"} onClick={() => store.toggleNextPhotoFailure()}>
             {tr("Next photo fails processing")}</button>
         </div>
       </section>

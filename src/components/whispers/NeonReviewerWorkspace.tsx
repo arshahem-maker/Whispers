@@ -145,13 +145,17 @@ interface InvitationAdminData {
 
 function NeonInvitationAdmin() {
   const [data, setData] = useState<InvitationAdminData>();
+  const [loadedAt, setLoadedAt] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
     void reviewerFetch("?invitations", { signal: controller.signal }).then(async (response) => {
-      if (response.ok) setData(await response.json() as InvitationAdminData);
+      if (response.ok) {
+        setData(await response.json() as InvitationAdminData);
+        setLoadedAt(Date.now());
+      }
       else if (response.status !== 403) throw new Error();
     }).catch(() => {
       if (!controller.signal.aborted) setError("Unable to check invitation management access.");
@@ -172,6 +176,7 @@ function NeonInvitationAdmin() {
       const refreshed = await reviewerFetch("?invitations");
       if (!refreshed.ok) throw new Error();
       setData(await refreshed.json() as InvitationAdminData);
+      setLoadedAt(Date.now());
     } catch {
       setError("Could not update invitations. Refresh and check your access.");
     } finally {
@@ -254,7 +259,7 @@ function NeonInvitationAdmin() {
     </details>}
     {data.invitations.map(invitation => {
       const state = invitation.accepted_at ? "Accepted" : invitation.revoked_at ? "Revoked"
-        : Date.parse(invitation.expires_at) <= Date.now() ? "Expired" : "Pending";
+        : loadedAt > 0 && Date.parse(invitation.expires_at) <= loadedAt ? "Expired" : "Pending";
       return <div className="border-t pt-2" key={invitation.id}>
         <p>{invitation.email} · {invitation.role} · {invitation.workspace} · {state}</p>
         {state === "Pending" && <Button disabled={busy} variant="outline" onClick={() =>

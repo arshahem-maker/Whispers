@@ -6,6 +6,44 @@ import { reviewerHandlers } from "./src/integrations/neon/reviewer-handlers.serv
 import { runNeonRetention } from "./src/lib/whispers/neon-retention.server";
 
 const headers = { "Cache-Control": "no-store" };
+const MAX_JSON_BODY_BYTES = 64 * 1024;
+
+async function readBoundedJson(request: Request): Promise<
+  { ok: true; value: unknown } | { ok: false; tooLarge: boolean }
+> {
+  const contentLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(contentLength) && contentLength > MAX_JSON_BODY_BYTES) {
+    return { ok: false, tooLarge: true };
+  }
+  if (!request.body) return { ok: false, tooLarge: false };
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_JSON_BODY_BYTES) {
+        await reader.cancel();
+        return { ok: false, tooLarge: true };
+      }
+      chunks.push(value);
+    }
+    const bytes = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    return { ok: true, value: JSON.parse(new TextDecoder().decode(bytes)) as unknown };
+  } catch {
+    return { ok: false, tooLarge: false };
+  } finally {
+    reader.releaseLock();
+  }
+}
 
 async function retention(source: "scheduled" | "manual") {
   let result: Awaited<ReturnType<typeof runNeonRetention>> | undefined;
@@ -66,7 +104,9 @@ export default {
       (source.pathname === "/receipt" || source.pathname === "/submit") &&
       request.method === "POST"
     ) {
-      const input = await request.json().catch(() => null);
+      const parsedBody = await readBoundedJson(request);
+      if (!parsedBody.ok) return new Response(null, { status: parsedBody.tooLarge ? 413 : 400, headers });
+      const input = parsedBody.value;
       const citizen = await import("./src/lib/whispers/neon-citizen.server");
       try {
         if (source.pathname === "/receipt") {

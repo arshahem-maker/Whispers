@@ -15,7 +15,9 @@ export default defineConfig({
       env: {
         WHISPERS_BACKEND_SECRET: { value: process.env.WHISPERS_BACKEND_SECRET, required: true },
         WHISPERS_APP_ORIGIN: { value: process.env.WHISPERS_APP_ORIGIN, required: true },
-        WHISPERS_PILOT_TESTER_IDS: { value: process.env.WHISPERS_PILOT_TESTER_IDS, required: true },
+        // Staging-only allowlist. Missing means no connected pilot submissions
+        // are accepted; production must not need this setting to provision.
+        WHISPERS_PILOT_TESTER_IDS: { value: process.env.WHISPERS_PILOT_TESTER_IDS, required: false },
       },
     },
     hello: { name: "Whispers database health", source: "./hello.ts" },

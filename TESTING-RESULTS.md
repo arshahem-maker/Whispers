@@ -1,5 +1,29 @@
 # Whispers verification results
 
+## Release hardening — 25 November 2026
+
+Changes after the previous verification include public fictional-demo copy,
+Worker and static-asset security headers, a 64 KiB Neon Function JSON limit,
+SHA-256 migration checksums, bounded voice-result arrays, refreshed dependencies,
+and the React lint fixes. Verification on the updated working tree:
+
+- `npm run typecheck` passed.
+- `npm run build` passed. The build still prints the upstream notice that
+  `vite-tsconfig-paths` can be replaced by Vite's native path resolution; the
+  Lovable Vite wrapper owns this plugin configuration, so no unverified wrapper
+  change was made.
+- `npm run lint` passed with 0 errors and 11 existing Fast Refresh
+  export-pattern warnings.
+- `npm test` passed: 42 tests across 11 files. Node emitted its existing
+  experimental `localStorage` warning for two workers.
+- `npx bun@1.4.5 audit` found no vulnerabilities in 639 locked packages.
+- `node --env-file=.env.staging.local scripts/migrate-neon.mjs` completed with
+  0 new migrations and initialized checksums for already-recorded staging
+  migrations. The database returned a benign notice that the migration ledger
+  already existed.
+- The isolated database suites were not rerun for this change set. The current
+  hosted Worker was not replaced in this verification.
+
 ## Current Neon verification — 25 November 2026
 
 Tested at commit `226a57c` (application code is unchanged since `91260ab`).

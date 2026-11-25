@@ -21,6 +21,18 @@ review, private media, and reviewed public updates.
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
   Cloudflare marks it `noindex`; anyone with the URL can visit it. The home and
   `/pilot` return HTTP 200, but this does not verify sign-in or report flows.
+- The public home and report metadata now describe the fictional demo and warn
+  users not to submit real or sensitive information. Worker responses add
+  baseline browser security headers; HTML responses are not cached, and
+  `workers.dev` responses are marked `noindex` in both Worker and static-asset
+  handling.
+- Neon Function submission and receipt bodies are capped at 64 KiB before JSON
+  parsing. The migration runner now stores SHA-256 checksums and rejects future
+  edits to recorded migration files. Existing staging migration records have
+  been pinned to checksums; this records the current file contents and cannot
+  independently prove what historical contents were first applied.
+- The dependency lock was updated to remove the current advisories. A Bun audit
+  step and weekly Dependabot updates for Bun and GitHub Actions are configured.
 
 ## Local development
 

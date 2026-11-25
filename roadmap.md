@@ -36,6 +36,15 @@ marked historical there.
 - The Lovable project is unpublished and its managed Supabase database remains
   enabled. Supabase must not be disabled until a verified data cutover.
 - Real-source intake is not approved or enabled.
+- The code now corrects public demo wording, adds Worker/static-asset security
+  headers and a request-body ceiling, pins migration file checksums, bounds
+  voice-output arrays, and refreshes vulnerable dependencies. Local typecheck,
+  build, lint, and Bun audit results are recorded at the top of
+  `TESTING-RESULTS.md`. Lint has 0 errors and 11 Fast Refresh warnings; Bun
+  audit reports no vulnerabilities across the 639 locked packages.
+- Existing staging migration rows now have SHA-256 checksums for the current
+  migration files. Because the old ledger had no checksums, this cannot prove
+  historical file contents; subsequent edits to these pinned files will fail.
 
 ## Next work, in order
 

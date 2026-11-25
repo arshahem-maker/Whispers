@@ -10,9 +10,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Whispers — Share what’s happening around you" },
-      { name: "description", content: "Send a private report to a humanitarian review team. No name or account required." },
+      { name: "description", content: "Explore a fictional Whispers reporting demo. No live response team receives reports from this demo." },
       { property: "og:title", content: "Whispers — Share what’s happening around you" },
-      { property: "og:description", content: "Send a private report to a humanitarian review team. No name or account required." },
+      { property: "og:description", content: "Explore a fictional Whispers reporting demo. No live response team receives reports from this demo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

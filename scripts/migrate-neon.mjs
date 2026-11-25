@@ -1,5 +1,6 @@
 import { requireStagingTarget } from "./staging-target.mjs";
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import postgres from "postgres";
 
 const migrations = [
@@ -34,20 +35,34 @@ try {
     await transaction`
       create table if not exists public.whispers_schema_migrations (
         name text primary key,
+        checksum text,
         applied_at timestamptz not null default now()
       )
     `;
-    const recorded = new Set((await transaction`select name from public.whispers_schema_migrations`).map(({ name }) => name));
+    await transaction`alter table public.whispers_schema_migrations add column if not exists checksum text`;
+    const recorded = new Map((await transaction`select name, checksum from public.whispers_schema_migrations`).map(({ name, checksum }) => [name, checksum]));
     const [existing] = await transaction`select to_regclass('public.whispers_reports') is not null as present`;
     if (existing.present && recorded.size === 0) {
       throw new Error("Whispers tables exist without a migration record. Check the existing schema before applying migrations.");
     }
     const completed = [];
     for (const path of migrations) {
-      if (recorded.has(path)) continue;
       const statement = await readFile(new URL(`../${path}`, import.meta.url), "utf8");
+      const checksum = createHash("sha256").update(statement).digest("hex");
+      if (recorded.has(path)) {
+        const priorChecksum = recorded.get(path);
+        if (priorChecksum && priorChecksum !== checksum) {
+          throw new Error(`Applied migration changed after deployment: ${path}`);
+        }
+        // Existing records predate checksums. Pin their current contents once,
+        // then reject any future edits to an applied migration.
+        if (!priorChecksum) {
+          await transaction`update public.whispers_schema_migrations set checksum=${checksum} where name=${path} and checksum is null`;
+        }
+        continue;
+      }
       await transaction.unsafe(statement).simple();
-      await transaction`insert into public.whispers_schema_migrations (name) values (${path})`;
+      await transaction`insert into public.whispers_schema_migrations (name, checksum) values (${path}, ${checksum})`;
       completed.push(path);
     }
     return completed;

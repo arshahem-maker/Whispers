@@ -16,6 +16,7 @@ jobs:
         with:
           bun-version: '1.4.5'
       - run: bun install --frozen-lockfile
+      - run: bun audit
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
