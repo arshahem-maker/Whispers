@@ -49,6 +49,15 @@ function isH3SwallowedErrorBody(body: string): boolean {
 // twice and renders garbled.
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const url = new URL(request.url);
+    if (url.protocol === "http:" && url.hostname.endsWith(".workers.dev")) {
+      const headers = { "Cache-Control": "no-store" };
+      if (request.method !== "GET" && request.method !== "HEAD") {
+        return new Response(null, { status: 403, headers });
+      }
+      url.protocol = "https:";
+      return new Response(null, { status: 308, headers: { ...headers, Location: url.href } });
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
