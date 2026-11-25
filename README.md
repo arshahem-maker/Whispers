@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Whispers
 
 This project was built with [Lovable](https://lovable.dev).
 
