@@ -14,6 +14,9 @@ Supabase/Lovable checklist. Historical test results remain in
 - Staging checks returned HTTP 200 from the database health Function and Neon
   Auth session endpoint, HTTP 401 from unauthenticated submission/reviewer
   endpoints, and passed a temporary Object Storage put/get/delete check.
+- Realtime accepted a live `SELECT 1` subscription. It rejected a query against
+  an RLS-protected Whispers table; the app currently polls public updates and
+  does not use Realtime, so no table policy was weakened to force the test.
 - GitHub draft PR #2 contains the Neon implementation. CI passed typecheck,
   lint, tests, disposable Postgres/Neon migration checks, and production build.
 - The hosted `workers.dev` home and `/pilot` respond, but full sign-in and
@@ -69,5 +72,8 @@ Supabase/Lovable checklist. Historical test results remain in
   still depend on Lovable/Supabase code paths; neither is Neon-complete.
 - AI Gateway is provisioned but no model calls are available until credits are
   purchased. No credits were purchased; voice remains disabled.
+- Realtime is provisioned but not used by app flows; the public feed currently
+  polls, and RLS-protected tables cannot be subscribed to through the tested
+  path.
 - Current Neon end-to-end tests, production data migration, private-media
   restore, and human release reviews are not verified.
