@@ -20,7 +20,7 @@ CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$
 $$;
 CREATE TABLE storage.objects (id uuid PRIMARY KEY, bucket_id text, name text);
 SQL
-for migration in drizzle/migrations/*.sql drizzle/proposed/0006_pilot_release_blockers.sql; do
+for migration in drizzle/migrations/*.sql drizzle/neon/0006_pilot_release_blockers.sql; do
   run_sql < "$migration"
 done
 run_sql < scripts/test-pilot-db.sql

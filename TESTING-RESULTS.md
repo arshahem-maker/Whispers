@@ -34,12 +34,32 @@ and the React lint fixes. Verification on the updated working tree:
 - The isolated database suites ran in GitHub CI; no authenticated Google OAuth
   or human reviewer workflows were exercised by this change set.
 
-## Current Neon verification — 25 November 2026
+## Hosted Google OAuth check — 25 November 2026
+
+- The Google Auth Platform project contains a Whispers staging Web OAuth client.
+  Its authorized redirect URI matches the staging Neon Auth callback, and the
+  Neon staging branch reports the same Google client ID. The client secret was
+  not displayed or written to the repository.
+- Added one authorized test account in Google's **Testing** audience. It appears
+  as `1 user (1 test, 0 other) / 100 user cap`.
+- Signed in through Google on the public staging preview. The Neon-backed
+  workspace showed the signed-in session, staff invitation controls, release
+  review status, and private retention queue. This verifies OAuth and the
+  administrator-scoped reads for that session.
+- The account has no reviewer role. Reviewer report visibility, private-photo
+  reads, replies, role-scoped reviewer invitations, and citizen submission were
+  not exercised. Four human release review types remain pending. Real intake
+  stays disabled.
+- The Neon CLI confirmed the staging Google provider is configured. A staging-
+  only migration check after the migration-file cleanup reported 0 new
+  migrations; the existing staging ledger remains at 14 recorded migrations.
+
+## Earlier local Neon verification — 25 November 2026
 
 Tested at commit `226a57c` (application code is unchanged since `91260ab`).
 These results cover local code and isolated fixtures;
-hosted authenticated user workflows are still blocked on a Whispers-owned
-Google OAuth client and tester accounts.
+the later hosted OAuth check above supersedes the hosted-authentication status
+recorded at that time.
 
 - TypeScript typecheck passed.
 - ESLint passed with 0 errors and 11 Fast Refresh export-pattern warnings.

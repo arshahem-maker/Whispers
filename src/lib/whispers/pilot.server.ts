@@ -32,7 +32,7 @@ async function report(client: Client,user: string,id: string,role="reviewer") {
   if (!r) throw new Error("Report unavailable.");
   return r;
 }
-// Pilot quotas are separate from voice limits (see drizzle/proposed/0006).
+// Pilot quotas are separate from voice limits (see drizzle/neon/0006).
 export const PILOT_QUOTAS = { intake:{limit:6,window:3600}, receipt:{limit:30,window:3600}, message:{limit:10,window:3600}, removal:{limit:3,window:3600}, upload:{limit:12,window:3600} } as const;
 type QuotaKind = keyof typeof PILOT_QUOTAS;
 // New RPCs are not in generated types until the proposed migration is applied.

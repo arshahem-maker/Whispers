@@ -31,7 +31,10 @@ marked historical there.
   that exact origin, and Neon Auth trusts it. The home, `/pilot`, database
   health Function, and Auth JWKS endpoint returned HTTP 200. The unauthenticated
   reviewer API and a forwarded request without a user session returned HTTP
-  401. Google sign-in and authenticated report/reviewer flows remain unverified.
+  401. Google sign-in reached the Neon-backed workspace; the signed-in account
+  loaded administrator invitation and retention panels. That account has no
+  reviewer role, so reviewer report access and citizen submission remain
+  unverified.
 - The Lovable project is unpublished and its managed Supabase database remains
   enabled. Supabase must not be disabled until a verified data cutover.
 - Real-source intake is not approved or enabled.
@@ -47,19 +50,19 @@ marked historical there.
 
 ## Next work, in order
 
-1. **Finish hosted authenticated verification.** Configure a Whispers-owned
-   Google Web OAuth client for the staging Auth URL and add authorized test
-   accounts. Then verify sign-in, invitations, role scoping, workspace access,
-   submission, private-code follow-up and reviewer workflows. The current
-   provider uses Google's shared development credential. The staging preview
-   is public to anyone with its URL; keep real intake disabled.
-2. **Review the release source.** Lovable's latest revision
-   (`db4290a`) only renamed its planning file; no application code was changed
-   in that update. Draft PR #2 is based directly on pilot-hardening PR #1's
-   head (`7516901`), so it includes those hardening changes plus the Neon
-   migration. Do not merge both branches independently. Keep PR #2 draft until
-   hosted workflows and human gates are complete. The Lovable project is
-   unpublished; its managed Supabase database is still enabled.
+1. **Finish hosted authenticated verification.** Staging now has a Whispers-
+   owned Google Web OAuth client, an authorized test account, and a verified
+   sign-in. The account is administrator-only. Use a separate, properly invited
+   reviewer account to verify role scoping, workspace access, citizen
+   submission, private-code follow-up, and reviewer photo/reply workflows. The
+   preview is public to anyone with its URL; keep real intake disabled.
+2. **Review the release source.** Lovable's current revision (`2c422d9`) only
+   updated its planning file; its previous application-code edit changed one
+   test line. Draft PR #2 is based directly on pilot-hardening PR #1's head
+   (`7516901`), so it includes those hardening changes plus the Neon migration.
+   Do not merge both branches independently. Keep PR #2 draft until hosted
+   workflows and human gates are complete. The Lovable project is unpublished;
+   its managed Supabase database is still enabled.
 3. **Complete and prove the Neon-only path.** Verify Worker environment flags
    and Function configuration. Port translation preparation to Neon Auth,
    Neon Postgres, and an approved AI provider, or keep it unavailable. Keep
@@ -90,15 +93,17 @@ marked historical there.
 
 ## Current blockers
 
-- The Neon Auth provider is still Google's shared development credential; no
-  Whispers OAuth client or tester accounts are configured. Authenticated
-  staging workflows require manual provider/account setup.
+- Google sign-in works on staging, but only an administrator account is
+  available. Reviewer-specific permissions and citizen report flows still need
+  a separate authorized test account and end-to-end verification.
 - Legacy records are held only in a restricted preflight snapshot; none are
   active. Their source content has not been reviewed, three private photos have
   not been copied, and no verified Neon user has been mapped to the legacy
   account.
-- Lovable still reports Supabase enabled. Translation preparation and voice
-  still depend on Lovable/Supabase code paths; neither is Neon-complete.
+- Lovable still reports its Supabase database enabled. The app retains legacy
+  Supabase compatibility code; the active Neon path does not use it for the
+  tested reviewer, staff, retention, or public-feed flows. Translation
+  preparation and voice remain unavailable in Neon mode.
 - Neon staging has no current-hash translation cache. The eight legacy Swahili
   entries are stale and deliberately skipped, so non-English interface choices
   remain unavailable until reviewed translations are prepared for Neon.

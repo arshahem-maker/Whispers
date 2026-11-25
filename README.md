@@ -14,13 +14,16 @@ review, private media, and reviewed public updates.
   have not been transferred. The local `.neon` and `.env.local` still point to
   production; use the ignored `.env.staging.local` for staging-only work.
 - The Lovable project is not published, and its managed Supabase database is
-  still enabled. Do not disable it until the data and private-file migration
-  has been reconciled and restored successfully.
+  still enabled. Its source snapshot has not been activated in Neon and its
+  private photo bytes have not been copied. Do not disable it until the data,
+  identity, private-file migration, counts, and restore have been reconciled.
 - Real-source intake remains disabled. The hosted `workers.dev` site is a
   public staging preview at
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
   Cloudflare marks it `noindex`; anyone with the URL can visit it. The home and
-  `/pilot` return HTTP 200, but this does not verify sign-in or report flows.
+  `/pilot` return HTTP 200. Google sign-in has been verified on staging and the
+  signed-in administrator can load invitation and retention panels. This does
+  not verify reviewer access or citizen report submission.
 - The public home and report metadata now describe the fictional demo and warn
   users not to submit real or sensitive information. Worker responses add
   baseline browser security headers; HTML responses are not cached, and
@@ -50,26 +53,12 @@ npm run dev
 - React
 - Tailwind CSS
 
-## Archived Supabase pilot instructions
-
-The earlier Supabase and Render pilot steps below are kept for historical
-reference only; do not follow them for the Neon deployment. The checked-in
-Neon migration runner has applied
-`drizzle/proposed/0006_pilot_release_blockers.sql` to isolated Neon staging.
-The active Neon setup and current release gates are documented below.
-
-### Legacy Render and Supabase configuration — do not use for new deployments
-
-The Render Blueprint targets one Free Node web service on the pilot branch. Use a separate Supabase Free project for PostgreSQL, Auth, and private storage. The browser and server Supabase URL and publishable key must point to that same staging project. Keep the service-role key server-only. The Blueprint generates separate secrets for intake throttling and the retention endpoint, so text intake can work without an AI gateway key.
-
-In staging Supabase, create the private `whispers-private` bucket, apply the reviewed migrations, and configure Google OAuth with the hosted `/pilot` redirect. Use a scheduled GitHub Actions job or an existing scheduler for the authenticated retention endpoint after the staging host and secret are configured. Export the database and private storage separately for restore testing.
-
 ### Neon setup and staging safeguards
 
 The Git branch `staging/neon` is not a Neon database branch. The production
 Neon project has only `production`; its `.neon` link and `.env.local` remain
 unchanged. A separate Free-plan `Whispers Staging` project has its own `main`
-branch, and the 14 checked-in migrations have been applied there. Its Auth,
+branch, and the 14 ordered migrations have been applied there. Its Auth,
 Object Storage, Functions, Realtime, and AI Gateway are provisioned. Schema-only
 branch creation was rejected for the production project's legacy database
 role, so staging was isolated in a separate project. A restricted source
@@ -87,18 +76,23 @@ rows and loopback storage. Rehearse private object recovery separately.
 
 Build with `VITE_WHISPERS_REVIEWER_BACKEND=neon` and `VITE_NEON_AUTH_URL` set to
 the selected branch's Auth base URL. Set `WHISPERS_PILOT_BACKEND=neon` on the
-server. This also selects the Neon public feed and translation cache. Keep
-`DATABASE_URL`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY` server-only.
+server. This selects the Neon public feed. Translation preparation and voice
+are unavailable in Neon mode until their supported paths are implemented.
+Keep `DATABASE_URL`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`
+server-only.
 The server also needs `NEON_AUTH_BASE_URL`, `NEON_AUTH_JWKS_URL`,
 `AWS_ENDPOINT_URL_S3` and `AWS_REGION`. When using a Node host, build with
 `NITRO_PRESET=node-server` and start with `node .output/server/index.mjs`.
-The existing Render Blueprint above describes the legacy deployment.
+The checked-in Render Blueprint is for the earlier pilot and does not describe
+the current Cloudflare/Neon staging deployment.
 
 Hosted staff sign-in requires the host's exact trusted origin in Neon Auth.
-For production, configure a Google OAuth Web application owned by Whispers,
-with the Neon Auth base URL followed by `/callback/google` as the authorized
-redirect URI. Keep the OAuth client secret in provider settings. After
-changing credentials, retest hosted sign-in and the existing staff mapping.
+The staging branch has a Whispers-owned Google OAuth Web client configured with
+the exact Neon Auth callback (`<Auth base URL>/callback/google`), and one
+authorized test account has signed in successfully. Production uses a separate
+Neon project and still needs its own reviewed OAuth configuration before a
+production deployment. Keep client secrets in Neon Auth provider settings; do
+not put them in Git or the browser bundle.
 
 Administrators with all three workspaces can record completed human reviews
 under **Manage staff invitations → Release reviews** on the pilot. The
@@ -124,19 +118,18 @@ workspace permissions. These settings apply to staging only; production
 configuration remains untouched. The preview URL is public, so keep real
 intake disabled and do not put real or sensitive data in it.
 
-The latest hosted guard checks returned HTTP 200 for `/`, `/pilot`, the staging
-database health Function, and the Neon Auth JWKS endpoint. The unauthenticated
-reviewer API returned HTTP 401, and forwarding with the staging backend secret
-but without a user session also returned HTTP 401. This confirms service
-connectivity and the unauthenticated guard, but does not verify Google sign-in,
-an authenticated submission, or reviewer workflows; those need a Whispers-owned
-Google OAuth client and staging tester accounts.
+The latest hosted checks returned HTTP 200 for `/`, `/pilot`, the staging
+database health Function, and the Neon Auth JWKS endpoint. Google sign-in
+successfully reached the Neon-backed workspace; the signed-in account has
+administrator access but no reviewer role. The unauthenticated reviewer API
+returned HTTP 401, and forwarding with the staging backend secret but without a
+user session also returned HTTP 401. Citizen submission, assigned reviewer
+flows, and private-photo authorization still need separate staging verification.
 
-Neon serves only prepared translations whose catalog hash matches the current
-interface. Staging has no matching cache: the eight legacy Swahili cache rows
-are stale and excluded from import, so the interface remains in English until
-current translations are prepared and reviewed. AI translation preparation is
-not enabled on the Neon path; do not promise non-English UI during this phase.
+Translation preparation is not enabled on the Neon path. Staging has no
+current-hash Swahili cache: the eight legacy rows are stale and excluded from
+import. Do not promise non-English UI until reviewed translations and their
+Neon-serving path are implemented.
 
 `neon.ts` schedules hourly cleanup through the authenticated Neon Function
 Trigger on `/scheduled-retention`. For local or alternate hosts,

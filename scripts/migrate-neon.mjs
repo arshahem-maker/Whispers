@@ -11,7 +11,7 @@ const migrations = [
   "drizzle/migrations/0003_atomic_pilot_safeguards.sql",
   "drizzle/migrations/0004_workspace_staff_invitations.sql",
   "drizzle/migrations/0005_bounded_translation_and_voice_costs.sql",
-  "drizzle/proposed/0006_pilot_release_blockers.sql",
+  "drizzle/neon/0006_pilot_release_blockers.sql",
   "drizzle/neon/0007_private_photo.sql",
   "drizzle/neon/0008_record_guard.sql",
   "drizzle/neon/0009_staff_invitation_scope.sql",
@@ -19,6 +19,14 @@ const migrations = [
   "drizzle/neon/0011_retention_status.sql",
   "drizzle/neon/0012_legacy_snapshot.sql",
 ];
+
+// 0006 was applied to the isolated staging database under its old path before
+// being classified as a Neon migration. Keep this alias so the move never
+// reruns its non-idempotent DDL on that already-migrated branch.
+const migrationAliases = {
+  "drizzle/neon/0006_pilot_release_blockers.sql":
+    "drizzle/proposed/0006_pilot_release_blockers.sql",
+};
 
 const connection = process.env.DATABASE_URL_UNPOOLED;
 if (!connection) throw new Error("DATABASE_URL_UNPOOLED is required for migrations.");
@@ -49,15 +57,20 @@ try {
     for (const path of migrations) {
       const statement = await readFile(new URL(`../${path}`, import.meta.url), "utf8");
       const checksum = createHash("sha256").update(statement).digest("hex");
-      if (recorded.has(path)) {
-        const priorChecksum = recorded.get(path);
+      const recordedPath = recorded.has(path)
+        ? path
+        : migrationAliases[path] && recorded.has(migrationAliases[path])
+          ? migrationAliases[path]
+          : undefined;
+      if (recordedPath) {
+        const priorChecksum = recorded.get(recordedPath);
         if (priorChecksum && priorChecksum !== checksum) {
-          throw new Error(`Applied migration changed after deployment: ${path}`);
+          throw new Error(`Applied migration changed after deployment: ${recordedPath}`);
         }
         // Existing records predate checksums. Pin their current contents once,
         // then reject any future edits to an applied migration.
         if (!priorChecksum) {
-          await transaction`update public.whispers_schema_migrations set checksum=${checksum} where name=${path} and checksum is null`;
+          await transaction`update public.whispers_schema_migrations set checksum=${checksum} where name=${recordedPath} and checksum is null`;
         }
         continue;
       }

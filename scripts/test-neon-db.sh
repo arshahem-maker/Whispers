@@ -8,7 +8,7 @@ for attempt in {1..60}; do
   sleep 1
 done
 run_sql() { docker exec -i "$container" psql -X -q -v ON_ERROR_STOP=1 -U postgres; }
-for migration in drizzle/neon/0000_platform.sql drizzle/migrations/000{0,1}_*.sql drizzle/neon/0002_retention.sql drizzle/migrations/000{3,4,5}_*.sql drizzle/proposed/0006_pilot_release_blockers.sql drizzle/neon/0007_private_photo.sql drizzle/neon/000{8,9}_*.sql drizzle/neon/001{0,1,2}_*.sql; do
+for migration in drizzle/neon/0000_platform.sql drizzle/migrations/000{0,1}_*.sql drizzle/neon/0002_retention.sql drizzle/migrations/000{3,4,5}_*.sql drizzle/neon/0006_pilot_release_blockers.sql drizzle/neon/0007_private_photo.sql drizzle/neon/000{8,9}_*.sql drizzle/neon/001{0,1,2}_*.sql; do
   { printf "BEGIN;\n"; cat "$migration"; printf "\nCOMMIT;\n"; } | run_sql
 done
 run_sql <<'SQL'
