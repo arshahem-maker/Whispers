@@ -8,10 +8,11 @@ review, private media, and reviewed public updates.
 
 - `staging/neon` is the current Neon implementation branch. The production
   Neon project remains separate. A second Free-plan project, `Whispers Staging`,
-  now provides an empty `main` database with the app's schema and Neon services.
-  It contains no copied production or legacy records. The local `.neon` and
-  `.env.local` still point to production; use the ignored `.env.staging.local`
-  for staging-only work.
+  provides the app schema and Neon services. A restricted source snapshot is
+  stored in its private `whispers_legacy_import` schema for preflight; no legacy
+  report rows have been activated in the app tables, and private photo bytes
+  have not been transferred. The local `.neon` and `.env.local` still point to
+  production; use the ignored `.env.staging.local` for staging-only work.
 - The Lovable project is not published, and its managed Supabase database is
   still enabled. Do not disable it until the data and private-file migration
   has been reconciled and restored successfully.
@@ -61,12 +62,13 @@ In staging Supabase, create the private `whispers-private` bucket, apply the rev
 
 The Git branch `staging/neon` is not a Neon database branch. The production
 Neon project has only `production`; its `.neon` link and `.env.local` remain
-unchanged. A separate Free-plan `Whispers Staging` project has an empty `main`
-branch, and the 13 checked-in migrations have been applied there. Its Auth,
+unchanged. A separate Free-plan `Whispers Staging` project has its own `main`
+branch, and the 14 checked-in migrations have been applied there. Its Auth,
 Object Storage, Functions, Realtime, and AI Gateway are provisioned. Schema-only
 branch creation was rejected for the production project's legacy database
-role, so staging was isolated in a separate project without copying production
-rows or private files.
+role, so staging was isolated in a separate project. A restricted source
+snapshot was copied there for preflight only; report rows remain inactive, and
+private files were not copied.
 
 Staging credentials are in the ignored `.env.staging.local`; do not replace the
 production `.neon` or `.env.local` link for routine staging work. The staging
@@ -122,13 +124,17 @@ the two timestamps to detect a failed attempt and check that scheduled
 successes continue hourly. The table contains no report IDs or text.
 Verify that successful runs are monitored before opening intake.
 
-The repository contains scripts for a legacy-data import, but the existence,
-contents, and completeness of a restricted Neon snapshot have not been verified
-in this release audit. Do not describe legacy data as migrated until the source
-snapshot, imported records, identities, and private files have been reconciled.
-If a verified export is available, transfer private files
-with `node --env-file=.env.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.
-Run `node --env-file=.env.local scripts/import-neon-legacy.mjs` to check
+The restricted source snapshot is available for preflight, but it is not an
+active app data import. The importer currently finds five reports, six records,
+eight translations, one legacy account, and three private photo references; it
+refuses activation because the three private photo objects are missing in Neon
+and the legacy account is not mapped to a verified Neon Auth user. Do not
+activate rows until both checks pass and the export is reconciled. To stage a
+new export, use `node --env-file=.env.staging.local
+scripts/store-neon-legacy-snapshot.mjs <local-export.json>`; keep exports out of
+Git and retain them only as long as necessary. Transfer private files with
+`node --env-file=.env.staging.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.
+Run `node --env-file=.env.staging.local scripts/import-neon-legacy.mjs` to check
 photo completeness, staff identity, and record eligibility. Reconcile the final
 source snapshot before running the same command with `--apply`. After activation,
 verify report and attachment counts, replay the staff and receipt checks, and
