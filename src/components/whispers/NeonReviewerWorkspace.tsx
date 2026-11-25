@@ -23,6 +23,7 @@ async function reviewerFetch(query = "", init?: RequestInit) {
 
 export function NeonReviewerWorkspace() {
   const [signedIn, setSignedIn] = useState(false);
+  const [canReview, setCanReview] = useState(false);
   const [reports, setReports] = useState<ReportSummary[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(true);
@@ -36,12 +37,15 @@ export function NeonReviewerWorkspace() {
         setSignedIn(true);
         const response = await reviewerFetch("", { signal: controller.signal });
         if (response.status === 403) {
-          setError("A reviewer role is required. If you were invited, accept your invitation below.");
+          setCanReview(false);
           return;
         }
         if (!response.ok) throw new Error("Unable to load reviewer access.");
         const result = await response.json() as { reports: ReportSummary[] };
-        if (!controller.signal.aborted) setReports(result.reports);
+        if (!controller.signal.aborted) {
+          setCanReview(true);
+          setReports(result.reports);
+        }
       } catch (cause) {
         if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : "Unable to load reports.");
       } finally {
@@ -79,6 +83,7 @@ export function NeonReviewerWorkspace() {
       const updated = await reviewerFetch();
       if (updated.ok) {
         const { reports: refreshed } = await updated.json() as { reports: ReportSummary[] };
+        setCanReview(true);
         setReports(refreshed);
       } else {
         setError(accepted ? "Invitation accepted. This page requires a reviewer role." : "No active invitation matched your verified email.");
@@ -96,6 +101,7 @@ export function NeonReviewerWorkspace() {
     try {
       const { error } = await (await neonAuthClient()).signOut();
       if (error) throw new Error();
+      setCanReview(false);
       setSignedIn(false);
     } catch {
       setError("Sign-out failed. Try again.");
@@ -112,7 +118,9 @@ export function NeonReviewerWorkspace() {
       {signedIn && <><NeonInvitationAdmin /><NeonRetentionAdmin onRemoved={id => setReports(items => items.filter(item => item.id !== id))} /></>}
       {signedIn && <NeonEditorialWorkspace fetchStaff={reviewerFetch} reports={reports} />}
       {error && <p role="alert">{error}</p>}
-      {signedIn && !error && reports.length === 0 && <p>No reports are available in your assigned workspaces.</p>}
+      {signedIn && <p role="status">Signed in with Google.</p>}
+      {signedIn && !error && !canReview && <p>Reviewer reports require a reviewer role. Your other staff tools appear here if you have access.</p>}
+      {signedIn && canReview && !error && reports.length === 0 && <p>No reports are available in your assigned workspaces.</p>}
       {reports.map((report) => (
         <article className="card grid gap-2 p-4" key={report.id}>
           <h2>{report.category || "Fictional report"}</h2>

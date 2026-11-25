@@ -39,7 +39,16 @@ function Sent() {
     setDraft((d) => ({ ...d, photos: d.photos.map((x) => (x.id === id ? { ...x, status: "sending" } : x)) }));
     let ok = false;
     try {
-      if (submission.provider === "pilot") ok = (await uploadConnected({ data: { code: submission.code, bytes: Array.from(p.bytes), uploadId: p.id } })).ok;
+      if (submission.provider === "pilot" && import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") {
+        const form = new FormData();
+        form.set("code", submission.code);
+        form.set("uploadId", p.id);
+        form.set("photo", new Blob([new Uint8Array(p.bytes)], { type: "image/jpeg" }), "photo.jpg");
+        const response = await fetch("/api/public/neon-photo", { method: "POST", body: form });
+        ok = response.ok;
+      } else if (submission.provider === "pilot") {
+        ok = (await uploadConnected({ data: { code: submission.code, bytes: Array.from(p.bytes), uploadId: p.id } })).ok;
+      }
       else ok = (await store.addAttachment(submission.code, { bytes: p.bytes, width: p.width, height: p.height, type: "image/jpeg", previewUrl: p.url })).ok;
     } catch { ok = false; }
     setDraft((d) => ({ ...d, photos: d.photos.map((x) => (x.id === id ? { ...x, status: ok ? "processed" : "failed" } : x)) }));

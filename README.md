@@ -75,10 +75,18 @@ review. Hidden updates expose only a withdrawal record in the public feed.
 Voice is disabled in Neon mode until its transcription and moderation path is
 ported and verified. Keep real intake disabled.
 
-For automated cleanup, call `POST /api/public/retention` with a bearer token
-matching the server-only `WHISPERS_RETENTION_SECRET`. Optionally keep the
-outgoing secret as `WHISPERS_RETENTION_SECRET_PREVIOUS` during a rotation, then
-remove it. Verify that successful runs are monitored before opening intake.
+The Cloudflare pilot delegates staff operations, connected submission, and
+receipt actions and uploads to the `whispersapi` Neon Function. Configure the Function
+with the exact `WHISPERS_APP_ORIGIN` and a generated
+`WHISPERS_BACKEND_SECRET`. Pass that same secret and the deployed
+`WHISPERS_BACKEND_URL` to the Worker as server-only secrets. The function
+still verifies the user's Neon Auth session and workspace permissions.
+
+`neon.ts` schedules hourly cleanup through the authenticated Neon Function
+Trigger on `/scheduled-retention`. For local or alternate hosts,
+`POST /api/public/retention` accepts the server-only
+`WHISPERS_RETENTION_SECRET` as a bearer token. Verify that successful runs
+are monitored before opening intake.
 
 Legacy data is held in a restricted Neon snapshot. Transfer private files
 with `node --env-file=.env.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.

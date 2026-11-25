@@ -29,3 +29,9 @@ export function publicationProblems(report: { revoked_at: string | null; expires
   if (report.body['sensitivity'] === "restricted") problems.push("Restricted reports cannot be published.");
   return problems;
 }
+
+export const pilotReceiptSchema = z.object({
+  code: z.string().max(80),
+  action: z.enum(["open", "message", "removal"]),
+  text: z.string().max(2000).optional(),
+}).strict();

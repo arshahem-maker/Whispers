@@ -114,7 +114,7 @@ export async function receiptNeonPilot(data: { code: string; action: ReceiptActi
   });
 }
 
-export async function uploadNeonPilot(data: { code: string; bytes: number[]; uploadId: string }) {
+export async function uploadNeonPilot(data: { code: string; bytes: number[] | Uint8Array; uploadId: string }) {
   const normalized = normalizeCode(data.code);
   if (!isWellFormedCode(normalized)) throw new Error("Report unavailable.");
   const hash = await hashCode(normalized);
@@ -133,7 +133,7 @@ export async function uploadNeonPilot(data: { code: string; bytes: number[]; upl
   if (!quota?.allowed) throw new Error("Photo upload limit reached.");
 
   const { default: jpeg } = await import("jpeg-js");
-  const decoded = jpeg.decode(new Uint8Array(data.bytes), {
+  const decoded = jpeg.decode(data.bytes instanceof Uint8Array ? data.bytes : new Uint8Array(data.bytes), {
     useTArray: true, maxResolutionInMP: 3, maxMemoryUsageInMB: 32, tolerantDecoding: false,
   });
   if (decoded.width * decoded.height > 1600 * 1600) throw new Error("Photo is too large.");

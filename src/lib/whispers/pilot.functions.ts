@@ -1,7 +1,7 @@
 import { createMiddleware, createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { pilotSubmitSchema, pilotCommandSchema } from "./pilot-schema";
+import { pilotSubmitSchema, pilotCommandSchema, pilotReceiptSchema } from "./pilot-schema";
 
 export const submitPilotReport = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((input) => pilotSubmitSchema.parse(input)).handler(async ({ data, context }) => {
   if (process.env["WHISPERS_PILOT_BACKEND"] === "neon") throw new Error("Use the Neon sign-in to submit a report.");
@@ -26,12 +26,20 @@ export const submitNeonPilotReport = createServerFn({ method: "POST" })
     const { getRequest, setResponseHeader } = await import("@tanstack/react-start/server");
     setResponseHeader("Cache-Control", "no-store");
     if (process.env["WHISPERS_PILOT_BACKEND"] !== "neon") throw new Error("Neon reporting is unavailable.");
+    const { callWhispersBackend } = await import("./backend-forward.server");
+    const forwarded = callWhispersBackend("/submit", data, getRequest().headers.get("Authorization"));
+    if (forwarded) return (await forwarded) as { accepted: true };
     const { submitNeonPilot } = await import("./neon-citizen.server");
     return submitNeonPilot(data, getRequest());
   });
-export const pilotReceipt = createServerFn({ method: "POST" }).inputValidator((input) => z.object({ code: z.string().max(80), action: z.enum(["open","message","removal"]), text: z.string().max(2000).optional() }).strict().parse(input)).handler(async ({ data }) => {
+export const pilotReceipt = createServerFn({ method: "POST" }).inputValidator((input) => pilotReceiptSchema.parse(input)).handler(async ({ data }) => {
   const { setResponseHeader } = await import("@tanstack/react-start/server"); setResponseHeader("Cache-Control", "no-store");
   if (process.env["WHISPERS_PILOT_BACKEND"] === "neon") {
+    const { callWhispersBackend } = await import("./backend-forward.server");
+    const forwarded = callWhispersBackend("/receipt", data);
+    if (forwarded) {
+      return (await forwarded) as Awaited<ReturnType<typeof import("./neon-citizen.server").receiptNeonPilot>>;
+    }
     return (await import("./neon-citizen.server")).receiptNeonPilot(data);
   }
   const { receiptPilot } = await import("./pilot.server"); return receiptPilot(data);

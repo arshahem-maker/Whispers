@@ -9,7 +9,23 @@ export default defineConfig({
   buckets: { "whispers-private": {} },
   aiGateway: true,
   functions: {
+    whispersapi: {
+      name: "Whispers private backend",
+      source: "./whispers-api.ts",
+      env: {
+        WHISPERS_BACKEND_SECRET: { value: process.env.WHISPERS_BACKEND_SECRET, required: true },
+        WHISPERS_APP_ORIGIN: { value: process.env.WHISPERS_APP_ORIGIN, required: true },
+      },
+    },
     hello: { name: "Whispers database health", source: "./hello.ts" },
+  },
+  triggers: {
+    "whispers-retention": {
+      type: "schedule",
+      function: "whispersapi",
+      cron: "0 * * * *",
+      functionPath: "/scheduled-retention",
+    },
   },
   // Branch policy: per-branch tuning
   branch: (branch) => {

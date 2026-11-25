@@ -59,6 +59,34 @@ export default {
       return new Response(null, { status: 308, headers: { ...headers, Location: url.href } });
     }
     try {
+      const backend = process.env["WHISPERS_BACKEND_URL"];
+      const secret = process.env["WHISPERS_BACKEND_SECRET"];
+      const photo = url.pathname === "/api/public/neon-photo";
+      const reviewer = url.pathname === "/api/public/neon-reviewer";
+      if ((backend && secret && reviewer) || photo) {
+        if (photo && (!backend || !secret)) {
+          if (process.env["WHISPERS_PILOT_BACKEND"] !== "neon") return new Response(null, { status: 404 });
+          const { handleNeonPhoto } = await import("./integrations/neon/photo-upload.server");
+          return handleNeonPhoto(request, url.origin);
+        }
+        if (photo && request.method !== "POST") return new Response(null, { status: 405 });
+        if (request.method !== "GET" && request.method !== "POST") return new Response(null, { status: 405 });
+        const headers = new Headers();
+        for (const key of ["Authorization", "Origin", "Content-Type"]) {
+          const value = request.headers.get(key);
+          if (value) headers.set(key, value);
+        }
+        if (secret) headers.set("X-Whispers-Backend", secret);
+        if (reviewer && !headers.has("Authorization")) return new Response(null, { status: 401, headers: { "Cache-Control": "no-store" } });
+        const upstream = await fetch(new URL(photo ? "/photo" : "/reviewer" + url.search, backend), {
+          method: request.method, headers, body: request.body,
+          redirect: "manual", signal: AbortSignal.timeout(15_000),
+        });
+        if (upstream.status >= 300 && upstream.status < 400) {
+          return new Response(null, { status: 502, headers: { "Cache-Control": "no-store" } });
+        }
+        return upstream;
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
