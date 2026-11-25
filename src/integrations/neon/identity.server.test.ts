@@ -9,6 +9,7 @@ vi.mock("jose", () => jose);
 
 describe("Neon Auth identity verification", () => {
   beforeEach(() => {
+    vi.unstubAllEnvs();
     vi.resetModules();
     jose.createRemoteJWKSet.mockClear();
     jose.jwtVerify.mockReset();
