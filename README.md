@@ -127,15 +127,20 @@ eight Swahili translation-cache entries, one legacy account, and three private
 photo references. Those cached translations use an obsolete catalog hash and
 are excluded from activation because this cache is rebuildable. Import preflight
 refuses activation because the three private photo objects are missing in Neon
-and the legacy account is not mapped to a verified Neon Auth user. Do not
-activate rows until both checks pass and the export is reconciled. To stage a
-new export, use `node --env-file=.env.staging.local
+and the legacy account is not mapped to a verified Neon Auth user. The source's
+`fictional` field is set by application code and is not proof of report content;
+the report text has not been reviewed. Do not activate rows until a responsible
+operator reviews the source data, attests that it is synthetic, and both photo
+and identity checks pass. The final command requires
+`--apply --confirm-fictional-source`. To stage a new export, use
+`node --env-file=.env.staging.local
 scripts/store-neon-legacy-snapshot.mjs <local-export.json>`; keep exports out of
 Git and retain them only as long as necessary. Transfer private files with
 `node --env-file=.env.staging.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.
 Run `node --env-file=.env.staging.local scripts/import-neon-legacy.mjs` to check
 photo completeness, staff identity, and record eligibility. Reconcile the final
-source snapshot before running the same command with `--apply`. After activation,
+source snapshot before running the same command with `--apply
+--confirm-fictional-source`. After activation,
 verify report and attachment counts, replay the staff and receipt checks, and
 rehearse restore with a disposable environment. Set an explicit access and
 retention policy for the restricted snapshot and downloaded files after cutover.

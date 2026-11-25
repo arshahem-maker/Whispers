@@ -59,7 +59,8 @@ try {
   payload.whispers_reports[0].body.fictional = true;
   await db`update whispers_legacy_import.snapshots set source_payload=${db.json(payload)} where id=${snapshotId}`;
   await assert.rejects(importer(), error => error.code === 2 && error.stdout.includes('"privatePhotosFound":0'));
-  await assert.rejects(importer("--apply"), /Preflight blocked activation/);
+  await assert.rejects(importer("--apply"), /--confirm-fictional-source/);
+  await assert.rejects(importer("--apply", "--confirm-fictional-source"), /Preflight blocked activation/);
   photoPresent = true;
   const check = await importer();
   assert.match(check.stdout, /Preflight passed/);
@@ -67,7 +68,7 @@ try {
   // Cause a late failure to prove the transaction rolls back earlier inserts.
   payload.whispers_audit.push({ id: randomUUID(), action: "fixture", workspace: null, at: received, outcome: "ok" });
   await db`update whispers_legacy_import.snapshots set source_payload=${db.json(payload)} where id=${snapshotId}`;
-  await assert.rejects(importer("--apply"), /null value|not-null constraint/);
+  await assert.rejects(importer("--apply", "--confirm-fictional-source"), /null value|not-null constraint/);
   const [rolledBack] = await db`select
     (select count(*)::int from public.whispers_reports) as reports,
     (select count(*)::int from auth.users) as users,
@@ -75,8 +76,8 @@ try {
   assert.deepEqual(rolledBack, { reports: 0, users: 0, translations: 0 });
   payload.whispers_audit = [];
   await db`update whispers_legacy_import.snapshots set source_payload=${db.json(payload)} where id=${snapshotId}`;
-  assert.match((await importer("--apply")).stdout, /Snapshot activation verified/);
-  assert.match((await importer("--apply")).stdout, /Snapshot already activated/);
+  assert.match((await importer("--apply", "--confirm-fictional-source")).stdout, /Snapshot activation verified/);
+  assert.match((await importer("--apply", "--confirm-fictional-source")).stdout, /Snapshot already activated/);
   const [translationCount] = await db`select count(*)::int as count from public.whispers_interface_translations`;
   assert.equal(translationCount.count, 0, "stale, rebuildable translation cache is not activated");
 

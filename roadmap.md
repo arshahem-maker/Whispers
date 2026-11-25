@@ -54,8 +54,12 @@ Supabase/Lovable checklist. Historical test results remain in
    translations have an obsolete catalog hash and are excluded from activation
    because the cache is rebuildable. Import preflight blocks safely because no
    photo bytes are in Neon and no verified Neon Auth user is mapped to the
-   legacy account. Obtain the private-file export and complete staff sign-in,
-   then compare counts and rehearse restore before activating any report data.
+   legacy account. Their `fictional` marker is application-set, not independent
+   proof, and no report text has been reviewed. A responsible operator must
+   review and attest the source is synthetic. Obtain the private-file export and
+   complete staff sign-in, then compare counts and rehearse restore before
+   activating any report data; the importer requires an explicit confirmation
+   flag for activation.
 6. **Run current staging verification.** With fictional fixtures and separate
    citizen, reviewer, expert, publisher, and administrator accounts, verify
    submissions, private-code follow-up, photo retry/viewing, removal, retention,

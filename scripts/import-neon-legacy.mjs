@@ -2,6 +2,7 @@ import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import postgres from "postgres";
 
 const apply = process.argv.includes("--apply");
+const confirmFictionalSource = process.argv.includes("--confirm-fictional-source");
 const databaseUrl = process.env.DATABASE_URL_UNPOOLED;
 const storageEndpoint = process.env.AWS_ENDPOINT_URL_S3;
 const authBaseUrl = process.env.NEON_AUTH_BASE_URL;
@@ -40,6 +41,9 @@ try {
   const reports = payload.whispers_reports;
   if (reports.some(report => report.body?.fictional !== true)) {
     throw new Error("Legacy snapshot contains a report not marked fictional; no records were imported.");
+  }
+  if (apply && reports.length > 0 && !confirmFictionalSource) {
+    throw new Error("Review the source reports and pass --confirm-fictional-source before activating report data.");
   }
   const photos = records.filter(record => record.kind === "photo");
   const photoKeys = new Set(photos.map(record => record.body?.key));
@@ -86,6 +90,7 @@ try {
 
   console.log(JSON.stringify({
     reports: reports.length, privatePhotosExpected: manifest.size, privatePhotosFound: manifest.size - missing,
+    reportRowsMarkedFictional: reports.filter(report => report.body?.fictional === true).length,
     legacyAccounts: payload.account_mapping.length, accountsMapped: mappings.length, historicalRecords,
   }));
   if (missing || unmapped || historicalRecords) {
