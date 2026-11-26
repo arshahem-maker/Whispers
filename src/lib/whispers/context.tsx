@@ -44,8 +44,6 @@ export interface WhispersContextValue {
   heldCode: string | null; // code held in memory for "Check my report"
   setHeldCode: (c: string | null) => void;
   wipe: () => void;
-  connected: boolean;
-  setConnected: (connected: boolean) => void;
 }
 
 export function WhispersProvider({ children }: { children: ReactNode }) {
@@ -53,13 +51,11 @@ export function WhispersProvider({ children }: { children: ReactNode }) {
   const [draft, setDraftState] = useState<Draft>(emptyDraft);
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [heldCode, setHeldCode] = useState<string | null>(null);
-  const [connected, setConnected] = useState(CONNECTED_BACKEND);
   const setDraft = useCallback((fn: (d: Draft) => Draft) => setDraftState(fn), []);
   const wipe = useCallback(() => {
     setDraftState((d) => { d.photos.forEach((p) => URL.revokeObjectURL(p.url)); return emptyDraft(); });
     setSubmission(null);
     setHeldCode(null);
-    setConnected(CONNECTED_BACKEND);
   }, []);
-  return <WhispersContext.Provider value={{ store, draft, setDraft, submission, setSubmission, heldCode, setHeldCode, wipe, connected, setConnected }}>{children}</WhispersContext.Provider>;
+  return <WhispersContext.Provider value={{ store, draft, setDraft, submission, setSubmission, heldCode, setHeldCode, wipe }}>{children}</WhispersContext.Provider>;
 }

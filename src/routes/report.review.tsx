@@ -5,7 +5,7 @@ import { ImagePlus, X } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { ActionBar, StepHeader } from "@/components/whispers/Form";
 import { PhotoEditor } from "@/components/whispers/PhotoEditor";
-import { CONNECTED_BACKEND, DEMO_MODE, DEMO_ONLY_BUILD } from "@/lib/whispers/context";
+import { CONNECTED_BACKEND } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import { generatePrivateCode, hashCode, randomId } from "@/lib/whispers/crypto";
 import { BASIS_LABEL, CATEGORY_LABEL, IMPACT_LABEL, TIME_LABEL, t } from "@/lib/whispers/i18n";
@@ -14,8 +14,8 @@ import { broadAreaLabel } from "@/lib/whispers/locations";
 import { ValidationError } from "@/lib/whispers/store";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { pilotIntakeMode, submitPilotReport, submitNeonPilotReport } from "@/lib/whispers/pilot.functions";
-import { pilotReportSchema, pilotSubmitSchema } from "@/lib/whispers/pilot-schema";
+import { pilotIntakeMode, submitNeonPilotReport } from "@/lib/whispers/pilot.functions";
+import { pilotReportSchema } from "@/lib/whispers/pilot-schema";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/report/review")({
@@ -48,11 +48,10 @@ function Row({ label, value, edit }: { label: string; value: string; edit: () =>
 
 function Review() {
   useTranslationVersion();
-  const { draft, setDraft, store, submission, setSubmission, connected, setConnected } = useWhispers();
+  const { draft, setDraft, store, submission, setSubmission } = useWhispers();
   const submitNeonConnected = useServerFn(submitNeonPilotReport);
-  const submitLegacyConnected = useServerFn(submitPilotReport);
   const getIntakeMode = useServerFn(pilotIntakeMode);
-  const intakeMode = useQuery({ queryKey: ["pilot-intake-mode"], queryFn: () => getIntakeMode(), enabled: connected, retry: false, staleTime: 10_000 });
+  const intakeMode = useQuery({ queryKey: ["pilot-intake-mode"], queryFn: () => getIntakeMode(), enabled: CONNECTED_BACKEND, retry: false, staleTime: 10_000 });
   const navigate = useNavigate();
   const [state, setState] = useState<"idle" | "sending" | "failed" | "timeout" | "offline" | "mode-changed">("idle");
   const [ackErr, setAckErr] = useState(false);
@@ -79,7 +78,7 @@ function Review() {
 
   const send = async () => {
     if (!draft.ack) { setAckErr(true); document.getElementById("ack")?.focus(); return; }
-    if (DEMO_ONLY_BUILD && !fictionalConfirmed) { setFictionalErr(true); document.getElementById("fictional-ack")?.focus(); return; }
+    if (!CONNECTED_BACKEND && !fictionalConfirmed) { setFictionalErr(true); document.getElementById("fictional-ack")?.focus(); return; }
     if (intakeMode.data?.partnerDemo && draft.photos.length > 0) {
       setPhotoErr("Remove all photos before sending a partner-demo report. Photos are disabled in this mode.");
       return;
@@ -87,7 +86,7 @@ function Review() {
     if (typeof navigator !== "undefined" && !navigator.onLine) { setState("offline"); return; }
     setState("sending");
     if (!draft.basis) { setState("failed"); return; }
-    const sub = submission ?? { code: generatePrivateCode(), idempotencyKey: randomId("idem"), accepted: false, provider: connected ? "pilot" as const : "demo" as const };
+    const sub = submission ?? { code: generatePrivateCode(), idempotencyKey: randomId("idem"), accepted: false, provider: CONNECTED_BACKEND ? "pilot" as const : "demo" as const };
     if (!submission) setSubmission(sub);
     try {
       const input = {
@@ -106,8 +105,8 @@ function Review() {
           return;
         }
         const connectedInput = { ...input, payload: pilotReportSchema.parse(input.payload), fictional: status.mode === "fictional" ? true as const : false as const };
-        if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") await submitNeonConnected({ data: connectedInput });
-        else await submitLegacyConnected({ data: pilotSubmitSchema.parse(connectedInput) });
+        if (!CONNECTED_BACKEND) throw new Error("Connected submission is unavailable in this browser-only demonstration.");
+        await submitNeonConnected({ data: connectedInput });
       }
       else await store.submitReport(input);
       setSubmission({ ...sub, accepted: true });
@@ -122,7 +121,7 @@ function Review() {
   };
 
   const go = (step: 1 | 2) => navigate({ to: "/report", search: step === 2 ? { step: 2 } : {} });
-  const intakeNotice = !connected
+  const intakeNotice = !CONNECTED_BACKEND
     ? t("s3.safe")
     : intakeMode.data?.partnerDemo
       ? tr("Partner demo: real-information submissions are accepted only from the single currently allowlisted account and stay in private staging. Nobody is monitoring them or guaranteeing a reply. Do not include names, contact details, exact locations, other identifying details, sensitive case information, or emergency requests. Photos and public sharing are disabled.")
@@ -175,16 +174,16 @@ function Review() {
 
       <p className="card p-4 mt-6">{intakeNotice}</p>
       <section className="mt-5 border-y py-4">
-        {DEMO_ONLY_BUILD ? <>
+        {!CONNECTED_BACKEND ? <>
           <label className="flex items-start gap-3 text-sm"><input id="fictional-ack" type="checkbox" checked={fictionalConfirmed} onChange={(event) => { setFictionalConfirmed(event.target.checked); setFictionalErr(false); }} />{tr("I confirm this contains only fictional test information.")}</label>
           {fictionalErr && <p role="alert" className="text-destructive">{tr("Please confirm this is fictional information.")}</p>}
-          <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. The project owner can show it in a simulated reviewer workspace; nothing reaches a live response team.")}</p>
+          <p className="hint mt-2">{tr("This browser-only demonstration is for fictional test information. It is saved in this browser and never sent to a connected reporting service.")}</p>
         </> : <>
-          <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={CONNECTED_BACKEND || !!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.partnerDemo
+          <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked readOnly />{intakeMode.data?.partnerDemo
             ? tr("I understand this real-information demo is private, unmonitored, and offers no response or emergency help.")
             : intakeMode.data?.mode === "real" ? tr("I understand this report contains real information and will be stored for authorized review.") : tr("I confirm this contains only fictional test information.")}</label>
-          {connected && <Link to={import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? "/pilot" : "/review/sign-in"} className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
-          <p className="hint mt-2">{connected ? intakeMode.isPending ? tr("Checking the connected intake mode…") : intakeMode.data?.partnerDemo ? tr("One invited account can use real-information intake for partner demonstrations. Submissions stay private, are not monitored, and cannot be published from this mode.") : intakeMode.data?.mode === "real" ? tr("Only invited, signed-in pilot accounts can submit real reports. Authorized staff can review them. This is not an emergency response service.") : tr("Connected staging is limited to the authorized account. Use fictional test information only; the account owner can review submissions during a demonstration.") : tr("Demo: this is saved only in this browser tab. The project owner can demonstrate fictional review workflows; nothing reaches a live response team.")}</p>
+          <Link to="/pilot" className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>
+          <p className="hint mt-2">{intakeMode.isPending ? tr("Checking the connected intake mode…") : intakeMode.data?.partnerDemo ? tr("One invited account can use real-information intake for partner demonstrations. Submissions stay private, are not monitored, and cannot be published from this mode.") : intakeMode.data?.mode === "real" ? tr("Only invited, signed-in pilot accounts can submit real reports. Authorized staff can review them. This is not an emergency response service.") : tr("Connected staging is limited to the authorized account. Use fictional test information only; the account owner can review submissions during a demonstration.")}</p>
         </>}
         </section>
 
@@ -211,13 +210,12 @@ function Review() {
         {state === "mode-changed" && <p role="alert" className="text-warning">⚠ {tr("The intake mode changed. Review the updated notice before sending.")}</p>}
         {state === "timeout" && <p role="alert" className="text-warning">⚠ {t("s3.timeout")}</p>}
         {state === "offline" && <p role="alert" className="text-warning">⚠ {t("s3.offline")}</p>}
-        {DEMO_MODE && !connected && !DEMO_ONLY_BUILD && <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. The project owner can show it in a simulated reviewer workspace; nothing reaches a live response team.")}</p>}
       </div>
 
       <ActionBar>
         <button className="btn btn-secondary" onClick={() => go(2)} disabled={state === "sending"}>{t("common.back")}</button>
-        <Button className="flex-1 min-h-12" onClick={send} disabled={state === "sending" || (connected && (intakeMode.isPending || intakeMode.isError))} aria-busy={state === "sending"}>
-          {state === "sending" ? t("s3.sending") : connected ? intakeMode.data?.partnerDemo ? tr("Submit to private staging demo") : intakeMode.data?.mode === "real" ? tr("Send report for review") : tr("Save fictional report to Cloud") : t("s3.sendDemo")}
+        <Button className="flex-1 min-h-12" onClick={send} disabled={state === "sending" || (CONNECTED_BACKEND && (intakeMode.isPending || intakeMode.isError))} aria-busy={state === "sending"}>
+          {state === "sending" ? t("s3.sending") : CONNECTED_BACKEND ? intakeMode.data?.partnerDemo ? tr("Submit to private staging demo") : intakeMode.data?.mode === "real" ? tr("Send report for review") : tr("Save fictional report to Cloud") : t("s3.sendDemo")}
         </Button>
       </ActionBar>
 

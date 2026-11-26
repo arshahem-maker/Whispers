@@ -5,7 +5,6 @@ import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { Wordmark } from "@/components/whispers/Brand";
 import { t } from "@/lib/whispers/i18n";
 import { CONNECTED_BACKEND, DEMO_CONTROLS_ENABLED, DEMO_ONLY_BUILD } from "@/lib/whispers/context";
-import { VoiceRecorder } from "@/components/whispers/VoiceRecorder";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,8 +38,6 @@ function Home() {
         </div>
         <div className="mt-4 grid gap-2">
           <Link to="/report" className="btn btn-primary btn-sm w-full">{CONNECTED_BACKEND ? tr("Open connected reporting") : t("home.make")}</Link>
-          {import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] !== "neon"
-            && import.meta.env["VITE_WHISPERS_VOICE_ENABLED"] === "true" && <VoiceRecorder />}
           <Link to="/check" className="btn btn-secondary btn-sm w-full">{CONNECTED_BACKEND ? tr("Check a report with your private code") : t("home.check")}</Link>
         </div>
         <ol className="mt-6 grid gap-2.5 text-sm">

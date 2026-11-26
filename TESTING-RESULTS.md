@@ -470,3 +470,22 @@ pilot and should not be read as a current Neon test result.
 4. Test photo viewing and reviewer replies with a legitimately invited, workspace-scoped reviewer account.
 
 The tests do not establish production readiness. Real-source intake remains disabled.
+
+# Runtime cleanup — 26 November 2026
+
+- Removed the app's Supabase/Lovable reviewer, auth, report, retention, voice-AI,
+  translation, and runtime error-reporting paths, along with direct package
+  dependencies. The Neon-authenticated reviewer and report flows remain.
+- Voice endpoints now fail closed with a no-store 503 response, and the voice
+  recorder UI has been removed so users are not prompted to submit audio that
+  cannot be processed. Translation is explicitly English-only until a supported,
+  reviewed replacement is implemented.
+- The historical Lovable/Supabase project and migration/import artifacts remain
+  available for data reconciliation. No remote database, report, account, or
+  service was changed. Existing staging report records were not opened or
+  modified during this code work.
+- `npm run typecheck`, `npm run lint`, and `npm run build -- --mode staging`
+  passed locally after the runtime cleanup. CI will run the repository's test
+  suite on the proposed source change; no local test suite was run here.
+- This is a source-only change. No Cloudflare deploy, production change, Neon
+  migration, or Lovable edit was performed.

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LanguageButton, LanguageProvider } from "./LanguagePicker";
 
@@ -17,13 +17,13 @@ describe("LanguageButton", () => {
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
-  it("keeps the selector available for the legacy backend", async () => {
+  it("shows the same English-only status when legacy backend settings are present", async () => {
     vi.stubEnv("VITE_WHISPERS_REVIEWER_BACKEND", "supabase");
 
     render(<LanguageProvider><LanguageButton tiny /></LanguageProvider>);
 
-    fireEvent.click(await screen.findByRole("button", { name: "Change language" }));
-    expect(await screen.findByRole("dialog", {}, { timeout: 5000 })).toBeInTheDocument();
+    expect(screen.getByLabelText("Language: English only")).toHaveTextContent("English only");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("keeps the Neon provider lightweight and leaves its children available", () => {

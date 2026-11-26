@@ -1,12 +1,7 @@
-import { lazy, Suspense } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { NeonReviewerWorkspace } from "@/components/whispers/NeonReviewerWorkspace";
-import { DEMO_ONLY_BUILD } from "@/lib/whispers/context";
-
-const LegacyPilot = lazy(() =>
-  import("@/components/whispers/LegacyPilot").then(({ LegacyPilot: Component }) => ({ default: Component })),
-);
+import { CONNECTED_BACKEND, DEMO_ONLY_BUILD } from "@/lib/whispers/context";
 
 export const Route = createFileRoute("/pilot")({
   head: () => ({
@@ -28,13 +23,9 @@ function Pilot() {
     return <CitizenShell><h1>Owner-run fictional demo</h1><p className="card p-4 mt-4">This isolated preview does not connect to Neon, Supabase, or staff sign-in. Use fictional roles and records in the demo controls; all saved reports stay in this browser tab.</p><Link className="btn btn-primary mt-5" to="/about">Open demo controls</Link></CitizenShell>;
   }
 
-  if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") {
+  if (CONNECTED_BACKEND) {
     return <CitizenShell sensitive><h1>Connected Whispers pilot</h1><p className="card p-4 mt-4">This workspace uses live Neon services and account-based access. Only invited accounts can open the reviewer workspace. The citizen report form checks the current intake mode before it sends anything. Reports are not automatically published, and this is not an emergency response service.</p><NeonReviewerWorkspace /></CitizenShell>;
   }
 
-  return (
-    <Suspense fallback={<p role="status">Loading pilot workspace…</p>}>
-      <LegacyPilot />
-    </Suspense>
-  );
+  return <CitizenShell><h1>Fictional reviewer demonstration</h1><p className="card p-4 mt-4">This browser-only demonstration does not connect to Neon, Lovable Cloud, or a live response team. Use fictional reports and sample roles only.</p><Link className="btn btn-primary mt-5" to="/review/sign-in">Open fictional reviewer roles</Link></CitizenShell>;
 }

@@ -20,7 +20,9 @@ fictional and browser-only. Neither mode is an emergency service.
   A second Free-plan project, `Whispers Staging`,
   provides the app schema and Neon services. The restricted migration snapshot
   and its three private photo copies were deleted from staging at the owner's
-  direction. No legacy report rows have been activated in app tables. The local
+  direction. No legacy report rows were activated in app tables. Later-created
+  staging reports are present; their contents have not been inspected or changed
+  during the runtime cleanup. The local
   `.neon` and `.env.local` still point to production; use the ignored
   `.env.staging.local` for staging-only work.
 - The initial owner-run, fictional-only demo safeguards and presenter flow
@@ -83,12 +85,13 @@ fictional and browser-only. Neither mode is an emergency service.
   treated as the production launch. The current repo has no reviewed production
   release configuration or deployment workflow; do not point real reporters
   to this Worker.
-- The Neon browser entry is 331 kB raw / 103 kB gzip. PR #18 removed the
-  Lovable-specific Vite build wrapper, but legacy Supabase code and dependencies
-  remain: the legacy Supabase Auth
-  client and pilot UI load separately; the public home and Neon `/pilot` do not
-  preload the Supabase client. This is a bundle optimization, not a removal of
-  the legacy integration or proof of a complete Neon-only migration.
+- The runtime cleanup removed legacy Supabase reviewer/authentication,
+  voice-AI, and translation providers from the app code and direct dependencies.
+  The database schema and migration/import scripts remain as archival and
+  reconciliation material; the old Lovable project and database remain enabled
+  until their metadata and configuration are reconciled. Neon Auth currently
+  brings `@supabase/auth-js` in transitively; the app does not directly call
+  Supabase. This code cleanup did not disable or modify either database.
 - Neon Function submission and receipt bodies are capped at 64 KiB before JSON
   parsing. The migration runner now stores SHA-256 checksums and rejects future
   edits to recorded migration files. Existing staging migration records have
@@ -125,7 +128,9 @@ branch creation was rejected for the production project's legacy database
 role, so staging was isolated in a separate project. A restricted source
 snapshot was copied there for preflight. Its five unrecognized reports and
 three associated photo copies were later deleted from staging. The original
-Lovable Supabase source remains enabled. No report rows are active in Neon.
+Lovable Supabase source remains enabled. The staging app later received report
+records; they were not inspected or changed during this cleanup. Do not assume
+those records are the historical import snapshot or synthetic.
 
 Staging credentials are in the ignored `.env.staging.local`; do not replace the
 production `.neon` or `.env.local` link for routine staging work. The staging
@@ -138,8 +143,9 @@ rows and loopback storage. Rehearse private object recovery separately.
 
 Build with `VITE_WHISPERS_REVIEWER_BACKEND=neon` and `VITE_NEON_AUTH_URL` set to
 the selected branch's Auth base URL. Set `WHISPERS_PILOT_BACKEND=neon` on the
-server. This selects the Neon public feed. Translation preparation and voice
-are unavailable in Neon mode until their supported paths are implemented.
+server. This selects the Neon public feed. Translation and voice are unavailable;
+their old Lovable-backed paths were removed and need a reviewed, supported
+replacement before they can return.
 Keep `DATABASE_URL`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`
 server-only.
 The server also needs `NEON_AUTH_BASE_URL`, `NEON_AUTH_JWKS_URL`,
