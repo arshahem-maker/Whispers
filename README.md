@@ -8,19 +8,23 @@ This is not an emergency or response service.
 
 ## Current release status — 26 November 2026
 
-- The Neon implementation on `staging/neon` was merged into `main` by PR #2
-  on 26 November 2026 (merge commit `43d890b`). The production
-  Neon project remains separate. A second Free-plan project, `Whispers Staging`,
+- The original Neon implementation entered `main` through PR #2 on
+  26 November 2026. Since then, the owner-demo route isolation and subsequent
+  hardening have also been merged. At the latest repository sync, `main` and
+  `staging/neon` matched their GitHub branches, the dependency batch in PR #11
+  was merged, and its GitHub Verify run passed. This source sync does not
+  itself deploy either branch. The production Neon project remains separate.
+  A second Free-plan project, `Whispers Staging`,
   provides the app schema and Neon services. The restricted migration snapshot
   and its three private photo copies were deleted from staging at the owner's
   direction. No legacy report rows have been activated in app tables. The local
   `.neon` and `.env.local` still point to production; use the ignored
   `.env.staging.local` for staging-only work.
-- The owner-run, fictional-only demo safeguards and presenter flow were merged
-  from `staging/neon` by [PR #8](https://github.com/arshahem-maker/Whispers/pull/8)
-  as `988e1cd`. GitHub Verify passed on the merge commit in run
-  [45802150296](https://github.com/arshahem-maker/Whispers/actions/runs/45802150296).
-  The separate owner-demo preview is built from app revision `2d2976c` below.
+- The initial owner-run, fictional-only demo safeguards and presenter flow
+  were merged by [PR #8](https://github.com/arshahem-maker/Whispers/pull/8)
+  and later refined by PR #10. The separate owner-demo preview was last
+  confirmed built from app revision `2d2976c`; repository updates do not
+  automatically redeploy that preview.
 - The Lovable project is not published, and its managed Supabase database is
   still enabled. All five source reports were explicitly marked fictional and
   have been deleted with their three private photo objects. Verification found
@@ -79,8 +83,9 @@ This is not an emergency or response service.
   edits to recorded migration files. Existing staging migration records have
   been pinned to checksums; this records the current file contents and cannot
   independently prove what historical contents were first applied.
-- The dependency lock was updated to remove the current advisories. A Bun audit
-  step and weekly Dependabot updates for Bun and GitHub Actions are configured.
+- The dependency lock includes the merged Dependabot updates through PR #11.
+  GitHub Verify's Bun audit found no known vulnerabilities on that revision.
+  Weekly Dependabot updates for Bun and GitHub Actions are configured.
 
 ## Local development
 
