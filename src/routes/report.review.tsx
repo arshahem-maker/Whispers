@@ -5,7 +5,7 @@ import { ImagePlus, X } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { ActionBar, StepHeader } from "@/components/whispers/Form";
 import { PhotoEditor } from "@/components/whispers/PhotoEditor";
-import { DEMO_MODE } from "@/lib/whispers/context";
+import { DEMO_MODE, DEMO_ONLY_BUILD } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import { generatePrivateCode, hashCode, randomId } from "@/lib/whispers/crypto";
 import { BASIS_LABEL, CATEGORY_LABEL, IMPACT_LABEL, TIME_LABEL, t } from "@/lib/whispers/i18n";
@@ -22,9 +22,9 @@ export const Route = createFileRoute("/report/review")({
   head: () => ({
     meta: [
       { title: "Check your report — Whispers" },
-      { name: "description", content: "Review your report before saving it in the Whispers demo or restricted staging pilot." },
+      { name: "description", content: "Review your fictional report before saving it in the Whispers demonstration." },
       { property: "og:title", content: "Check your report — Whispers" },
-      { property: "og:description", content: "Review your report before saving it in the Whispers demo or restricted staging pilot." },
+      { property: "og:description", content: "Review your fictional report before saving it in the Whispers demonstration." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -56,6 +56,8 @@ function Review() {
   const navigate = useNavigate();
   const [state, setState] = useState<"idle" | "sending" | "failed" | "timeout" | "offline" | "mode-changed">("idle");
   const [ackErr, setAckErr] = useState(false);
+  const [fictionalErr, setFictionalErr] = useState(false);
+  const [fictionalConfirmed, setFictionalConfirmed] = useState(false);
   const [photoErr, setPhotoErr] = useState<string | null>(null);
   const [editing, setEditing] = useState<ImageBitmap | null>(null);
 
@@ -77,6 +79,7 @@ function Review() {
 
   const send = async () => {
     if (!draft.ack) { setAckErr(true); document.getElementById("ack")?.focus(); return; }
+    if (DEMO_ONLY_BUILD && !fictionalConfirmed) { setFictionalErr(true); document.getElementById("fictional-ack")?.focus(); return; }
     if (intakeMode.data?.partnerDemo && draft.photos.length > 0) {
       setPhotoErr("Remove all photos before sending a partner-demo report. Photos are disabled in this mode.");
       return;
@@ -172,12 +175,18 @@ function Review() {
 
       <p className="card p-4 mt-6">{intakeNotice}</p>
       <section className="mt-5 border-y py-4">
-        <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.partnerDemo
-          ? tr("I understand this real-information demo is private, unmonitored, and offers no response or emergency help.")
-          : intakeMode.data?.mode === "real" ? tr("I understand this report contains real information and will be stored for authorized review.") : tr("I confirm this contains only fictional test information.")}</label>
-        {connected && <Link to={import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? "/pilot" : "/review/sign-in"} className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
-        <p className="hint mt-2">{connected ? intakeMode.isPending ? tr("Checking the connected intake mode…") : intakeMode.data?.partnerDemo ? tr("One invited account can use real-information intake for partner demonstrations. Submissions stay private, are not monitored, and cannot be published from this mode.") : intakeMode.data?.mode === "real" ? tr("Only invited, signed-in pilot accounts can submit real reports. Authorized staff can review them. This is not an emergency response service.") : tr("Invited pilot testers only. Sign in before sending. Use fictional information only.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
-      </section>
+        {DEMO_ONLY_BUILD ? <>
+          <label className="flex items-start gap-3 text-sm"><input id="fictional-ack" type="checkbox" checked={fictionalConfirmed} onChange={(event) => { setFictionalConfirmed(event.target.checked); setFictionalErr(false); }} />{tr("I confirm this contains only fictional test information.")}</label>
+          {fictionalErr && <p role="alert" className="text-destructive">{tr("Please confirm this is fictional information.")}</p>}
+          <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. The project owner can show it in a simulated reviewer workspace; nothing reaches a live response team.")}</p>
+        </> : <>
+          <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.partnerDemo
+            ? tr("I understand this real-information demo is private, unmonitored, and offers no response or emergency help.")
+            : intakeMode.data?.mode === "real" ? tr("I understand this report contains real information and will be stored for authorized review.") : tr("I confirm this contains only fictional test information.")}</label>
+          {connected && <Link to={import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? "/pilot" : "/review/sign-in"} className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
+          <p className="hint mt-2">{connected ? intakeMode.isPending ? tr("Checking the connected intake mode…") : intakeMode.data?.partnerDemo ? tr("One invited account can use real-information intake for partner demonstrations. Submissions stay private, are not monitored, and cannot be published from this mode.") : intakeMode.data?.mode === "real" ? tr("Only invited, signed-in pilot accounts can submit real reports. Authorized staff can review them. This is not an emergency response service.") : tr("Connected staging is limited to the authorized account. Use fictional test information only; the account owner can review submissions during a demonstration.") : tr("Demo: this is saved only in this browser tab. The project owner can demonstrate fictional review workflows; nothing reaches a live response team.")}</p>
+        </>}
+        </section>
 
       <div className="mt-6 grid gap-3">
         <button id="ack" type="button" role="checkbox" aria-checked={draft.ack} className="choice" aria-describedby={ackErr ? "ack-err" : undefined}
@@ -202,7 +211,7 @@ function Review() {
         {state === "mode-changed" && <p role="alert" className="text-warning">⚠ {tr("The intake mode changed. Review the updated notice before sending.")}</p>}
         {state === "timeout" && <p role="alert" className="text-warning">⚠ {t("s3.timeout")}</p>}
         {state === "offline" && <p role="alert" className="text-warning">⚠ {t("s3.offline")}</p>}
-        {DEMO_MODE && !connected && <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>}
+        {DEMO_MODE && !connected && !DEMO_ONLY_BUILD && <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. The project owner can show it in a simulated reviewer workspace; nothing reaches a live response team.")}</p>}
       </div>
 
       <ActionBar>

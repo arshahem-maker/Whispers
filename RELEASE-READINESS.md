@@ -2,7 +2,7 @@
 
 **Assessment date:** 26 November 2026  
 **Scope:** GitHub `staging/neon`, Neon staging, the current Cloudflare preview, and the separately deployed Cloudflare production Worker.
-**Decision:** Not ready for a live launch or as a public or partner reporting channel. Suitable only for a clearly labelled product demonstration and non-sensitive partner-evaluation conversations.
+**Decision:** Not ready for live reporting. Suitable for an owner-run product demonstration using fictional data and for non-sensitive partner-evaluation conversations.
 
 **Revision and deployment:** Application revision `c26ca44c7c94f0b74aa272b81453a0dfc60b5825` is deployed to the staging preview. GitHub Verify passed on this exact revision in [runs 45788162408](https://github.com/arshahem-maker/Whispers/actions/runs/45788162408) and [45788154662](https://github.com/arshahem-maker/Whispers/actions/runs/45788154662). The preview is not production and is not access-controlled.
 
@@ -11,13 +11,13 @@
 ## Verified operating boundary
 
 - The public experience defaults to fictional, browser-local demonstration data.
-- The connected staging preview accepts real-information submissions only from one authorized, allowlisted account. This is a constrained demonstration of the flow, not organizational access.
-- Staging reports are private, unmonitored, and have no promised response. Photos, public sharing, and follow-up messages are disabled in that mode.
+- The connected staging preview accepts fictional test reports only from one authorized, allowlisted account. The account owner is the temporary operator and can review synthetic records during a demonstration. This is not organizational access.
+- Real-information partner-demo intake was disabled on 26 November 2026. The owner-run in-memory demo resets on refresh; connected synthetic reports stay in private staging and can be removed using the reviewer controls. Neither demo is continuously monitored or promises a response.
 - The preview URL is public to anyone who knows it. `noindex` affects indexing behavior; it is not an access-control mechanism.
 - Cloudflare also serves an older production deployment at `https://whispers-neon-pilot.whispers-by-arsh.workers.dev`. The Worker URL is enabled for anyone, and its public home and report pages identify the experience as a fictional demo. The checked production HTML responses lacked `Content-Security-Policy`, `X-Robots-Tag`, and `Cache-Control`; `/partners` returned 404. The unauthenticated reviewer API returned 401 with `Cache-Control: no-store`. The production Worker is not the current staging revision and has no reviewed production release configuration in this repository.
 - Full release intake remains gated. The public production Worker is an older fictional-demo deployment, not an operational intake service; the database currently has no active reports.
-- CI passed on the latest GitHub branch revision, but hosted verification is limited to route rendering, status, and authenticated workspace reads. No hosted citizen submission-to-removal flow has been proven end to end.
-- The restricted staging partner-demo switch is a separate exception to the full-release gate. It permits one allowlisted account to submit real information into staging. It does not imply that this data is safe to collect operationally; that account must use synthetic or non-sensitive demonstration content.
+- The isolated owner-run preview has passed an end-to-end fictional report-to-review workflow in one browser tab. This is an in-memory demo only. Connected staging has not yet passed a full submission-to-removal, response, or private-media flow.
+- No independent reviewers are needed to demonstrate simulated workflows, and none are represented as having completed reviews. The account owner is the temporary presenter/operator; seeded staff and review roles are fictional. Real-world operational release still requires independent reviews and an accountable organization.
 
 ## Readiness register
 
@@ -57,18 +57,21 @@ Before live use, a responsible operator must complete and document all of the fo
 11. Field-test accessibility, language comprehension, low-bandwidth and device behavior, and safety assumptions with intended user communities through an appropriate safeguarding process.
 12. Review the exact production commit, run the release workflow, and document rollback and who is authorized to switch intake on.
 
-Until these gates are complete, use the browser-local fictional demonstration and partner-evaluation page only. Do not invite the public or organizations to submit real reports, and do not send case details by email.
+For demonstrations, use the owner-run fictional preview or the connected staging workspace with fictional test data only. The project owner is the temporary presenter/operator; do not claim that simulated roles are independent reviewers. Do not invite anyone to submit real reports or send case details by email. The remaining gates apply only before real-world operational use.
 
 ## Implementation changes in this branch
 
 - Clarifies the boundary between browser-local fictional demo and restricted connected staging.
 - Removes the unverified “private company” description and the account-free product promise.
 - Removes the fictional-demo banner from the connected Neon reviewer workspace and hides fictional role controls in the connected build.
-- Changes the partner-demo submit action and report-safety text to state that records go to unmonitored private staging.
+- Disables the staging real-information partner-demo flag and changes connected workspace copy to fictional-only owner-run testing.
+- Adds a separate Cloudflare owner-demo preview build that ignores preview base configuration and carries no Neon bindings or secrets; its reports remain in browser memory.
+- Disables the connected-cloud intake toggle in the owner-demo build. The form remains fictional-only and clearly says the temporary operator can demonstrate its simulated review workflow.
+- Identifies the account owner as the temporary demo operator while clearly marking sample reports, staff roles, and review outcomes as fictional.
 - Adds a partner-evaluation page with a direct email link, no form, and an explicit request not to email sensitive case details.
 - Adds a fresh nonce to every script and style element in Cloudflare Worker HTML responses; the `script-src` policy no longer permits inline scripts there. Inline style attributes remain allowed for the current styling framework and need a separate production review.
 - The separate production Worker was inspected read-only on 26 November 2026. It still serves an older fictional demo build, has no `/partners` page, and lacks the checked HTML response headers noted above. Keep it separate from real intake until an approved production build and configuration are reviewed and deployed.
-- Corrects the roadmap and adds this readiness register. Latest GitHub CI passed; the nonce/header pair was verified on `/`, `/partners`, `/help`, `/report`, and `/pilot` at app revision `c26ca44`.
+- Corrects the roadmap and adds this readiness register. GitHub CI and the deployed owner-demo revision will be recorded after source changes are pushed; the nonce/header pair was verified on `/`, `/partners`, `/help`, `/report`, and `/pilot` at the earlier staging revision `c26ca44`.
 
 ## Humanitarian data-responsibility review
 

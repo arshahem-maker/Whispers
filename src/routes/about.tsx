@@ -24,12 +24,13 @@ export const Route = createFileRoute("/about")({
 function About() {
   useTranslationVersion();
   const { store } = useWhispers();
-  if (!DEMO_CONTROLS_ENABLED) return <CitizenShell><h1>{tr("About Whispers")}</h1><p className="mt-3">{tr("Whispers is an early-stage prototype. The public demo uses fictional information; real-information staging access is restricted to one authorized account and is not monitored.")}</p><Link className="btn btn-secondary mt-5" to="/partners">{tr("For organizations")}</Link></CitizenShell>;
+  if (!DEMO_CONTROLS_ENABLED) return <CitizenShell><h1>{tr("About Whispers")}</h1><p className="mt-3">{tr("Whispers is an owner-run demonstration. The connected staging workspace accepts fictional test records only from the authorized account. Real-information intake is disabled. The account owner is the temporary operator; there is no emergency or response service.")}</p><Link className="btn btn-secondary mt-5" to="/partners">{tr("For organizations")}</Link></CitizenShell>;
   const me = store.staff(store.actorId);
   return (
     <CitizenShell>
       <h1>{tr("Demo controls")}</h1>
       <p className="mt-2 text-muted-foreground">{tr("For presenters. Switch fictional roles and simulate conditions. This panel exists only with the synthetic demo provider; a connected build has no client-side role switch.")}</p>
+      <p className="card p-4 mt-4">Temporary demonstration operator: you, the Whispers project owner. All sample people, staff, reports, expert responses, and outcomes are fictional. Switching roles simulates workflows; it does not represent independent reviewers or completed release approvals.</p>
 
       <section className="card p-5 mt-6">
         <h2 className="mb-3">{tr("Role")}</h2>

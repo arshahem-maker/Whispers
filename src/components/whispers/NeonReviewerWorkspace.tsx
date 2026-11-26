@@ -251,9 +251,9 @@ function NeonInvitationAdmin() {
     </details>}
     {data.releaseReviews && <details className="grid gap-2">
       <summary>Release reviews</summary>
-      <p>Only record reviews completed by the named independent reviewers. The full release requires all five review areas, two reviewers who are not the named operator, an explicit server setting, and activation by an administrator other than the operator. The limited staging partner demo is separate and does not record or imply those approvals.</p>
+      <p>These release reviews apply only before accepting information about real-world events. For the current owner-run demo, the account owner is the temporary operator and only fictional test records are accepted. Demo roles and sample reviews are simulated; do not record them as independent reviewers or completed release approvals. The operational release still requires all five review areas, two reviewers who are not the named operator, an explicit server setting, and activation by a different administrator.</p>
       <p role="status">{data.readiness?.partnerDemo
-        ? "Partner-demo real intake is active on staging for the single allowlisted account. The full release gate remains off."
+        ? "Real-information partner intake is enabled for the single allowlisted account. The full release gate remains off."
         : `Real intake: ${data.readiness?.enabled ? "active" : "off"}. ${data.readiness?.missing.length ? `Still required: ${data.readiness.missing.map(gate => releaseGateLabels[gate] ?? gate).join(", ")}.` : "Release prerequisites are recorded."}`}</p>
       {data.readiness?.partnerDemo && <p className="hint">This demo mode is not monitored, does not provide a response, disables photos and public sharing, and is blocked on production databases.</p>}
       <p className="hint">Named operator: {data.release?.operator_name || "not set"}{data.release?.operator_contact ? ` · ${data.release.operator_contact}` : ""}</p>

@@ -1,5 +1,48 @@
 # Whispers verification results
 
+## Owner-run fictional demo preview — 26 November 2026
+
+- Published a separate Cloudflare Preview at
+  <https://owner-demo-whispers-neon-pilot.whispers-by-arsh.workers.dev> using
+  `wrangler.demo.jsonc` and Wrangler's `--ignore-base-config` option. The
+  dedicated configuration has no Neon bindings or secrets. The build hides
+  the connected-cloud intake toggle; reports stay in the browser's in-memory
+  demo store and reset on refresh. The preview remains publicly reachable by
+  URL and is marked `noindex`; it is not a private access boundary.
+- The account owner completed the browser flow using a wholly invented
+  scenario: report entry, review of the summary, fictional confirmation, save,
+  switch to a named but fictional reviewer role, open the report, assign it,
+  and save an internal note stating no real sources or independent review were
+  used. The UI showed the synthetic report in the reviewer inbox and its detail
+  page. The status remained unassessed; no evidence or release approval was
+  recorded. The record exists only in that browser's demo state.
+- During the first trial, the fictional confirmation checkbox also enabled the
+  connected path and the page copy still referred to the old real-information
+  staging mode. No report was sent through that path. The demo build now hides
+  the connected toggle and explains the owner-run simulated review flow.
+- Hosted route checks returned HTTP 200, `X-Robots-Tag: noindex`, and a CSP for
+  `/`, `/about`, `/partners`, `/report`, `/help`, and `/review/reports` on the
+  isolated demo preview.
+- Local validation after the demo-only change passed `npm run typecheck`,
+  `npm run lint`, and `npm test` (49 tests across 14 files). The demo production
+  build and Cloudflare Preview upload completed successfully. This validates
+  the owner-run demonstration, not connected Neon submission, private media,
+  reply, removal, retention, recovery, or any real-world operation.
+
+## Connected staging intake safeguard — 26 November 2026
+
+- Redeployed the `whispersapi` Neon Function to the separate staging project
+  `wild-mountain-69998844`, branch `br-winter-butterfly-bgqazjbj`. Neon reported
+  deployment ID 8 completed with runtime `nodejs24`.
+- Both `WHISPERS_LIVE_INTAKE_ENABLED` and
+  `WHISPERS_PARTNER_DEMO_REAL_INTAKE_ENABLED` are explicitly set to `false` in
+  this staging deployment. Fictional connected tests remain supported for the
+  single allowlisted test account. The production Neon project and production
+  Cloudflare Worker were not changed.
+- This is a deployment/configuration check, not a full connected submission
+  test. Before any real-world use, keep intake off until accountable
+  organizational operations and qualified independent reviews are in place.
+
 ## Content Security Policy nonce deployment — 26 November 2026
 
 - Application commit `c26ca44c7c94f0b74aa272b81453a0dfc60b5825` deployed to the existing Cloudflare staging Preview only. Its script policy no longer includes `unsafe-inline`; Cloudflare's streaming HTMLRewriter adds a per-response nonce to SSR script/style elements and provides the nonce to the client runtime.

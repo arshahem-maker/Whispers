@@ -15,6 +15,7 @@ export const Route = createFileRoute("/partners")({
 
 function Partners() {
   const subject = encodeURIComponent("Whispers prototype evaluation");
+  const connectedStaging = import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon";
   return (
     <CitizenShell>
       <h1>{"For humanitarian organizations"}</h1>
@@ -25,9 +26,11 @@ function Partners() {
       <section className="card p-5 mt-6" aria-labelledby="status-title">
         <h2 id="status-title">Current status</h2>
         <ul className="mt-3 grid gap-2 list-disc pl-5">
-          <li>The public experience is a fictional demonstration.</li>
-          <li>Real-information staging access is restricted to one authorized account and is not open to partner organizations or the public.</li>
-          <li>Staging submissions are private but unmonitored. Nobody promises or provides a response.</li>
+          <li>This is an owner-run demonstration. The account owner is the temporary presenter and operator.</li>
+          <li>All demonstration reports, people, staff, and review outcomes are fictional. {connectedStaging ? "Connected fictional test reports are stored in private staging." : "New reports stay in this browser tab and are discarded when the demo is reset or refreshed."}</li>
+          <li>Reviewer and expert roles are simulated in the owner-run demo; they do not represent independent people or real approvals.</li>
+          {connectedStaging && <li>Connected staging access is limited to one authorized account and is not open to partner organizations or the public.</li>}
+          <li>No live humanitarian team monitors these demonstrations or promises a response.</li>
           <li>This is not an emergency, protection, or aid-delivery channel. Do not submit real case details, names, exact locations, photos, or urgent requests.</li>
           <li>No organization partnership or endorsement is implied.</li>
         </ul>

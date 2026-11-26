@@ -8,6 +8,7 @@ import { WhispersContext } from "./whispers-context";
 // The separate connected staff workspace must not inherit fake role controls.
 export const DEMO_MODE = true;
 export const DEMO_CONTROLS_ENABLED = import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] !== "neon";
+export const DEMO_ONLY_BUILD = import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true";
 
 export interface ProcessedPhoto {
   id: string;
