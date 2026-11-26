@@ -1,5 +1,34 @@
 # Whispers verification results
 
+## Standalone build and staging retention auth — 26 November 2026
+
+- PR #18 replaced the Lovable-specific Vite wrapper with direct TanStack Start,
+  React, Tailwind, and Nitro configuration and removed the wrapper dependency.
+  It was merged to `main` and synchronized to `staging/neon` at
+  `fdb7becfe3d08948b665f546217ec836da76523d`.
+- Local verification passed: `npm run typecheck`, `npm run lint`, 49 tests
+  across 14 files, and `npm run build -- --mode staging`. Local Vite smoke
+  requests to `/` and `/pilot` returned HTTP 200. Both GitHub Verify checks
+  passed: [run 45862852825](https://github.com/arshahem-maker/Whispers/actions/runs/45862852825)
+  and [run 45862861142](https://github.com/arshahem-maker/Whispers/actions/runs/45862861142).
+- The staging Preview was refreshed at
+  <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>;
+  latest version URL:
+  <https://924b05af-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+  `/`, `/report`, `/help`, `/about`, `/partners`, and `/pilot` returned HTTP
+  200. The unauthenticated reviewer endpoint and retention endpoint returned
+  HTTP 401. No report or cleanup operation was run.
+- The staging-only `WHISPERS_RETENTION_SECRET` is stored in the local ignored
+  `.env.staging.local` and on the `staging-neon` Worker Preview. It is not set
+  on the production Worker. A normal preview refresh preserved it. This enables
+  authorized use of the optional HTTP retention endpoint; scheduled retention
+  continues to use the Neon Function Trigger.
+- This deploy changes build tooling and staging-only configuration. It does
+  not make anonymous intake available, validate production configuration, or
+  remove legacy Supabase code. The build still includes legacy Supabase/AI
+  server modules for compatibility; PR #18 only removes Lovable's build-time
+  Vite dependency. Wrangler reports the Preview command as open beta.
+
 ## Connected staging refresh — 26 November 2026
 
 - Refreshed the Cloudflare staging Worker from the current connected-build

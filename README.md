@@ -12,10 +12,10 @@ fictional and browser-only. Neither mode is an emergency service.
 - The original Neon implementation entered `main` through PR #2 on
   26 November 2026. Since then, the owner-demo route isolation and subsequent
   hardening have also been merged. At the latest repository sync, `main` and
-  `staging/neon` matched their GitHub branches. PR #14 refreshed connected
-  staging behavior and PR #15 recorded the verification status; both Verify
-  runs passed. The staging preview was separately refreshed from PR #14's
-  source commit. GitHub source merges do not automatically deploy either
+  `staging/neon` matched their GitHub branches. PR #18 removed the
+  build-time dependency on Lovable's Vite wrapper; both GitHub Verify runs
+  passed. The staging Preview was refreshed from source commit `fdb7bec` after
+  the merge. GitHub source merges do not automatically deploy either
   branch. The production Neon project remains separate.
   A second Free-plan project, `Whispers Staging`,
   provides the app schema and Neon services. The restricted migration snapshot
@@ -49,6 +49,8 @@ fictional and browser-only. Neither mode is an emergency service.
   `workers.dev` site is a
   public staging preview at
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+  Its latest version URL is
+  <https://924b05af-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
   Cloudflare marks it `noindex`; anyone with the URL can visit it. The home,
   report, report-review, help, and `/pilot` routes return HTTP 200. Google
   sign-in and the allowlisted account's reviewer workspace have been verified.
@@ -81,7 +83,9 @@ fictional and browser-only. Neither mode is an emergency service.
   treated as the production launch. The current repo has no reviewed production
   release configuration or deployment workflow; do not point real reporters
   to this Worker.
-- The Neon browser entry is 331 kB raw / 103 kB gzip. The legacy Supabase Auth
+- The Neon browser entry is 331 kB raw / 103 kB gzip. PR #18 removed the
+  Lovable-specific Vite build wrapper, but legacy Supabase code and dependencies
+  remain: the legacy Supabase Auth
   client and pilot UI load separately; the public home and Neon `/pilot` do not
   preload the Supabase client. This is a bundle optimization, not a removal of
   the legacy integration or proof of a complete Neon-only migration.
