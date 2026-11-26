@@ -11,12 +11,12 @@ import {
   operatorDetailsComplete,
 } from "./operator";
 
-// Concrete values taken from the operator's own words: the published contact address
-// and the purpose statement must stay word-for-word, and must be translatable.
+// Keep the published contact and prototype description accurate, and make sure a
+// real-operator readiness check cannot pass without an explicitly supplied name.
 describe("published operator details", () => {
-  it("names Whispers as a private company and publishes no CEO line", () => {
-    expect(OPERATOR.organisation).toBe("Whispers");
-    expect(OPERATOR.legalForm).toBe("private company");
+  it("describes the project without claiming an unverified legal form", () => {
+    expect(OPERATOR.organisation).toBe("Whispers prototype");
+    expect("legalForm" in OPERATOR).toBe(false);
     expect("ceo" in OPERATOR).toBe(false);
     for (const sentence of [OPERATOR_RECEIPT_NOTE, OPERATOR_ABOUT_NOTE, OPERATOR_SETTINGS_SUMMARY]) {
       expect(sentence).not.toContain("CEO");
@@ -32,7 +32,7 @@ describe("published operator details", () => {
 
   it("publishes the purpose statement word for word", () => {
     expect(OPERATOR_PURPOSE).toBe(
-      "Whispers helps people affected by conflict share what’s happening on the ground without creating an account, so humanitarian teams can make better-informed decisions.",
+      "Whispers is an early-stage humanitarian reporting and review prototype. The public demonstration uses fictional information. Real-information intake is limited to a restricted staging demonstration and is not monitored or an emergency response service.",
     );
     expect(OPERATOR_RECEIPT_NOTE).toContain(OPERATOR_PURPOSE);
   });
@@ -50,10 +50,12 @@ describe("published operator details", () => {
     }
   });
 
-  it("counts operator details as ready only with a reachable contact and a real purpose", () => {
-    expect(operatorDetailsComplete()).toBe(true);
-    expect(operatorDetailsComplete({ contact: "", purpose: OPERATOR_PURPOSE })).toBe(false);
-    expect(operatorDetailsComplete({ contact: "not-an-email", purpose: OPERATOR_PURPOSE })).toBe(false);
-    expect(operatorDetailsComplete({ contact: OPERATOR.contact, purpose: "" })).toBe(false);
+  it("requires a confirmed legal operator name, a reachable contact, and a purpose", () => {
+    expect(operatorDetailsComplete()).toBe(false);
+    const confirmed = { legalOperatorName: "Confirmed legal entity", contact: OPERATOR.contact, purpose: OPERATOR_PURPOSE };
+    expect(operatorDetailsComplete(confirmed)).toBe(true);
+    expect(operatorDetailsComplete({ ...confirmed, legalOperatorName: " " })).toBe(false);
+    expect(operatorDetailsComplete({ ...confirmed, contact: "not-an-email" })).toBe(false);
+    expect(operatorDetailsComplete({ ...confirmed, purpose: "" })).toBe(false);
   });
 });

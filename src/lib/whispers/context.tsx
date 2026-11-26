@@ -4,7 +4,10 @@ import type { Category, Impact, KnowledgeBasis, TimeBucket } from "./types";
 import { emptyDraft } from "./draft";
 import { WhispersContext } from "./whispers-context";
 
-export const DEMO_MODE = true; // Cloud powers interface translation; report intake still uses the demo provider.
+// This app keeps its local fictional demonstration available in every build.
+// The separate connected staff workspace must not inherit fake role controls.
+export const DEMO_MODE = true;
+export const DEMO_CONTROLS_ENABLED = import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] !== "neon";
 
 export interface ProcessedPhoto {
   id: string;

@@ -1,7 +1,7 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
-import { DEMO_MODE } from "@/lib/whispers/context";
+import { DEMO_CONTROLS_ENABLED } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import { groupCode } from "@/lib/whispers/crypto";
 import { FIXTURE_CODES } from "@/lib/whispers/demo-data";
@@ -9,10 +9,10 @@ import { FIXTURE_CODES } from "@/lib/whispers/demo-data";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About and demo controls — Whispers" },
-      { name: "description", content: "About Whispers and controls for the fictional demonstration." },
-      { property: "og:title", content: "About — Whispers" },
-      { property: "og:description", content: "About Whispers and the fictional demonstration." },
+      { title: "About Whispers" },
+      { name: "description", content: "About the Whispers prototype and its current staging limitations." },
+      { property: "og:title", content: "About Whispers" },
+      { property: "og:description", content: "About the Whispers prototype and its current staging limitations." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/about")({
 function About() {
   useTranslationVersion();
   const { store } = useWhispers();
-  if (!DEMO_MODE) return <CitizenShell><h1>{tr("About")}</h1></CitizenShell>;
+  if (!DEMO_CONTROLS_ENABLED) return <CitizenShell><h1>{tr("About Whispers")}</h1><p className="mt-3">{tr("Whispers is an early-stage prototype. The public demo uses fictional information; real-information staging access is restricted to one authorized account and is not monitored.")}</p><Link className="btn btn-secondary mt-5" to="/partners">{tr("For organizations")}</Link></CitizenShell>;
   const me = store.staff(store.actorId);
   return (
     <CitizenShell>

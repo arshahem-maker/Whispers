@@ -1,7 +1,7 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { Wordmark } from "@/components/whispers/Brand";
-import { DEMO_MODE } from "@/lib/whispers/context";
+import { DEMO_CONTROLS_ENABLED } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import { useState } from "react";
 import { lovable } from "@/integrations/lovable";
@@ -62,7 +62,7 @@ function SignIn() {
           <Link to="/pilot" className="text-primary underline mt-3 inline-block">{tr("Open connected pilot")}</Link>
           <p className="hint mt-2">{tr("Nobody can give themselves reviewer or admin access.")}</p>
         </div>
-        {DEMO_MODE && (
+        {DEMO_CONTROLS_ENABLED && (
           <div className="card p-5 mt-4">
             <h2 className="label mb-3">{tr("Continue as a fictional demo role")}</h2>
             <div className="grid gap-2">

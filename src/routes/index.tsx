@@ -4,6 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { Wordmark } from "@/components/whispers/Brand";
 import { t } from "@/lib/whispers/i18n";
+import { DEMO_CONTROLS_ENABLED } from "@/lib/whispers/context";
 import { VoiceRecorder } from "@/components/whispers/VoiceRecorder";
 
 export const Route = createFileRoute("/")({
@@ -48,6 +49,7 @@ function Home() {
           <p className="flex gap-2.5"><ShieldCheck className="h-5 w-5 text-primary shrink-0" aria-hidden />{t("home.privacy")}</p>
           <Link to="/help" hash="privacy" className="btn-ghost inline-flex items-center !px-0 !min-h-0 mt-1 text-sm">{t("home.privacyLink")}</Link>
         </div>
+        {!DEMO_CONTROLS_ENABLED && <Link to="/partners" className="btn btn-secondary w-full mt-4">{tr("For organizations: discuss an evaluation")}</Link>}
         <p className="mt-4 hint text-sm">{t("home.notEmergency")}</p>
       </section>
     </CitizenShell>

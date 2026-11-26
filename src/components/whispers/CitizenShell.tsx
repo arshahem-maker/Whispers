@@ -33,7 +33,7 @@ export function CitizenShell({ children, sensitive = false, hideNav = false }: {
             )}
           </div>
         </div>
-        {DEMO_MODE && (
+        {DEMO_MODE && path !== "/pilot" && (
           <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">{connected ? tr("Connected pilot — follow the intake and privacy notice shown before sending.") : t("demo.banner")}</div>
         )}
       </header>

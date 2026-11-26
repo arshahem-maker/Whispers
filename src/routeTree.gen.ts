@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as CheckRouteImport } from './routes/check'
 import { Route as ClosedRouteImport } from './routes/closed'
 import { Route as HelpRouteImport } from './routes/help'
+import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as UpdatesRouteImport } from './routes/updates'
 import { Route as ReportIndexRouteImport } from './routes/report.index'
@@ -55,6 +56,11 @@ const ClosedRoute = ClosedRouteImport.update({
 const HelpRoute = HelpRouteImport.update({
   id: '/help',
   path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnersRoute = PartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PilotRoute = PilotRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/check': typeof CheckRoute
   '/closed': typeof ClosedRoute
   '/help': typeof HelpRoute
+  '/partners': typeof PartnersRoute
   '/pilot': typeof PilotRoute
   '/updates': typeof UpdatesRoute
   '/report/review': typeof ReportReviewRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/check': typeof CheckRoute
   '/closed': typeof ClosedRoute
   '/help': typeof HelpRoute
+  '/partners': typeof PartnersRoute
   '/pilot': typeof PilotRoute
   '/updates': typeof UpdatesRoute
   '/report/review': typeof ReportReviewRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/check': typeof CheckRoute
   '/closed': typeof ClosedRoute
   '/help': typeof HelpRoute
+  '/partners': typeof PartnersRoute
   '/pilot': typeof PilotRoute
   '/updates': typeof UpdatesRoute
   '/report/review': typeof ReportReviewRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/check'
     | '/closed'
     | '/help'
+    | '/partners'
     | '/pilot'
     | '/updates'
     | '/report/review'
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/check'
     | '/closed'
     | '/help'
+    | '/partners'
     | '/pilot'
     | '/updates'
     | '/report/review'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/check'
     | '/closed'
     | '/help'
+    | '/partners'
     | '/pilot'
     | '/updates'
     | '/report/review'
@@ -297,6 +309,7 @@ export interface RootRouteChildren {
   CheckRoute: typeof CheckRoute
   ClosedRoute: typeof ClosedRoute
   HelpRoute: typeof HelpRoute
+  PartnersRoute: typeof PartnersRoute
   PilotRoute: typeof PilotRoute
   UpdatesRoute: typeof UpdatesRoute
   ReportReviewRoute: typeof ReportReviewRoute
@@ -351,6 +364,13 @@ declare module '@tanstack/react-router' {
       path: '/help'
       fullPath: '/help'
       preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partners': {
+      id: '/partners'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof PartnersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pilot': {
@@ -481,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckRoute: CheckRoute,
   ClosedRoute: ClosedRoute,
   HelpRoute: HelpRoute,
+  PartnersRoute: PartnersRoute,
   PilotRoute: PilotRoute,
   UpdatesRoute: UpdatesRoute,
   ReportReviewRoute: ReportReviewRoute,

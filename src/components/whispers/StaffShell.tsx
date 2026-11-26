@@ -2,7 +2,7 @@ import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Wordmark } from "./Brand";
-import { DEMO_MODE } from "@/lib/whispers/context";
+import { DEMO_CONTROLS_ENABLED, DEMO_MODE } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import type { Role } from "@/lib/whispers/types";
 import { LanguageButton } from "./LanguagePicker";
@@ -39,13 +39,13 @@ export function StaffShell({ children, need, title }: { children: ReactNode; nee
           <div className="ml-auto flex items-center gap-3 text-sm">
             <LanguageButton compact />
             <Link to="/pilot" className="text-primary underline">{tr("Connected pilot")}</Link>
-            {DEMO_MODE && <Link to="/about" className="text-primary underline">{tr("Demo controls")}</Link>}
-            {DEMO_MODE && <Link to="/" className="text-primary underline">{tr("Citizen view")}</Link>}
+            {DEMO_CONTROLS_ENABLED && <Link to="/about" className="text-primary underline">{tr("Demo controls")}</Link>}
+            {DEMO_CONTROLS_ENABLED && <Link to="/" className="text-primary underline">{tr("Citizen view")}</Link>}
             {me && <span className="text-muted-foreground">{me.name}</span>}
             {me && <button className="btn btn-secondary btn-sm" onClick={() => store.setDemoActor(null)}>{tr("Sign out")}</button>}
           </div>
         </div>
-        {DEMO_MODE && <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">{tr("Demo workspace — all reports, people and outcomes are fictional.")}</div>}
+        {DEMO_MODE && DEMO_CONTROLS_ENABLED && <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">{tr("Demo workspace — all reports, people and outcomes are fictional.")}</div>}
       </header>
       <main className="mx-auto max-w-6xl px-5 py-6">
         {allowed ? (<><h1 className="mb-6">{tr(title)}</h1>{children}</>) : (

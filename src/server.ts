@@ -15,7 +15,24 @@ function withSecurityHeaders(request: Request, response: Response): Response {
   headers.set("X-Frame-Options", "DENY");
   headers.set("Referrer-Policy", "no-referrer");
   headers.set("Permissions-Policy", "camera=(), geolocation=(), microphone=(self), payment=()");
-  headers.set("Content-Security-Policy", "base-uri 'self'; object-src 'none'; frame-ancestors 'none'");
+  // Keep browser execution and network access on the app's own origin and the
+  // two configured Neon Auth origins. The application shell currently emits
+  // inline hydration scripts and styles, so those are explicitly allowed until
+  // the framework can supply per-response nonces.
+  headers.set("Content-Security-Policy", [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data:",
+    "media-src 'self' blob:",
+    "worker-src 'self' blob:",
+    "connect-src 'self' https://ep-blue-thunder-bgfcd7v8.neonauth.c-9.eu-central-1.aws.neon.tech https://ep-rapid-union-bgsrx39c.neonauth.c-9.eu-central-1.aws.neon.tech",
+  ].join("; "));
   if (new URL(request.url).protocol === "https:") {
     headers.set("Strict-Transport-Security", "max-age=31536000");
   }

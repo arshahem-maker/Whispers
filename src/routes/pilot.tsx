@@ -24,7 +24,7 @@ export const Route = createFileRoute("/pilot")({
 
 function Pilot() {
   if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") {
-    return <CitizenShell sensitive><h1>Connected pilot</h1><NeonReviewerWorkspace /></CitizenShell>;
+    return <CitizenShell sensitive><h1>Connected pilot</h1><p className="card p-4 mt-4">This is a restricted staging demonstration. Real-information intake is available only to one authorized account. Submissions are private but unmonitored; there is no response or emergency service. Do not use this page to submit sensitive or urgent information.</p><NeonReviewerWorkspace /></CitizenShell>;
   }
 
   return (

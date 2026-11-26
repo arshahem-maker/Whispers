@@ -22,9 +22,9 @@ export const Route = createFileRoute("/report/review")({
   head: () => ({
     meta: [
       { title: "Check your report — Whispers" },
-      { name: "description", content: "Review your report before sending it to the review team." },
+      { name: "description", content: "Review your report before saving it in the Whispers demo or restricted staging pilot." },
       { property: "og:title", content: "Check your report — Whispers" },
-      { property: "og:description", content: "Review your report before sending it." },
+      { property: "og:description", content: "Review your report before saving it in the Whispers demo or restricted staging pilot." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -119,6 +119,13 @@ function Review() {
   };
 
   const go = (step: 1 | 2) => navigate({ to: "/report", search: step === 2 ? { step: 2 } : {} });
+  const intakeNotice = !connected
+    ? t("s3.safe")
+    : intakeMode.data?.partnerDemo
+      ? tr("Partner demo: real-information submissions are accepted only from the single currently allowlisted account and stay in private staging. Nobody is monitoring them or guaranteeing a reply. Do not include names, contact details, exact locations, other identifying details, sensitive case information, or emergency requests. Photos and public sharing are disabled.")
+      : intakeMode.data?.mode === "real"
+        ? tr("Only send information you can share safely. This report is stored for authorized review and is not automatically published. This is not an emergency response service.")
+        : tr("Connected pilot testing accepts fictional information only. Use no real names, locations, or case details.");
 
   return (
     <CitizenShell sensitive hideNav>
@@ -163,9 +170,7 @@ function Review() {
         {photoErr && <p role="alert" className="text-destructive mt-2">⚠ {photoErr}</p>}
       </section>
 
-      <p className="card p-4 mt-6">{intakeMode.data?.partnerDemo
-        ? tr("Partner demo: real-information submissions are accepted only from the single currently allowlisted account and stay in private staging. Nobody is monitoring them or guaranteeing a reply. Do not include names, contact details, exact locations, other identifying details, sensitive case information, or emergency requests. Photos and public sharing are disabled.")
-        : t("s3.safe")}</p>
+      <p className="card p-4 mt-6">{intakeNotice}</p>
       <section className="mt-5 border-y py-4">
         <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.partnerDemo
           ? tr("I understand this real-information demo is private, unmonitored, and offers no response or emergency help.")
@@ -203,7 +208,7 @@ function Review() {
       <ActionBar>
         <button className="btn btn-secondary" onClick={() => go(2)} disabled={state === "sending"}>{t("common.back")}</button>
         <Button className="flex-1 min-h-12" onClick={send} disabled={state === "sending" || (connected && (intakeMode.isPending || intakeMode.isError))} aria-busy={state === "sending"}>
-          {state === "sending" ? t("s3.sending") : connected ? intakeMode.data?.mode === "real" ? tr("Send report for review") : tr("Save fictional report to Cloud") : t("s3.sendDemo")}
+          {state === "sending" ? t("s3.sending") : connected ? intakeMode.data?.partnerDemo ? tr("Submit to private staging demo") : intakeMode.data?.mode === "real" ? tr("Send report for review") : tr("Save fictional report to Cloud") : t("s3.sendDemo")}
         </Button>
       </ActionBar>
 

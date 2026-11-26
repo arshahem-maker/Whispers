@@ -14,9 +14,9 @@ export const Route = createFileRoute("/report/")({
   head: () => ({
     meta: [
       { title: "Make a report — Whispers" },
-      { name: "description", content: "Create a fictional demo report. Do not enter real or sensitive information." },
+      { name: "description", content: "Create a fictional Whispers demo report, or use restricted staging intake if you are an authorized tester." },
       { property: "og:title", content: "Make a report — Whispers" },
-      { property: "og:description", content: "Describe what happened in your own words." },
+      { property: "og:description", content: "Create a fictional demo report or use restricted staging intake if you are an authorized tester." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

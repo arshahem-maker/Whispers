@@ -1,8 +1,9 @@
 # Whispers
 
-Whispers is an independent humanitarian reporting and review application. It
-supports a fictional demonstration, private report follow-up, workspace-scoped
-review, private media, and reviewed public updates.
+Whispers is an early-stage humanitarian reporting and review prototype. The
+public experience is a fictional demonstration. Connected real-information
+intake is restricted to one authorized staging account and is not monitored or
+an emergency response service.
 
 ## Current release status — 26 November 2026
 
@@ -35,11 +36,18 @@ review, private media, and reviewed public updates.
   sign-in and the allowlisted account's reviewer workspace have been verified.
   The workspace showed no reports awaiting review. Citizen submission has not
   been exercised end to end.
+- A **For organizations** page supports partner-evaluation conversations. It
+  uses a mail link rather than a form and asks people not to email sensitive
+  case details. Organizations still cannot submit reports through staging.
+- The operator information describes Whispers as a prototype. The legal
+  operator and legal form have not been confirmed, so the app does not claim a
+  registered company or present its FAQ as a complete legal privacy notice.
 - The public home and report metadata distinguish local fictional demo from
   restricted staging partner demo. Worker responses add
   baseline browser security headers; HTML responses are not cached, and
   `workers.dev` responses are marked `noindex` in both Worker and static-asset
-  handling.
+  handling. The browser Content Security Policy is narrower; inline scripts and
+  styles remain allowed until the server-rendered app supports response nonces.
 - The Neon browser entry is 331 kB raw / 103 kB gzip. The legacy Supabase Auth
   client and pilot UI load separately; the public home and Neon `/pilot` do not
   preload the Supabase client. This is a bundle optimization, not a removal of
