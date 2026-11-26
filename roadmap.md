@@ -33,10 +33,12 @@ marked historical there.
   health Function, and Auth JWKS endpoint returned HTTP 200. The unauthenticated
   reviewer API and a forwarded request without a user session returned HTTP
   401. Google sign-in reached the Neon-backed workspace; the signed-in account
-  loaded administrator invitation and retention panels. That account has no
-  reviewer role, so reviewer report access and citizen submission remain
-  unverified. The public interface now labels the Neon pilot English-only
-  instead of presenting a translation control with no working Neon catalog.
+  loaded administrator invitation and retention panels. The first admin role
+  has now been provisioned for that verified owner identity on staging and
+  logged in the audit table. The account has no reviewer role, so reviewer
+  report access and citizen submission remain unverified. The public interface
+  now labels the Neon pilot English-only instead of presenting a translation
+  control with no working Neon catalog.
 - The Lovable project is unpublished and its managed Supabase database remains
   enabled. Supabase must not be disabled until a verified data cutover.
 - Real-source intake is not approved or enabled.
@@ -46,7 +48,7 @@ marked historical there.
   build, lint, and Bun audit results are recorded at the top of
   `TESTING-RESULTS.md`. Lint has 0 errors and 0 warnings; Bun audit reported no
   vulnerabilities across the 639 locked packages.
-- Commit `614b942` is the current pushed staging head. GitHub Verify passed;
+- Commit `520d0ef` is the current pushed staging head. GitHub Verify passed;
   the public home and `/pilot` were smoke-tested. The Neon entry is 331.17 kB
   raw / 103.07 kB gzip, with the 220.32 kB Supabase compatibility client kept
   out of home and Neon pilot preloads. Details are in `TESTING-RESULTS.md`.
@@ -58,7 +60,7 @@ marked historical there.
 
 1. **Finish hosted authenticated verification.** Staging now has a Whispers-
    owned Google Web OAuth client, an authorized test account, and a verified
-   sign-in. The account is administrator-only. Use a separate, properly invited
+   sign-in, and an administrator role. Use a separate, properly invited
    reviewer account to verify role scoping, workspace access, citizen
    submission, private-code follow-up, and reviewer photo/reply workflows. The
    preview is public to anyone with its URL; keep real intake disabled.

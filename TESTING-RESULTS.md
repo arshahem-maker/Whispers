@@ -1,5 +1,27 @@
 # Whispers verification results
 
+## Staging access and data audit — 26 November 2026
+
+- A guarded, read-only audit confirmed all 14 recorded migrations are present.
+  The scheduled retention function last succeeded at 01:00 UTC on 26 November
+  and expired zero reports in that run.
+- Before this check, the verified Google owner account could sign in but had no
+  active staff role. The account was matched to its verified Neon Auth identity
+  and granted the initial administrator role for the `ua`, `td`, and `general`
+  workspaces on the isolated staging database. Three audit entries record the
+  bootstrap. The existing signed-in staging session then showed the staff
+  invitation, release-review, and retention controls. No production database
+  was touched.
+- Staging currently has one active report in `general`, marked `fictional=true`
+  by the application, with no attached records or photos. Its content was not
+  read and the marker does not attest to its source; treat it as unverified
+  staging data until the owner confirms its provenance or removes it through
+  the retention controls. No reviewer role exists yet, so reviewer access and
+  citizen follow-up remain unverified.
+- The restricted legacy snapshot remains separate from app tables. No source
+  records or private photo bytes were activated or copied. The staging audit
+  did not inspect report text, identity values, or file contents.
+
 ## Bundle and hosted route verification — 26 November 2026
 
 The Neon-only browser entry previously carried the legacy Supabase Auth client
