@@ -9,7 +9,7 @@ marked historical there.
 
 - `staging/neon` is pushed to GitHub; `main` does not yet include it.
 - A separate Neon Free-plan project, `Whispers Staging`, has its own `main`
-  database. The 14 checked-in migrations are applied, and Neon Auth, Object
+  database. The 15 checked-in migrations are applied, and Neon Auth, Object
   Storage, Functions, Realtime, AI Gateway, and the hourly retention trigger
   are provisioned. No legacy data is active. The previously imported restricted
   snapshot and three private photo copies were deleted from staging at the
@@ -83,7 +83,8 @@ marked historical there.
    sign-in, and an administrator role. Use a separate, properly invited
    reviewer account to verify role scoping, workspace access, citizen
    submission, private-code follow-up, and reviewer photo/reply workflows. The
-   preview is public to anyone with its URL; keep real intake disabled.
+   preview is public to anyone with its URL; the partner demo is limited to
+   one allowlisted account, and full real intake remains disabled.
 2. **Review the release source.** Lovable's current revision (`2c422d9`) only
    updated its planning file; its previous application-code edit changed one
    test line. Draft PR #2 includes the pilot-hardening commits from PR #1 plus
@@ -146,5 +147,9 @@ marked historical there.
 - Realtime is provisioned but not used by app flows; the public feed currently
   polls, and RLS-protected tables cannot be subscribed to through the tested
   path.
-- Current Neon end-to-end tests, legacy data activation, private-media restore,
-  and human release reviews are not verified.
+- The staging partner-demo intake accepts real-information examples from the
+  single allowlisted account. It is private, unmonitored, and excludes photos,
+  public sharing, and follow-up. Full real intake remains off pending human
+  release reviews and operational response arrangements.
+- Independent organization accounts, external user flows, production OAuth,
+  legacy data activation, and private-media restore are not verified.

@@ -136,7 +136,7 @@ export function NeonReviewerWorkspace() {
 interface InvitationAdminData {
   releaseReviews: { kind: string; reviewer_id: string; reference: string; reviewed_at: string }[] | null;
   release: { live_intake: boolean; operator_name: string | null; operator_contact: string | null; operator_user_id: string | null } | null;
-  readiness: { ready: boolean; enabled: boolean; missing: string[] } | null;
+  readiness: { ready: boolean; enabled: boolean; partnerDemo: boolean; missing: string[] } | null;
   scopes: Extract<NeonInvitationCommand, { action: "invite_staff" }>["invitation"]["workspace"][];
   staff: { id: string; email: string }[];
   invitations: {
@@ -251,8 +251,11 @@ function NeonInvitationAdmin() {
     </details>}
     {data.releaseReviews && <details className="grid gap-2">
       <summary>Release reviews</summary>
-      <p>Only record reviews completed by the named independent reviewers. Real intake requires all five review areas, two reviewers who are not the named operator, an explicit server setting, and activation by an administrator other than the operator.</p>
-      <p role="status">Real intake: {data.readiness?.enabled ? "active" : "off"}. {data.readiness?.missing.length ? `Still required: ${data.readiness.missing.map(gate => releaseGateLabels[gate] ?? gate).join(", ")}.` : "Release prerequisites are recorded."}</p>
+      <p>Only record reviews completed by the named independent reviewers. The full release requires all five review areas, two reviewers who are not the named operator, an explicit server setting, and activation by an administrator other than the operator. The limited staging partner demo is separate and does not record or imply those approvals.</p>
+      <p role="status">{data.readiness?.partnerDemo
+        ? "Partner-demo real intake is active on staging for the single allowlisted account. The full release gate remains off."
+        : `Real intake: ${data.readiness?.enabled ? "active" : "off"}. ${data.readiness?.missing.length ? `Still required: ${data.readiness.missing.map(gate => releaseGateLabels[gate] ?? gate).join(", ")}.` : "Release prerequisites are recorded."}`}</p>
+      {data.readiness?.partnerDemo && <p className="hint">This demo mode is not monitored, does not provide a response, disables photos and public sharing, and is blocked on production databases.</p>}
       <p className="hint">Named operator: {data.release?.operator_name || "not set"}{data.release?.operator_contact ? ` · ${data.release.operator_contact}` : ""}</p>
       <form className="grid gap-2" onSubmit={event => {
         event.preventDefault();
@@ -285,9 +288,9 @@ function NeonInvitationAdmin() {
         <label><input type="checkbox" name="completed" required /> A human reviewer completed this review.</label>
         <Button type="submit" disabled={busy}>Record review</Button>
       </form>
-      <Button variant={data.release?.live_intake ? "destructive" : "secondary"} disabled={busy || (!data.release?.live_intake && !data.readiness?.ready)} onClick={() => void update({ action: "live_intake", enabled: !data.release?.live_intake })}>
+      {!data.readiness?.partnerDemo && <Button variant={data.release?.live_intake ? "destructive" : "secondary"} disabled={busy || (!data.release?.live_intake && !data.readiness?.ready)} onClick={() => void update({ action: "live_intake", enabled: !data.release?.live_intake })}>
         {data.release?.live_intake ? "Turn real intake off" : "Enable real intake after all gates"}
-      </Button>
+      </Button>}
     </details>}
     {data.invitations.map(invitation => {
       const state = invitation.accepted_at ? "Accepted" : invitation.revoked_at ? "Revoked"

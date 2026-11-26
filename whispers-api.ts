@@ -108,8 +108,8 @@ export default {
       if (!parsedBody.ok) return new Response(null, { status: parsedBody.tooLarge ? 413 : 400, headers });
       const input = parsedBody.value;
       if (source.pathname === "/intake-status") {
-        const { currentNeonIntakeMode } = await import("./src/integrations/neon/live-intake.server");
-        return Response.json({ mode: await currentNeonIntakeMode() }, { headers });
+        const { currentNeonIntakeStatus } = await import("./src/integrations/neon/live-intake.server");
+        return Response.json(await currentNeonIntakeStatus(), { headers });
       }
       const citizen = await import("./src/lib/whispers/neon-citizen.server");
       try {

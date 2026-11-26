@@ -77,6 +77,10 @@ function Review() {
 
   const send = async () => {
     if (!draft.ack) { setAckErr(true); document.getElementById("ack")?.focus(); return; }
+    if (intakeMode.data?.partnerDemo && draft.photos.length > 0) {
+      setPhotoErr("Remove all photos before sending a partner-demo report. Photos are disabled in this mode.");
+      return;
+    }
     if (typeof navigator !== "undefined" && !navigator.onLine) { setState("offline"); return; }
     setState("sending");
     if (!draft.basis) { setState("failed"); return; }
@@ -88,12 +92,12 @@ function Review() {
         payload: {
           text: draft.text, category: draft.category, knowledgeBasis: draft.basis, countryCode: draft.country ?? "not_shared",
           areaId: draft.area, timeBucket: draft.time ?? "not_sure", impacts: draft.impacts,
-          publicSummaryPermission: draft.publicPermission, acknowledged: draft.ack,
+          publicSummaryPermission: intakeMode.data?.partnerDemo ? false : draft.publicPermission, acknowledged: draft.ack,
         },
       };
       if (sub.provider === "pilot") {
         const status = await getIntakeMode();
-        if (status.mode !== intakeMode.data?.mode) {
+        if (status.mode !== intakeMode.data?.mode || status.partnerDemo !== intakeMode.data?.partnerDemo) {
           await intakeMode.refetch();
           setState("mode-changed");
           return;
@@ -143,7 +147,7 @@ function Review() {
             ))}
           </ul>
         )}
-        {draft.photos.length < 3 && (
+        {draft.photos.length < 3 && !intakeMode.data?.partnerDemo && (
           <>
             <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" id="photo" onChange={(event) => {
               const file = event.currentTarget.files?.[0];
@@ -153,15 +157,21 @@ function Review() {
             <label htmlFor="photo" className="btn btn-secondary btn-sm cursor-pointer"><ImagePlus className="h-4 w-4" aria-hidden /> {t("s3.addPhoto")}</label>
           </>
         )}
-        <p className="hint mt-2">{tr("Up to 3 still photos (JPEG, PNG or WebP). A photo is never required.")}</p>
+        <p className="hint mt-2">{intakeMode.data?.partnerDemo
+          ? tr("Photos are disabled for real-information reports in this private partner demo.")
+          : tr("Up to 3 still photos (JPEG, PNG or WebP). A photo is never required.")}</p>
         {photoErr && <p role="alert" className="text-destructive mt-2">⚠ {photoErr}</p>}
       </section>
 
-      <p className="card p-4 mt-6">{t("s3.safe")}</p>
+      <p className="card p-4 mt-6">{intakeMode.data?.partnerDemo
+        ? tr("Partner demo: real-information submissions are accepted only from the single currently allowlisted account and stay in private staging. Nobody is monitoring them or guaranteeing a reply. Do not include names, contact details, exact locations, other identifying details, sensitive case information, or emergency requests. Photos and public sharing are disabled.")
+        : t("s3.safe")}</p>
       <section className="mt-5 border-y py-4">
-        <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.mode === "real" ? tr("I understand this report contains real information and will be stored for authorized review.") : tr("I confirm this contains only fictional test information.")}</label>
+        <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.partnerDemo
+          ? tr("I understand this real-information demo is private, unmonitored, and offers no response or emergency help.")
+          : intakeMode.data?.mode === "real" ? tr("I understand this report contains real information and will be stored for authorized review.") : tr("I confirm this contains only fictional test information.")}</label>
         {connected && <Link to={import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? "/pilot" : "/review/sign-in"} className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
-        <p className="hint mt-2">{connected ? intakeMode.isPending ? tr("Checking the connected intake mode…") : intakeMode.data?.mode === "real" ? tr("Only invited, signed-in pilot accounts can submit real reports. Authorized staff can review them. This is not an emergency response service.") : tr("Invited pilot testers only. Sign in before sending. Use fictional information only.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
+        <p className="hint mt-2">{connected ? intakeMode.isPending ? tr("Checking the connected intake mode…") : intakeMode.data?.partnerDemo ? tr("One invited account can use real-information intake for partner demonstrations. Submissions stay private, are not monitored, and cannot be published from this mode.") : intakeMode.data?.mode === "real" ? tr("Only invited, signed-in pilot accounts can submit real reports. Authorized staff can review them. This is not an emergency response service.") : tr("Invited pilot testers only. Sign in before sending. Use fictional information only.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
       </section>
 
       <div className="mt-6 grid gap-3">
@@ -171,11 +181,15 @@ function Review() {
         </button>
         <Link to="/help" hash="use" className="btn-ghost !px-0 w-fit">{t("s3.ackLink")}</Link>
         {ackErr && <p id="ack-err" role="alert" className="text-destructive">⚠ {t("s3.errAck")}</p>}
-        <button type="button" role="switch" aria-checked={draft.publicPermission} className="choice" aria-describedby="pub-help"
-          onClick={() => setDraft((d) => ({ ...d, publicPermission: !d.publicPermission }))}>
-          <Box on={draft.publicPermission} /> <span>{t("s3.public")}</span>
-        </button>
-        <p id="pub-help" className="hint">{t("s3.publicHelp")}</p>
+        {intakeMode.data?.partnerDemo
+          ? <p id="pub-help" className="hint">{tr("Public use is disabled for all partner-demo reports.")}</p>
+          : <>
+            <button type="button" role="switch" aria-checked={draft.publicPermission} className="choice" aria-describedby="pub-help"
+              onClick={() => setDraft((d) => ({ ...d, publicPermission: !d.publicPermission }))}>
+              <Box on={draft.publicPermission} /> <span>{t("s3.public")}</span>
+            </button>
+            <p id="pub-help" className="hint">{t("s3.publicHelp")}</p>
+          </>}
       </div>
 
       <div aria-live="polite" className="mt-4 mb-28">

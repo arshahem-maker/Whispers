@@ -4,7 +4,7 @@ import { neonIdentity } from "@/integrations/neon/identity.server";
 import { hashCode, isWellFormedCode, normalizeCode, sha256Hex } from "./crypto";
 import { broadAreaLabel, PILOT_COUNTRIES, workspaceFor } from "./locations";
 import type { connectedSubmitSchema } from "./pilot-schema";
-import { requireNeonIntakeMode } from "@/integrations/neon/live-intake.server";
+import { partnerDemoRealIntakeEnabled, requireNeonIntakeMode } from "@/integrations/neon/live-intake.server";
 import type { TimeBucket } from "./types";
 
 type ReceiptAction = "open" | "message" | "removal";
@@ -55,9 +55,11 @@ export async function submitNeonPilot(input: z.infer<typeof connectedSubmitSchem
     `;
     if (!quota?.allowed) return false;
     const workspace = workspaceFor(payload.countryCode);
-    const body = { ...payload, processingState: "received", evidenceState: "unassessed",
+    const partnerDemo = partnerDemoRealIntakeEnabled();
+    const body = { ...payload, publicSummaryPermission: partnerDemo ? false : payload.publicSummaryPermission,
+      processingState: "received", evidenceState: "unassessed",
       sensitivity: payload.category === "safety" || payload.category === "aid_concern" ? "restricted" : "standard",
-      fictional: intakeMode === "fictional" };
+      fictional: intakeMode === "fictional", partnerDemo: partnerDemo && intakeMode === "real" };
     const [report] = await sql<{ id: string }[]>`
       insert into public.whispers_reports (workspace, body, code_hash, idempotency_key, payload_hash)
       values (${workspace}, ${sql.json(body)}, ${input.codeHash}, ${input.idempotencyKey}, ${payloadHash}) returning id
@@ -79,6 +81,10 @@ export async function receiptNeonPilot(data: { code: string; action: ReceiptActi
   const [report] = await db<Report[]>`select id, workspace, body, received_at, removal_requested_at
     from public.whispers_reports where code_hash=${hash} and revoked_at is null and expires_at > now()`;
   if (!report) return null;
+
+  if (data.action === "message" && report.body["partnerDemo"] === true) {
+    throw new Error("Follow-up messaging is disabled in the unattended partner demo.");
+  }
 
   const quotaKey = data.action === "open" ? "receipt" : data.action;
   const limit = data.action === "open" ? 30 : data.action === "message" ? 10 : 3;
@@ -128,11 +134,13 @@ export async function uploadNeonPilot(data: { code: string; bytes: number[] | Ui
   if (!isWellFormedCode(normalized)) throw new Error("Report unavailable.");
   const hash = await hashCode(normalized);
   const db = neonDatabase();
-  const [report] = await db<{ id: string }[]>`
-    select id from public.whispers_reports where code_hash=${hash} and revoked_at is null
+  const [report] = await db<{ id: string; body: Record<string, unknown> }[]>`
+    select id, body from public.whispers_reports where code_hash=${hash} and revoked_at is null
       and removal_requested_at is null and expires_at > now()
   `;
-  if (!report) throw new Error("Report unavailable.");
+  if (!report || report.body["partnerDemo"] === true) {
+    throw new Error("Photo upload is disabled for real reports in the unattended partner demo.");
+  }
   const [prior] = await db`select id from public.whispers_records
     where report_id=${report.id} and upload_id=${data.uploadId}`;
   if (prior) return { ok: true };

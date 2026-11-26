@@ -33,12 +33,12 @@ export const submitNeonPilotReport = createServerFn({ method: "POST" })
     return submitNeonPilot(data, getRequest());
   });
 export const pilotIntakeMode = createServerFn({ method: "POST" }).handler(async () => {
-  if (process.env["WHISPERS_PILOT_BACKEND"] !== "neon") return { mode: "fictional" as const };
+  if (process.env["WHISPERS_PILOT_BACKEND"] !== "neon") return { mode: "fictional" as const, partnerDemo: false };
   const { callWhispersBackend } = await import("./backend-forward.server");
   const forwarded = callWhispersBackend("/intake-status", {});
-  if (forwarded) return (await forwarded) as { mode: "fictional" | "real" };
-  const { currentNeonIntakeMode } = await import("@/integrations/neon/live-intake.server");
-  return { mode: await currentNeonIntakeMode() };
+  if (forwarded) return (await forwarded) as { mode: "fictional" | "real"; partnerDemo: boolean };
+  const { currentNeonIntakeStatus } = await import("@/integrations/neon/live-intake.server");
+  return currentNeonIntakeStatus();
 });
 export const pilotReceipt = createServerFn({ method: "POST" }).validator((input) => pilotReceiptSchema.parse(input)).handler(async ({ data }) => {
   const { setResponseHeader } = await import("@tanstack/react-start/server"); setResponseHeader("Cache-Control", "no-store");

@@ -17,6 +17,8 @@ export default defineConfig({
         WHISPERS_APP_ORIGIN: { value: process.env.WHISPERS_APP_ORIGIN, required: true },
         // Default closed. Real intake requires the matching database release gate.
         WHISPERS_LIVE_INTAKE_ENABLED: { value: process.env.WHISPERS_LIVE_INTAKE_ENABLED ?? "false", required: false },
+        // Narrow, staging-host-checked partner demo. It never bypasses the tester allowlist.
+        WHISPERS_PARTNER_DEMO_REAL_INTAKE_ENABLED: { value: process.env.WHISPERS_PARTNER_DEMO_REAL_INTAKE_ENABLED ?? "false", required: false },
         // Staging-only allowlist. Missing means no connected pilot submissions
         // are accepted; production must not need this setting to provision.
         WHISPERS_PILOT_TESTER_IDS: { value: process.env.WHISPERS_PILOT_TESTER_IDS, required: false },

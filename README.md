@@ -19,12 +19,14 @@ review, private media, and reviewed public updates.
   zero report rows and zero objects in `whispers-private`; no report content was
   inspected. Do not disable the database until remaining app dependencies and
   configuration have been reconciled.
-- Real-source intake remains disabled. The code now supports a separate real-
-  report mode behind a server flag and database approval gate; it stays off
-  until an operator is named, five release reviews are recorded, and two
-  independent reviewers (not the operator) approve it. A separate administrator
-  must activate it. Even then, submissions remain restricted to authenticated
-  pilot IDs; this is not an anonymous public intake channel. The hosted
+- Full real-source release remains disabled. Staging has a limited partner-demo
+  mode for real-information submissions from the single allowlisted account.
+  Reports stay private, cannot be published, and do not accept photos or
+  contributor follow-up. The screen warns that nobody is monitoring or
+  responding; users are told not to submit identifying, sensitive, or urgent
+  details. This is a demonstration flow, not an operational reporting service.
+  The full release gate still requires an operator and human reviews. Submissions
+  remain authenticated and allowlisted; this is not anonymous public intake. The hosted
   `workers.dev` site is a
   public staging preview at
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
@@ -32,8 +34,8 @@ review, private media, and reviewed public updates.
   `/pilot` return HTTP 200. Google sign-in has been verified on staging and the
   signed-in administrator can load invitation and retention panels. This does
   not verify reviewer access or citizen report submission.
-- The public home and report metadata now describe the fictional demo and warn
-  users not to submit real or sensitive information. Worker responses add
+- The public home and report metadata distinguish local fictional demo from
+  restricted staging partner demo. Worker responses add
   baseline browser security headers; HTML responses are not cached, and
   `workers.dev` responses are marked `noindex` in both Worker and static-asset
   handling.
@@ -70,7 +72,7 @@ npm run dev
 The Git branch `staging/neon` is not a Neon database branch. The production
 Neon project has only `production`; its `.neon` link and `.env.local` remain
 unchanged. A separate Free-plan `Whispers Staging` project has its own `main`
-branch, and the 14 ordered migrations have been applied there. Its Auth,
+branch, and the 15 ordered migrations have been applied there. Its Auth,
 Object Storage, Functions, Realtime, and AI Gateway are provisioned. Schema-only
 branch creation was rejected for the production project's legacy database
 role, so staging was isolated in a separate project. A restricted source
@@ -112,9 +114,10 @@ under **Manage staff invitations → Release reviews** on the pilot. The
 record stores the review type, reference, recording administrator and date.
 After the server flag is enabled and the operator, all five review areas, and
 two independent reviewers are recorded, a separate administrator can activate
-real intake in that panel. The server still rejects real submissions whenever
-any gate is missing. This code path is not yet deployed or activated on the
-hosted staging or production app.
+full real intake in that panel. The staging partner-demo flag is a separate
+restricted mode: only the one allowlisted account can submit, and the mode is
+blocked unless the Neon Function is connected to the exact staging database
+host. Production does not enable it.
 Invited staff sign in with the matching verified Google account and select
 **Accept staff invitations** on `/pilot`. The reviewer page supports workspace
 scoped reports, private photos, private notes, status changes, and replies.
@@ -123,7 +126,8 @@ report retention. Editorial workflows include redacted expert requests,
 assigned assessments, moderator interpretation, and independent publication
 review. Hidden updates expose only a withdrawal record in the public feed.
 Voice is disabled in Neon mode until its transcription and moderation path is
-ported and verified. Keep real intake disabled.
+ported and verified. Keep full real intake disabled until the human release
+reviews and operational response arrangements are in place.
 
 The Cloudflare staging pilot delegates staff operations, connected submission,
 and receipt actions and uploads to the `whispersapi` Neon Function. The staging

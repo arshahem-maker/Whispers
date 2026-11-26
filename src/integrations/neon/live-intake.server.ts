@@ -1,6 +1,22 @@
 import { neonDatabase } from "./database.server";
 
 const requiredReviewKinds = ["translation", "security", "legal", "safeguarding", "operations"] as const;
+const stagingDatabaseHosts = new Set([
+  "ep-blue-thunder-bgfcd7v8.c-9.eu-central-1.aws.neon.tech",
+  "ep-blue-thunder-bgfcd7v8-pooler.c-9.eu-central-1.aws.neon.tech",
+]);
+
+export function partnerDemoRealIntakeEnabled() {
+  if (process.env["WHISPERS_PARTNER_DEMO_REAL_INTAKE_ENABLED"] !== "true") return false;
+  const testers = (process.env["WHISPERS_PILOT_TESTER_IDS"] ?? "").split(",").map((id) => id.trim()).filter(Boolean);
+  if (testers.length !== 1) return false;
+  try {
+    const host = new URL(process.env["DATABASE_URL"] ?? process.env["DATABASE_URL_UNPOOLED"] ?? "").hostname;
+    return stagingDatabaseHosts.has(host);
+  } catch {
+    return false;
+  }
+}
 
 interface ReleaseRow {
   live_intake: boolean;
@@ -17,7 +33,12 @@ interface ReviewRow {
 
 export async function liveIntakeReadiness() {
   if (process.env["WHISPERS_LIVE_INTAKE_ENABLED"] !== "true") {
-    return { ready: false, enabled: false, missing: ["server_enable_flag"] as string[] };
+    return {
+      ready: false,
+      enabled: false,
+      partnerDemo: partnerDemoRealIntakeEnabled(),
+      missing: ["server_enable_flag"] as string[],
+    };
   }
 
   try {
@@ -44,18 +65,26 @@ export async function liveIntakeReadiness() {
       return {
         ready,
         enabled: ready && release?.live_intake === true,
+        partnerDemo: partnerDemoRealIntakeEnabled(),
         missing,
       };
     });
   } catch {
     // Missing schema or unavailable database must never be interpreted as approval.
-    return { ready: false, enabled: false, missing: ["release_state_unavailable"] as string[] };
+    return { ready: false, enabled: false, partnerDemo: partnerDemoRealIntakeEnabled(), missing: ["release_state_unavailable"] as string[] };
   }
 }
 
-export async function currentNeonIntakeMode() {
+export async function currentNeonIntakeStatus() {
   const readiness = await liveIntakeReadiness();
-  return readiness.enabled ? "real" as const : "fictional" as const;
+  return {
+    mode: readiness.enabled || readiness.partnerDemo ? "real" as const : "fictional" as const,
+    partnerDemo: readiness.partnerDemo,
+  };
+}
+
+export async function currentNeonIntakeMode() {
+  return (await currentNeonIntakeStatus()).mode;
 }
 
 export async function requireNeonIntakeMode(fictional: boolean) {
