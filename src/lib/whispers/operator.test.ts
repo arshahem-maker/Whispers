@@ -32,7 +32,7 @@ describe("published operator details", () => {
 
   it("publishes the purpose statement word for word", () => {
     expect(OPERATOR_PURPOSE).toBe(
-      "Whispers is an early-stage humanitarian reporting and review prototype. The public demonstration uses fictional information. Real-information intake is limited to a restricted staging demonstration and is not monitored or an emergency response service.",
+      "Whispers is an early-stage humanitarian reporting and review prototype. The project owner is the temporary operator for demonstrations. All demonstration information is fictional. Real-information intake is disabled. This is not an emergency response service.",
     );
     expect(OPERATOR_RECEIPT_NOTE).toContain(OPERATOR_PURPOSE);
   });

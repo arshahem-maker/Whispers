@@ -5,7 +5,7 @@ export const OPERATOR = {
   organisation: "Whispers prototype",
   contact: "arshahem@gmail.com",
   purpose:
-    "Whispers is an early-stage humanitarian reporting and review prototype. The public demonstration uses fictional information. Real-information intake is limited to a restricted staging demonstration and is not monitored or an emergency response service.",
+    "Whispers is an early-stage humanitarian reporting and review prototype. The project owner is the temporary operator for demonstrations. All demonstration information is fictional. Real-information intake is disabled. This is not an emergency response service.",
 } as const;
 
 export const OPERATOR_CONTACT_LABEL = "Contact:";
@@ -16,7 +16,7 @@ export const OPERATOR_PURPOSE = OPERATOR.purpose;
 export const OPERATOR_RECEIPT_NOTE =
   `${OPERATOR.organisation}. ${OPERATOR.purpose} ` +
   `${OPERATOR_CONTACT_LABEL} ${OPERATOR.contact}. ` +
-  "Do not send identifying, sensitive, or urgent information through the staging demonstration.";
+  "Do not send identifying, sensitive, or urgent information through this demonstration.";
 
 export const OPERATOR_ABOUT_NOTE =
   `${OPERATOR.organisation} is an early-stage prototype. Its legal operator and legal form have not yet been confirmed.`;

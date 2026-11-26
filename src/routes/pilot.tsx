@@ -11,9 +11,9 @@ export const Route = createFileRoute("/pilot")({
   head: () => ({
     meta: [
       { title: "Connected pilot — Whispers" },
-      { name: "description", content: "Restricted staging workspace for one authorized account. Submissions are unmonitored and this is not an emergency or response service." },
+      { name: "description", content: "Owner-run staging workspace for fictional test records only. Real intake is disabled." },
       { property: "og:title", content: "Connected pilot — Whispers" },
-      { property: "og:description", content: "Restricted staging workspace for one authorized account. Submissions are unmonitored and this is not an emergency or response service." },
+      { property: "og:description", content: "Owner-run staging workspace for fictional test records only. Real intake is disabled." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/pilot")({
 
 function Pilot() {
   if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") {
-    return <CitizenShell sensitive><h1>Connected pilot</h1><p className="card p-4 mt-4">This is a restricted staging demonstration. Real-information intake is available only to one authorized account. Submissions are private but unmonitored; there is no response or emergency service. Do not use this page to submit sensitive or urgent information.</p><NeonReviewerWorkspace /></CitizenShell>;
+    return <CitizenShell sensitive><h1>Connected fictional pilot</h1><p className="card p-4 mt-4">This is an owner-run demonstration. The account owner is the temporary operator. Only fictional test reports are accepted in this connected staging workspace; real-information intake is disabled. All other staff, reports, and review outcomes shown in the demo are fictional.</p><NeonReviewerWorkspace /></CitizenShell>;
   }
 
   return (
