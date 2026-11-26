@@ -18,9 +18,12 @@
   staging data until the owner confirms its provenance or removes it through
   the retention controls. No reviewer role exists yet, so reviewer access and
   citizen follow-up remain unverified.
-- The restricted legacy snapshot remains separate from app tables. No source
-  records or private photo bytes were activated or copied. The staging audit
-  did not inspect report text, identity values, or file contents.
+- The restricted legacy snapshot remains separate from app tables. All three
+  source photos were copied to the private staging bucket and compared byte for
+  byte with the downloaded archives. The Neon import preflight now passes with
+  five reports, three photos, and one mapped account. The reports remain
+  inactive because their origin is unknown. The staging audit did not inspect
+  report text or file contents.
 
 ## Bundle and hosted route verification — 26 November 2026
 

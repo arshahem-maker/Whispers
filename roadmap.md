@@ -82,13 +82,13 @@ marked historical there.
    legacy account, and references to three private photos. The cached
    translations have an obsolete catalog hash and are excluded from activation
    because the cache is rebuildable. Import preflight blocks safely because no
-   photo bytes are in Neon and no verified Neon Auth user is mapped to the
-   legacy account. Their `fictional` marker is application-set, not independent
-   proof, and no report text has been reviewed. A responsible operator must
-   review and attest the source is synthetic. Obtain the private-file export and
-   complete staff sign-in, then compare counts and rehearse restore before
-   activating any report data; the importer requires an explicit confirmation
-   flag for activation.
+   photo bytes are now copied and verified in Neon staging, and the legacy
+   account maps to a verified Neon Auth user. Preflight passes, but the report
+   origin remains unknown. Their `fictional` marker is application-set, not
+   independent proof, and no report text has been reviewed. Do not activate
+   the reports until a responsible operator establishes their origin and
+   determines whether they should be retained. The importer requires an
+   explicit confirmation flag for activation.
 5. **Run current staging verification.** With fictional fixtures and separate
    citizen, reviewer, expert, publisher, and administrator accounts, verify
    submissions, private-code follow-up, photo retry/viewing, removal, retention,
@@ -105,9 +105,9 @@ marked historical there.
   available. Reviewer-specific permissions and citizen report flows still need
   a separate authorized test account and end-to-end verification.
 - Legacy records are held only in a restricted preflight snapshot; none are
-  active. Their source content has not been reviewed, three private photos have
-  not been copied, and no verified Neon user has been mapped to the legacy
-  account.
+  active. Their source content has not been reviewed. Three private photos are
+  now byte-verified in staging, and the legacy account has a verified Neon
+  identity mapping. The source and retention decision remain unresolved.
 - Lovable still reports its Supabase database enabled. The app retains legacy
   Supabase compatibility code; the active Neon path does not use it for the
   tested reviewer, staff, retention, or public-feed flows. Translation

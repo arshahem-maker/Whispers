@@ -10,13 +10,14 @@ review, private media, and reviewed public updates.
   Neon project remains separate. A second Free-plan project, `Whispers Staging`,
   provides the app schema and Neon services. A restricted source snapshot is
   stored in its private `whispers_legacy_import` schema for preflight; no legacy
-  report rows have been activated in the app tables, and private photo bytes
-  have not been transferred. The local `.neon` and `.env.local` still point to
+  report rows have been activated in the app tables. All three legacy photo
+  objects are copied and byte-verified in private staging storage. The local
+  `.neon` and `.env.local` still point to
   production; use the ignored `.env.staging.local` for staging-only work.
 - The Lovable project is not published, and its managed Supabase database is
   still enabled. Its source snapshot has not been activated in Neon and its
-  private photo bytes have not been copied. Do not disable it until the data,
-  identity, private-file migration, counts, and restore have been reconciled.
+  report origin remains unverified. Do not disable it until the data and
+  restore have been reconciled.
 - Real-source intake remains disabled. The hosted `workers.dev` site is a
   public staging preview at
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
