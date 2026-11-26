@@ -42,6 +42,9 @@ marked historical there.
 - The Lovable project is unpublished and its managed Supabase database remains
   enabled. Supabase must not be disabled until a verified data cutover.
 - Real-source intake is not approved or enabled.
+- The unverified staging report was revoked through the administrator retention
+  workflow and its body was redacted. Its storage cleanup is queued behind the
+  configured 24-hour grace period. No active reports remain in the app tables.
 - The code now corrects public demo wording, adds Worker/static-asset security
   headers and a request-body ceiling, pins migration file checksums, bounds
   voice-output arrays, and refreshes vulnerable dependencies. Local typecheck,

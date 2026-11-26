@@ -12,12 +12,12 @@
   bootstrap. The existing signed-in staging session then showed the staff
   invitation, release-review, and retention controls. No production database
   was touched.
-- Staging currently has one active report in `general`, marked `fictional=true`
-  by the application, with no attached records or photos. Its content was not
-  read and the marker does not attest to its source; treat it as unverified
-  staging data until the owner confirms its provenance or removes it through
-  the retention controls. No reviewer role exists yet, so reviewer access and
-  citizen follow-up remain unverified.
+- A separate active staging report in `general` had an application-set
+  `fictional=true` marker and no attached records. Its source was unknown, so
+  the admin retention action revoked it, redacted its stored body, and queued
+  the private-storage cleanup. The cleanup queue honors a 24-hour grace period.
+  No report content was inspected. The live app now has zero active reports.
+  Reviewer access and citizen follow-up remain unverified.
 - The restricted legacy snapshot remains separate from app tables. All three
   source photos were copied to the private staging bucket and compared byte for
   byte with the downloaded archives. The Neon import preflight now passes with
