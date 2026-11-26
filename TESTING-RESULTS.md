@@ -485,7 +485,30 @@ The tests do not establish production readiness. Real-source intake remains disa
   service was changed. Existing staging report records were not opened or
   modified during this code work.
 - `npm run typecheck`, `npm run lint`, and `npm run build -- --mode staging`
-  passed locally after the runtime cleanup. CI will run the repository's test
-  suite on the proposed source change; no local test suite was run here.
-- This is a source-only change. No Cloudflare deploy, production change, Neon
-  migration, or Lovable edit was performed.
+  passed locally after the runtime cleanup. GitHub Verify passed on PR #20 in
+  [run 45871203107](https://github.com/arshahem-maker/Whispers/actions/runs/45871203107),
+  then on `main` in
+  [run 45871428000](https://github.com/arshahem-maker/Whispers/actions/runs/45871428000)
+  and `staging/neon` in
+  [run 45871468556](https://github.com/arshahem-maker/Whispers/actions/runs/45871468556).
+  All steps passed, including Bun audit, tests, pilot DB, Neon DB/import, and
+  build suites.
+- The PR itself made no production change, Neon migration, or Lovable edit. The
+  follow-up staging Preview refresh is recorded below.
+
+## PR #20 staging refresh — 26 November 2026
+
+- PR #20 merged as `791c6265b4e71d70491ba2474af29bc9552d7a63`; `main` and
+  `staging/neon` now point to that same commit. The staging Cloudflare Preview
+  was refreshed from this source. Version URL:
+  <https://89a8a8ee-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+- Read-only route checks returned HTTP 200 for `/`, `/pilot`, `/report`,
+  `/report/review`, `/help`, `/about`, `/partners`, and `/updates`. The
+  unauthenticated Neon reviewer API returned 401; unauthenticated voice and
+  voice-challenge requests returned 503; unauthenticated retention returned
+  401. The root response carried CSP with a nonce, `Cache-Control: no-store`,
+  `X-Robots-Tag: noindex`, `X-Content-Type-Options: nosniff`, and
+  `X-Frame-Options: DENY`.
+- No authenticated submission/reviewer workflow was run in this refresh. The
+  staging report records were not read, modified, or deleted. No production
+  Worker, Neon data/schema, or Lovable project was changed.

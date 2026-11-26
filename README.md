@@ -9,14 +9,14 @@ fictional and browser-only. Neither mode is an emergency service.
 
 ## Current release status — 26 November 2026
 
-- The original Neon implementation entered `main` through PR #2 on
-  26 November 2026. Since then, the owner-demo route isolation and subsequent
-  hardening have also been merged. At the latest repository sync, `main` and
-  `staging/neon` matched their GitHub branches. PR #18 removed the
-  build-time dependency on Lovable's Vite wrapper; both GitHub Verify runs
-  passed. The staging Preview was refreshed from source commit `fdb7bec` after
-  the merge. GitHub source merges do not automatically deploy either
-  branch. The production Neon project remains separate.
+- `main` and `staging/neon` are synced at merge commit `791c626`. PR #20 removed
+  the legacy Supabase/Lovable application runtime and direct dependencies;
+  GitHub Verify passed on the PR and on both synced branches. The staging
+  Preview now runs that source at version
+  <https://89a8a8ee-whispers-neon-pilot.whispers-by-arsh.workers.dev>. The
+  separate production Worker was not changed. GitHub source merges do not
+  automatically deploy either branch. The production Neon project remains
+  separate.
   A second Free-plan project, `Whispers Staging`,
   provides the app schema and Neon services. The restricted migration snapshot
   and its three private photo copies were deleted from staging at the owner's
@@ -52,10 +52,14 @@ fictional and browser-only. Neither mode is an emergency service.
   public staging preview at
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
   Its latest version URL is
-  <https://924b05af-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
-  Cloudflare marks it `noindex`; anyone with the URL can visit it. The home,
-  report, report-review, help, and `/pilot` routes return HTTP 200. Google
-  sign-in and the allowlisted account's reviewer workspace have been verified.
+  <https://89a8a8ee-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+  Cloudflare marks it `noindex`; anyone with the URL can visit it. On this
+  revision, `/`, `/pilot`, `/report`, `/report/review`, `/help`, `/about`,
+  `/partners`, and `/updates` returned HTTP 200. The unauthenticated reviewer
+  API and retention endpoint returned HTTP 401; the retired voice endpoints
+  returned HTTP 503. The root response had nonce-based script CSP, `no-store`,
+  `noindex`, `nosniff`, and `DENY` headers. These checks did not open report
+  records or verify an authenticated report workflow.
   The owner-run demo preview is separately built without Neon bindings or
   secrets at
   <https://owner-demo-whispers-neon-pilot.whispers-by-arsh.workers.dev>. Its
