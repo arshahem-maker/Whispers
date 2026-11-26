@@ -1,5 +1,14 @@
 # Whispers verification results
 
+## Content Security Policy nonce deployment — 26 November 2026
+
+- Application commit `c26ca44c7c94f0b74aa272b81453a0dfc60b5825` deployed to the existing Cloudflare staging Preview only. Its script policy no longer includes `unsafe-inline`; Cloudflare's streaming HTMLRewriter adds a per-response nonce to SSR script/style elements and provides the nonce to the client runtime.
+- `npm run typecheck`, `npm run lint`, `npm run build -- --mode staging`, and `git diff --check` passed locally. The build retains the upstream `vite-tsconfig-paths` compatibility notice.
+- GitHub Verify passed on this exact revision in [runs 45788162408](https://github.com/arshahem-maker/Whispers/actions/runs/45788162408) and [45788154662](https://github.com/arshahem-maker/Whispers/actions/runs/45788154662), including typecheck, lint, tests, database/import checks, and production build.
+- Hosted HTML for `/`, `/partners`, `/help`, `/report`, and `/pilot` returned HTTP 200. Each response had a nonce-based `script-src`, and all four rendered script tags had the exact nonce named by the response CSP; the inserted `csp-nonce` meta tag matched it. The page had `no-store`, `nosniff`, and `X-Robots-Tag: noindex` headers. Unauthenticated reviewer API access returned HTTP 401 and `no-store`.
+- A signed-in browser rendered the connected pilot workspace, reviewer/admin panels, and zero reports without breaking hydration. No report was submitted, no staff/data mutation was performed, and no production deployment or configuration was changed.
+- Inline style attributes remain allowed by `style-src` for the current styling framework; removing them is a separate UI/security review item before production. The staging preview is public despite `noindex`.
+
 ## Staging boundary and partner-evaluation update — 26 November 2026
 
 - Application revision `22dac77ad6125fce84fd4942ab3577a8b5351cce` was built and
