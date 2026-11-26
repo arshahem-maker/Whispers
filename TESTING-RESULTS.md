@@ -8,9 +8,9 @@
 - Added regression checks for a revoked report just inside the grace period and
   one just beyond it. The full Vitest suite passed: 49 tests across 14 files.
   Typecheck, lint, and the production build also passed.
-- This correction is in the local `staging/neon` working tree only. It has not
-  been committed, pushed, or deployed, so the hosted staging worker has not yet
-  been verified against this behavior.
+- This correction is committed and pushed to `staging/neon` as `b70f9c1`. It
+  has not been deployed, so the hosted staging worker has not yet been verified
+  against this behavior.
 
 ## Staging access and data audit — 26 November 2026
 
@@ -30,7 +30,7 @@
   the private-storage cleanup. No report content was inspected. The live app
   now has zero active reports. The later retention-code review found that the
   deployed worker did not honor the documented 24-hour media grace period; see
-  the local correction above, which has not yet been deployed.
+  the `b70f9c1` correction above, which has not yet been deployed.
   Reviewer access and citizen follow-up remain unverified.
 - At the owner's direction, the five-report restricted snapshot and its three
   private photo copies were deleted from Neon staging. Verification confirmed

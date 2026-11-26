@@ -47,8 +47,9 @@ marked historical there.
   workflow and its body was redacted. The last recorded database check showed
   its storage cleanup queued and no active reports. Review found the deployed
   worker could delete revoked media before the documented 24-hour grace period.
-  A local code and test fix now waits from the original revocation time; it has
-  not been pushed or deployed, so the hosted behavior is not yet corrected.
+  Commit `b70f9c1` now waits from the original revocation time and includes
+  regression tests. It is pushed but not deployed, so hosted behavior is not yet
+  corrected.
 - The code now corrects public demo wording, adds Worker/static-asset security
   headers and a request-body ceiling, pins migration file checksums, bounds
   voice-output arrays, and refreshes vulnerable dependencies. Local typecheck,
