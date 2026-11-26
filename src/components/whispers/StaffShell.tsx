@@ -2,7 +2,7 @@ import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Wordmark } from "./Brand";
-import { DEMO_CONTROLS_ENABLED, DEMO_MODE } from "@/lib/whispers/context";
+import { DEMO_CONTROLS_ENABLED, DEMO_MODE, DEMO_ONLY_BUILD } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import type { Role } from "@/lib/whispers/types";
 import { LanguageButton } from "./LanguagePicker";
@@ -38,7 +38,7 @@ export function StaffShell({ children, need, title }: { children: ReactNode; nee
           )}
           <div className="ml-auto flex items-center gap-3 text-sm">
             <LanguageButton compact />
-            <Link to="/pilot" className="text-primary underline">{tr("Connected pilot")}</Link>
+            {!DEMO_ONLY_BUILD && <Link to="/pilot" className="text-primary underline">{tr("Connected pilot")}</Link>}
             {DEMO_CONTROLS_ENABLED && <Link to="/about" className="text-primary underline">{tr("Demo controls")}</Link>}
             {DEMO_CONTROLS_ENABLED && <Link to="/" className="text-primary underline">{tr("Citizen view")}</Link>}
             {me && <span className="text-muted-foreground">{me.name}</span>}

@@ -1,7 +1,7 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { Wordmark } from "@/components/whispers/Brand";
-import { DEMO_CONTROLS_ENABLED } from "@/lib/whispers/context";
+import { DEMO_CONTROLS_ENABLED, DEMO_ONLY_BUILD } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import { useState } from "react";
 import { lovable } from "@/integrations/lovable";
@@ -12,10 +12,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/review/sign-in")({
   head: () => ({
     meta: [
-      { title: "Staff sign-in — Whispers" },
-      { name: "description", content: "Sign-in for authorised Whispers reviewers and invited experts." },
-      { property: "og:title", content: "Staff sign-in — Whispers" },
-      { property: "og:description", content: "Sign-in for authorised reviewers and experts." },
+      { title: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Demo reviewer roles — Whispers" : "Staff sign-in — Whispers" },
+      { name: "description", content: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Choose a fictional reviewer role for the owner-run demonstration." : "Sign-in for authorised Whispers reviewers and invited experts." },
+      { property: "og:title", content: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Demo reviewer roles — Whispers" : "Staff sign-in — Whispers" },
+      { property: "og:description", content: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Choose a fictional reviewer role for the owner-run demonstration." : "Sign-in for authorised reviewers and experts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -33,7 +33,7 @@ function SignIn() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const cache = useQueryClient();
-  const session = useQuery({ queryKey: ["staff-session"], queryFn: async () => (await supabase.auth.getUser()).data.user, retry: false });
+  const session = useQuery({ queryKey: ["staff-session"], queryFn: async () => (await supabase.auth.getUser()).data.user, retry: false, enabled: !DEMO_ONLY_BUILD });
   const signOut = async () => { await cache.cancelQueries(); cache.clear(); await supabase.auth.signOut(); await navigate({ to: "/review/sign-in", replace: true }); };
   const externalAuth = import.meta.env["VITE_WHISPERS_EXTERNAL_AUTH"] === "true";
   const signIn = async (provider: "google" | "lovable") => {
@@ -54,17 +54,18 @@ function SignIn() {
     <main className="min-h-dvh flex items-center justify-center px-5 py-10">
       <div className="w-full max-w-md">
         <Wordmark />
-        <h1 className="mt-6 text-2xl">{tr("Staff sign-in")}</h1>
-        <div className="card p-5 mt-5">
+        <h1 className="mt-6 text-2xl">{tr(DEMO_ONLY_BUILD ? "Demo reviewer roles" : "Staff sign-in")}</h1>
+        {!DEMO_ONLY_BUILD && <div className="card p-5 mt-5">
           <p className="font-semibold">{tr("Connected pilot staff sign-in")}</p>
           {session.data ? <div className="grid gap-2 mt-4"><p>{tr("Signed in")}</p><Button onClick={() => void navigate({ to: "/pilot" })}>{tr("Open connected pilot")}</Button><Button variant="outline" onClick={() => void signOut()}>{tr("Sign out")}</Button></div> : <div className="grid gap-2 mt-4"><Button onClick={() => void signIn("google")}>{tr("Sign in with Google")}</Button>{!externalAuth && <Button variant="secondary" onClick={() => void signIn("lovable")}>{tr("Sign in with Lovable")}</Button>}</div>}
           {error && <p role="alert" className="text-destructive mt-3">{error}</p>}
           <Link to="/pilot" className="text-primary underline mt-3 inline-block">{tr("Open connected pilot")}</Link>
           <p className="hint mt-2">{tr("Nobody can give themselves reviewer or admin access.")}</p>
-        </div>
+        </div>}
         {DEMO_CONTROLS_ENABLED && (
           <div className="card p-5 mt-4">
-            <h2 className="label mb-3">{tr("Continue as a fictional demo role")}</h2>
+            <h2 className="label mb-3">{tr(DEMO_ONLY_BUILD ? "Choose a fictional reviewer role for this demo" : "Continue as a fictional demo role")}</h2>
+            {DEMO_ONLY_BUILD && <p className="hint mb-3">{tr("This isolated preview does not connect to staff sign-in or an external database. The project owner can simulate these fictional roles.")}</p>}
             <div className="grid gap-2">
               {store.state.staff.filter((s) => !s.roles.includes("expert") || s.id === "ex-4").map((s) => (
                 <button key={s.id} className="choice" onClick={() => { store.setDemoActor(s.id); navigate({ to: s.roles.includes("expert") ? "/expert/assignments" : "/review/reports" }); }}>

@@ -7,6 +7,7 @@ import { ActionBar, MultiToggle, RadioGroup, StepHeader } from "@/components/whi
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import { BASIS_LABEL, CATEGORY_LABEL, IMPACT_LABEL, TIME_LABEL, t } from "@/lib/whispers/i18n";
 import { PILOT_COUNTRIES } from "@/lib/whispers/locations";
+import { DEMO_ONLY_BUILD } from "@/lib/whispers/context";
 import type { Category, Impact, KnowledgeBasis, TimeBucket } from "@/lib/whispers/types";
 
 export const Route = createFileRoute("/report/")({
@@ -14,9 +15,9 @@ export const Route = createFileRoute("/report/")({
   head: () => ({
     meta: [
       { title: "Make a report — Whispers" },
-      { name: "description", content: "Create a fictional Whispers demo report, or use restricted staging intake if you are an authorized tester." },
+      { name: "description", content: DEMO_ONLY_BUILD ? "Create a fictional Whispers demo report. It stays in this browser tab." : "Create a fictional Whispers demonstration report or a fictional-only connected staging test report." },
       { property: "og:title", content: "Make a report — Whispers" },
-      { property: "og:description", content: "Create a fictional demo report or use restricted staging intake if you are an authorized tester." },
+      { property: "og:description", content: DEMO_ONLY_BUILD ? "Create a fictional Whispers demo report. It stays in this browser tab." : "Create a fictional Whispers demonstration report or a fictional-only connected staging test report." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

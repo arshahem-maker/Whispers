@@ -67,6 +67,7 @@ For demonstrations, use the owner-run fictional preview or the connected staging
 - Disables the staging real-information partner-demo flag and changes connected workspace copy to fictional-only owner-run testing.
 - Adds a separate Cloudflare owner-demo preview build that ignores preview base configuration and carries no Neon bindings or secrets; its reports remain in browser memory.
 - Disables the connected-cloud intake toggle in the owner-demo build. The form remains fictional-only and clearly says the temporary operator can demonstrate its simulated review workflow.
+- Isolates the owner-demo route experience: the pilot path is an explanatory page, reviewer sign-in offers simulated fictional roles only, and the home/help/report metadata no longer implies a connected database or staging intake.
 - Identifies the account owner as the temporary demo operator while clearly marking sample reports, staff roles, and review outcomes as fictional.
 - Adds a partner-evaluation page with a direct email link, no form, and an explicit request not to email sensitive case details.
 - Adds a fresh nonce to every script and style element in Cloudflare Worker HTML responses; the `script-src` policy no longer permits inline scripts there. Inline style attributes remain allowed for the current styling framework and need a separate production review.
