@@ -12,6 +12,21 @@
   has not been deployed, so the hosted staging worker has not yet been verified
   against this behavior.
 
+## Legacy fictional data cleanup — 26 November 2026
+
+- The original Lovable Supabase source contained five reports, all explicitly
+  marked fictional, with six linked records, including three private photos.
+  None had linked expert requests or public updates. Report text and photo
+  contents were not inspected.
+- At the owner's direction, the three files were removed through the Supabase
+  Storage API. The five reports and six linked records were then deleted in one
+  database transaction. Independent aggregate verification returned zero
+  remaining report rows, linked records, private bucket objects, expert
+  requests, or public updates. The entire private bucket is empty. No accounts,
+  role rows, unrelated storage, or project settings were changed.
+- The Lovable-managed Supabase database remains enabled. This cleanup does not
+  verify that the rest of the old project can be disabled safely.
+
 ## Staging access and data audit — 26 November 2026
 
 - A guarded, read-only audit confirmed all 14 recorded migrations are present.
@@ -35,8 +50,9 @@
 - At the owner's direction, the five-report restricted snapshot and its three
   private photo copies were deleted from Neon staging. Verification confirmed
   zero remaining snapshots, zero active app reports, and deletion of all three
-  photo objects. The original Lovable Supabase source remains enabled. Report
-  contents were not inspected.
+  photo objects. The original Lovable Supabase source remains enabled; its five
+  fictional reports and three photos have since been deleted as recorded above.
+  No report contents were inspected.
 
 ## Bundle and hosted route verification — 26 November 2026
 

@@ -14,7 +14,9 @@ marked historical there.
   are provisioned. No legacy data is active. The previously imported restricted
   snapshot and three private photo copies were deleted from staging at the
   owner's direction.
-  The original Lovable Supabase source remains enabled.
+  The original Lovable Supabase database remains enabled, but its five
+  fictional test reports and three private photos have also been deleted.
+  Verification found zero report rows and zero private objects in that source.
 - Staging checks returned HTTP 200 from the database health Function and Neon
   Auth session endpoint, HTTP 401 from unauthenticated submission/reviewer
   endpoints, and passed a temporary Object Storage put/get/delete check.
@@ -85,10 +87,11 @@ marked historical there.
    voice disabled until its Neon path and cost controls are implemented and
    reviewed. Identify and remove runtime Supabase dependencies only after each
    route has a tested Neon replacement.
-4. **Resolve the legacy source.** The owner does not recognize the five reports,
-   so their Neon archive and private photo copies were deleted. The original
-   Lovable Supabase source remains enabled. Do not export or activate those
-   reports again unless their origin and retention status are established.
+4. **Finish the legacy source retirement.** The five fictional reports and
+   their three photo objects were deleted from both Neon staging and the
+   original Lovable Supabase source. Do not re-import them. The Lovable-managed
+   database remains enabled; inventory any remaining app dependencies and
+   settings before disabling it.
 5. **Run current staging verification.** With fictional fixtures and separate
    citizen, reviewer, expert, publisher, and administrator accounts, verify
    submissions, private-code follow-up, photo retry/viewing, removal, retention,
@@ -104,9 +107,10 @@ marked historical there.
 - Google sign-in works on staging, but only an administrator account is
   available. Reviewer-specific permissions and citizen report flows still need
   a separate authorized test account and end-to-end verification.
-- The original legacy reports remain in Lovable Supabase. Their origin and
-  retention status are unknown, and no legacy data is active in Neon. The Neon
-  archive copy and photo copies were deleted at the owner's direction.
+- Legacy report cleanup is complete in both source and Neon. No report rows or
+  private photo objects remain in the source database. The Lovable-managed
+  database itself is still enabled, and legacy Supabase compatibility code
+  remains in the repository.
 - Lovable still reports its Supabase database enabled. The app retains legacy
   Supabase compatibility code; the active Neon path does not use it for the
   tested reviewer, staff, retention, or public-feed flows. Translation

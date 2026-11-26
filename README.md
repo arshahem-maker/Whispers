@@ -10,14 +10,15 @@ review, private media, and reviewed public updates.
   Neon project remains separate. A second Free-plan project, `Whispers Staging`,
   provides the app schema and Neon services. The restricted migration snapshot
   and its three private photo copies were deleted from staging at the owner's
-  direction. No legacy report rows have
-  been activated in app tables. The local
+  direction. No legacy report rows have been activated in app tables. The local
   `.neon` and `.env.local` still point to production; use the ignored
   `.env.staging.local` for staging-only work.
 - The Lovable project is not published, and its managed Supabase database is
-  still enabled. Its source snapshot has not been activated in Neon and its
-  report origin remains unverified. Do not disable it until the data and
-  restore have been reconciled.
+  still enabled. All five source reports were explicitly marked fictional and
+  have been deleted with their three private photo objects. Verification found
+  zero report rows and zero objects in `whispers-private`; no report content was
+  inspected. Do not disable the database until remaining app dependencies and
+  configuration have been reconciled.
 - Real-source intake remains disabled. The hosted `workers.dev` site is a
   public staging preview at
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
@@ -146,8 +147,9 @@ the two timestamps to detect a failed attempt and check that scheduled
 successes continue hourly. The table contains no report IDs or text.
 Verify that successful runs are monitored before opening intake.
 
-The five unrecognized legacy reports and their photo copies were deleted from
-Neon staging at the owner's direction. The original Lovable Supabase source
-remains enabled. Their origin and retention status are unknown, so do not export
-or activate them again unless that is established. The earlier verified account
-mapping does not resolve the reports' origin.
+The five fictional legacy reports and their three private photo copies were
+deleted from both Neon staging and the original Lovable Supabase source at the
+owner's direction. Verification found no reports or objects remaining in that
+source database. Its database remains enabled and may still hold unrelated
+accounts or configuration; do not disable it until the remaining dependencies
+are reconciled. Do not re-import the deleted reports.
