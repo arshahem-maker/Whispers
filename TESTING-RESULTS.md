@@ -1,5 +1,39 @@
 # Whispers verification results
 
+## Staging boundary and partner-evaluation update — 26 November 2026
+
+- Application revision `22dac77ad6125fce84fd4942ab3577a8b5351cce` was built and
+  deployed to the existing Cloudflare staging Preview at
+  <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+  The separate version URL is
+  <https://63329a3e-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+- Local verification passed: `npm run typecheck`, `npm run lint`, `npm test`
+  (49 tests across 14 files), and `npm run build`. One concurrent run had a
+  5-second timeout in the existing language-picker test while four checks were
+  running; an isolated rerun passed all 49 tests. The build retains the existing
+  `vite-tsconfig-paths` compatibility notice.
+- Hosted read-only checks returned HTTP 200 for `/`, `/partners`, `/help`,
+  `/report`, and `/pilot`; the unauthenticated reviewer API returned HTTP 401.
+  HTML responses carried the updated CSP and `X-Robots-Tag: noindex` on the
+  public `workers.dev` domain. The partner route rendered its current status,
+  safety limits, and email link. No contact was sent and no report was created.
+- A signed-in staging browser session displayed the restricted-staging warning,
+  reviewer/admin panels, and zero available reports. The connected reviewer
+  page no longer displays the fictional-demo banner. This confirms route rendering
+  and session-backed workspace reads; it does not exercise citizen submission,
+  reviewer action, removal, or private-media authorization end to end.
+- The browser CSP now limits default resources to the app origin, restricts
+  connections to the staging and production Neon Auth origins, and blocks
+  objects/frames. Inline scripts and styles remain permitted because the current
+  server-rendered app does not yet supply per-response CSP nonces.
+- Production was not deployed or modified. The one-account, unmonitored staging
+  intake boundary and full-release gate are unchanged. The OAuth client secret
+  was not rotated; Google Cloud credential entry and submission require the
+  account owner to complete that step.
+- GitHub Verify passed for this pushed revision in runs
+  [45781044608](https://github.com/arshahem-maker/Whispers/actions/runs/45781044608)
+  and [45781036447](https://github.com/arshahem-maker/Whispers/actions/runs/45781036447).
+
 ## Restricted staging partner-demo intake — 26 November 2026
 
 - Commit `1c56655f7c0f84f6e28695f903c483a9bb4e5ce8` enables real-information
