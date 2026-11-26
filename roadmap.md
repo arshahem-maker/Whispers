@@ -1,16 +1,16 @@
 # Whispers release roadmap
 
-Status checked 26 November 2026. This roadmap describes the maintained `staging/neon` branch, its connected fictional-only staging preview, and the isolated owner-run demo preview. Neither is an operational reporting service.
+Status checked 26 November 2026. This roadmap describes the maintained `staging/neon` branch, its live Neon-backed staging preview with a restricted one-account real-information path, and the isolated owner-run fictional demo. Staging is not an open public or organization-backed reporting service.
 
 ## Current state
 
-- The Neon implementation from `staging/neon` was merged into GitHub `main` via PR #2 on 26 November 2026 (merge commit `43d890b`). The staging preview still runs application revision `c26ca44`; the latest documentation update is in the merged source. The separate production Worker was not changed by the merge.
+- The Neon implementation from `staging/neon` was merged into GitHub `main` via PR #2 on 26 November 2026 (merge commit `43d890b`). On 26 November, the staging preview was refreshed from the connected-build candidate and served Cloudflare version `1103ea61`; its route and header checks are recorded in `TESTING-RESULTS.md`. The separate production Worker was not changed.
 - Owner-run demo safeguards were later merged from `staging/neon` via [PR #8](https://github.com/arshahem-maker/Whispers/pull/8) as `988e1cd`; GitHub Verify passed on the merge commit in [run 45802150296](https://github.com/arshahem-maker/Whispers/actions/runs/45802150296). The isolated preview is built from source revision `2d2976c` and does not deploy production.
-- GitHub Verify passed on application revision `c26ca44` in runs [45788162408](https://github.com/arshahem-maker/Whispers/actions/runs/45788162408) and [45788154662](https://github.com/arshahem-maker/Whispers/actions/runs/45788154662).
-- The Cloudflare staging preview is public to anyone who has the URL and is marked `noindex`. It must not be described as access-controlled. Connected staging now accepts fictional test submissions only from one verified, allowlisted account; the partner-demo real-information flag is off.
+- GitHub Verify passed on the earlier application revision `c26ca44` in runs [45788162408](https://github.com/arshahem-maker/Whispers/actions/runs/45788162408) and [45788154662](https://github.com/arshahem-maker/Whispers/actions/runs/45788154662). Local checks for the latest candidate passed; its GitHub Verify run will follow the source sync.
+- The Cloudflare staging preview is public to anyone who has the URL and is marked `noindex`; the site itself is not access-controlled. The connected build now defaults to Neon rather than its browser-only fictional path. The partner-demo real-information flag is on only for the one verified, allowlisted account; it keeps reports private, blocks photos and public sharing, and does not provide monitoring or response. Other visitors cannot submit.
 - The project owner is the temporary operator and presenter for synthetic demonstrations. The separate owner-run preview is at <https://owner-demo-whispers-neon-pilot.whispers-by-arsh.workers.dev>; it has a dedicated build without Neon bindings or secrets, cannot select cloud submission, and keeps demo records in browser memory.
 - The owner-run preview passed a synthetic report-to-review flow in one browser tab, including assignment and an internal note that explicitly says no evidence review occurred. This does not prove connected staging submission, response, removal, private-photo authorization, retention, or recovery flows.
-- Staging has no active reports. Its partner-demo real-information flag and full real-intake release gate are off; production intake is unchanged.
+- Full release intake remains gated, and production intake is unchanged. Staging is not anonymous public intake. A connected real-report submission-to-removal flow has not yet been exercised end to end.
 - Cloudflare Worker HTML now uses per-response CSP nonces for script tags; `/`, `/partners`, `/help`, `/report`, and `/pilot` were checked for matching header/body nonces. Inline styles remain allowed. This is a security hardening step, not an independent security review.
 - A separate older Cloudflare **production** Worker remains publicly reachable at `whispers-neon-pilot.whispers-by-arsh.workers.dev`. It presents the fictional demo; `/partners` returns 404; checked HTML responses lacked CSP, `X-Robots-Tag`, and `Cache-Control`. Its unauthenticated reviewer API returned 401/no-store. This live deployment is not the current staging revision, and there is no reviewed production release configuration or deployment workflow in the repository. Do not invite real reports through it.
 - Lovable remains an unpublished legacy copy with its managed Supabase database enabled. It is not the source of truth for this Neon branch. Do not disable it until remaining configuration and historical metadata have a reviewed disposition.
@@ -18,12 +18,12 @@ Status checked 26 November 2026. This roadmap describes the maintained `staging/
 
 ## Work that can be completed in code
 
-1. Keep user-facing language accurate for each mode: owner-run local fictional demo, owner-operated fictional connected staging, and any future organization-backed release.
+1. Keep user-facing language accurate for each mode: the owner-run browser demo, one-account restricted real-information staging, and any future organization-backed release.
 2. Add partner-evaluation information that does not invite the public to submit cases or collect sensitive details.
 3. Publish a complete privacy notice only after the real operator, data flows, retention, hosting, sharing, and applicable legal basis have been confirmed.
 4. Add a narrow Content Security Policy and remove inline-script allowances when the framework supports safe per-response nonces.
 5. Add isolated synthetic end-to-end checks for submission, reviewer scoping, removal, scheduled expiry, and restore. Never use real case information as test data.
-6. Keep CI and test results tied to the exact current commit. Distinguish the owner-run synthetic browser flow from connected staging and never describe either as a live operational service.
+6. Keep CI and test results tied to the exact current commit. Distinguish the owner-run synthetic browser flow from the Neon-backed staging service; do not describe staging as open public or organization-backed operations.
 
 ## Work requiring a responsible human or external account
 

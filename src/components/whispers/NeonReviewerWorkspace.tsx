@@ -251,7 +251,7 @@ function NeonInvitationAdmin() {
     </details>}
     {data.releaseReviews && <details className="grid gap-2">
       <summary>Release reviews</summary>
-      <p>These release reviews apply only before accepting information about real-world events. For the current owner-run demo, the account owner is the temporary operator and only fictional test records are accepted. Demo roles and sample reviews are simulated; do not record them as independent reviewers or completed release approvals. The operational release still requires all five review areas, two reviewers who are not the named operator, an explicit server setting, and activation by a different administrator.</p>
+      <p>These release reviews apply before broad real-world intake. The connected workspace uses live Neon services, but that does not by itself mean the intake is open or monitored. Record only reviews that actually happened; a reference string or account entry does not prove independent review. Full operational release still requires all five review areas, two reviewers who are not the named operator, an explicit server setting, and activation by a different administrator.</p>
       <p role="status">{data.readiness?.partnerDemo
         ? "Real-information partner intake is enabled for the single allowlisted account. The full release gate remains off."
         : `Real intake: ${data.readiness?.enabled ? "active" : "off"}. ${data.readiness?.missing.length ? `Still required: ${data.readiness.missing.map(gate => releaseGateLabels[gate] ?? gate).join(", ")}.` : "Release prerequisites are recorded."}`}</p>

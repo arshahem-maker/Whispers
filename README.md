@@ -1,10 +1,11 @@
 # Whispers
 
-Whispers is an owner-run humanitarian reporting and review demonstration. All
-sample people, reports, reviewer roles, and outcomes are fictional. The
-connected staging path accepts fictional test records only; real-information
-intake is disabled. The account owner is the temporary demonstration operator.
-This is not an emergency or response service.
+Whispers is a connected humanitarian reporting and review application. The
+maintained staging deployment uses live Neon services. Its restricted,
+one-account staging mode can accept real information, but the public release
+gate remains closed: it is not anonymous public intake, is not continuously
+monitored, and does not promise a response. The separate owner-demo build is
+fictional and browser-only. Neither mode is an emergency service.
 
 ## Current release status — 26 November 2026
 
@@ -36,14 +37,14 @@ This is not an emergency or response service.
   repository. GitHub is the current code source; this repository sync did not
   bring the Lovable editor or preview up to date. Do not disable the database
   until remaining app dependencies and configuration have been reconciled.
-- Full real-source release and real-information partner intake are disabled.
-  Connected staging accepts fictional test reports from the one verified,
-  allowlisted account. The account owner is the temporary demo operator and
-  can review these synthetic records during a demonstration. Public and local
-  browser demos use in-memory fictional data. The full release gate still
-  requires independent operational, privacy, safeguarding, language, and
-  security work before any real-world use. Staging submissions remain
-  authenticated and allowlisted; this is not anonymous public intake. The hosted
+- Full release intake remains disabled. The restricted staging partner-demo
+  mode is enabled only for the one verified, allowlisted account; it stores
+  real-information submissions privately, blocks photos and public sharing,
+  and offers no monitoring or response. The preview URL itself is public, but
+  submission still requires that authorized account. This is not anonymous
+  public intake. The separate owner-demo build keeps fictional reports in
+  browser memory. The full release gate still requires independent operational,
+  privacy, safeguarding, language, and security work before public use. The hosted
   `workers.dev` site is a
   public staging preview at
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
@@ -155,10 +156,10 @@ under **Manage staff invitations → Release reviews** on the pilot. The
 record stores the review type, reference, recording administrator and date.
 After the server flag is enabled and the operator, all five review areas, and
 two independent reviewers are recorded, a separate administrator can activate
-full real intake in that panel. The staging partner-demo real-intake flag is
-disabled. Only fictional test reports are accepted from the one allowlisted
-account; keep demo role simulations and reports marked fictional. Production
-does not enable intake.
+full real intake in that panel. The staging partner-demo flag is currently
+enabled for one allowlisted account only. It does not open anonymous public
+intake, public sharing, photos, or follow-up messages and does not provide
+monitoring or response. Production does not enable intake.
 Invited staff sign in with the matching verified Google account and select
 **Accept staff invitations** on `/pilot`. The reviewer page supports workspace
 scoped reports, private photos, private notes, status changes, and replies.
@@ -178,13 +179,14 @@ through server-only `WHISPERS_BACKEND_URL` and `WHISPERS_BACKEND_SECRET`
 settings. The function still verifies the user's Neon Auth session and
 workspace permissions. These settings apply to staging only; production
 configuration remains untouched. The preview URL is public. Its connected
-staging workspace accepts fictional test records only from one allowlisted
-account. Other visitors cannot submit.
+staging workspace accepts real-information submissions from one allowlisted
+account in a private, unmonitored mode. Other visitors cannot submit.
 
-Connected staging route checks returned HTTP 200 for `/`, `/report`,
-`/report/review`, `/help`, and `/pilot`. Its protected intake status reports
-fictional mode and `partnerDemo=false`; a connected staging submission-to-
-removal flow has not been proven. The separate owner-run preview passed a
+Connected staging route checks returned HTTP 200 for `/`, `/report`, `/help`,
+`/about`, `/partners`, and `/pilot`. The protected intake-status endpoint
+reports `mode=real` and `partnerDemo=true`. The connected UI defaults to Neon
+and accurately describes its one-account limits. A real report submission and
+subsequent removal have not been exercised end to end. The separate owner-run preview passed a
 fictional report-to-review workflow in one browser tab; that in-memory result
 does not prove connected staging behavior. See `TESTING-RESULTS.md`.
 

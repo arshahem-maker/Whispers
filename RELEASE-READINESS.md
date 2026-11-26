@@ -1,10 +1,10 @@
 # Whispers partner-evaluation readiness
 
 **Assessment date:** 26 November 2026  
-**Scope:** GitHub `staging/neon`, Neon staging, the connected fictional-only Cloudflare preview, the isolated owner-run Cloudflare demo preview, and the separately deployed Cloudflare production Worker.
-**Decision:** Not ready for live reporting. Suitable for an owner-run product demonstration using fictional data and for non-sensitive partner-evaluation conversations.
+**Scope:** GitHub `staging/neon`, the connected Neon staging preview, the isolated owner-run Cloudflare demo preview, and the separately deployed Cloudflare production Worker.
+**Decision:** Not ready for open public or organization-backed reporting. The staging service is connected to live Neon services and accepts real-information submissions only from one authorized account in a private, unmonitored mode. That narrow path is not a public response service.
 
-**Revision and deployment:** The last externally verified staging app revision was `c26ca44c7c94f0b74aa272b81453a0dfc60b5825`; the isolated owner-demo preview was last confirmed built from `2d2976c0197f9a4734187d496d409acd337cf958`. Those deployment observations predate later repository changes and have not been rechecked in this assessment. PR #11 merged the remaining dependency updates and PR #12 updated the repository status documentation; the post-merge GitHub Verify run passed in [run 45813864349](https://github.com/arshahem-maker/Whispers/actions/runs/45813864349). A GitHub merge does not deploy either preview. Both known preview URLs are public to anyone who has them and are not production.
+**Revision and deployment:** On 26 November 2026, the connected staging Worker was refreshed from the current local candidate and received Cloudflare version `1103ea61` at <https://1103ea61-whispers-neon-pilot.whispers-by-arsh.workers.dev>; the stable preview is <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>. This source candidate is being synced to GitHub now. The isolated owner-demo preview was last confirmed from `2d2976c0197f9a4734187d496d409acd337cf958`. PR #11 merged the remaining dependency updates and PR #12 updated repository status documentation; the post-merge Verify run passed in [run 45813864349](https://github.com/arshahem-maker/Whispers/actions/runs/45813864349). A GitHub merge does not deploy either preview. Both known preview URLs are public to anyone who has them and are not production.
 
 **Source integration:** PR #2 originally merged the Neon integration into `main` on 26 November 2026. Subsequent owner-demo isolation and hardening were merged later, PR #11 brought the remaining verified dependency updates into the synchronized `main` and `staging/neon` branches, and PR #12 corrected the source/deployment status notes. Verify passed on the resulting `main` in [run 45813864349](https://github.com/arshahem-maker/Whispers/actions/runs/45813864349). None of these source merges deployed or changed the production Worker.
 
@@ -12,12 +12,12 @@
 
 ## Verified operating boundary
 
-- The public experience defaults to fictional, browser-local demonstration data.
-- The connected staging preview accepts fictional test reports only from one authorized, allowlisted account. The account owner is the temporary operator and can review synthetic records during a demonstration. This is not organizational access.
-- Real-information partner-demo intake was disabled on 26 November 2026. The owner-run in-memory demo resets on refresh; connected synthetic reports stay in private staging and can be removed using the reviewer controls. Neither demo is continuously monitored or promises a response.
+- The connected staging build now defaults to its live Neon-backed path; the browser-only fictional flow remains isolated in the owner-demo build.
+- The staging partner-demo flag is enabled only for one authorized, allowlisted account. It accepts real information into private staging, blocks photos and public sharing, and offers no monitoring or response. The full real-intake release gate remains off.
+- The owner-run in-memory demo resets on refresh. Staging is not anonymous public intake and has not completed end-to-end real-report submission and removal verification.
 - The preview URL is public to anyone who knows it. `noindex` affects indexing behavior; it is not an access-control mechanism.
 - Cloudflare also serves an older production deployment at `https://whispers-neon-pilot.whispers-by-arsh.workers.dev`. The Worker URL is enabled for anyone, and its public home and report pages identify the experience as a fictional demo. The checked production HTML responses lacked `Content-Security-Policy`, `X-Robots-Tag`, and `Cache-Control`; `/partners` returned 404. The unauthenticated reviewer API returned 401 with `Cache-Control: no-store`. The production Worker is not the current staging revision and has no reviewed production release configuration in this repository.
-- Full release intake remains gated. The public production Worker is an older fictional-demo deployment, not an operational intake service; the database currently has no active reports.
+- Full release intake remains gated. The public production Worker is an older fictional-demo deployment, not an operational intake service. Production report data was not inspected as part of this staging refresh.
 - The isolated owner-run preview has passed an end-to-end fictional report-to-review workflow in one browser tab. This is an in-memory demo only. Connected staging has not yet passed a full submission-to-removal, response, or private-media flow.
 - No independent reviewers are needed to demonstrate simulated workflows, and none are represented as having completed reviews. The account owner is the temporary presenter/operator; seeded staff and review roles are fictional. Real-world operational release still requires independent reviews and an accountable organization.
 
@@ -44,7 +44,7 @@ An older Cloudflare Worker is deployed in the production environment and publicl
 
 The application's release-review screen is an administrative checklist backed by review references. A reference string and a recorded account do not independently prove reviewer identity, independence, competence, scope, or review quality. A responsible operator must verify the evidence outside the software before enabling an operational service. OCHA's current data-responsibility guidance and the ICRC handbook emphasize understanding data flows, sensitivity, potential harm, sharing safeguards, accountability, and operating context; the app cannot complete that assessment on the operator's behalf.
 
-Before live use, a responsible operator must complete and document all of the following:
+Before open public or organization-backed use, a responsible operator must complete and document all of the following:
 
 1. Confirm the legal operator, accountable owner, privacy contact, intended users and purposes, and the jurisdictions where the service will operate.
 2. Complete a contextual data-protection and safeguarding assessment. Identify likely harms from collection or disclosure, assess necessity and proportionality, and consider whether less identifying data would suffice.
@@ -59,14 +59,14 @@ Before live use, a responsible operator must complete and document all of the fo
 11. Field-test accessibility, language comprehension, low-bandwidth and device behavior, and safety assumptions with intended user communities through an appropriate safeguarding process.
 12. Review the exact production commit, run the release workflow, and document rollback and who is authorized to switch intake on.
 
-For demonstrations, use the owner-run fictional preview or the connected staging workspace with fictional test data only. The project owner is the temporary presenter/operator; do not claim that simulated roles are independent reviewers. Do not invite anyone to submit real reports or send case details by email. The remaining gates apply only before real-world operational use.
+For demonstrations, use the owner-run fictional preview for synthetic workflows. The connected staging account can accept real information, but that path is private, limited to one authorized account, unmonitored, and has no response commitment; do not invite other people to submit reports. The project owner is the temporary presenter/operator; do not claim that simulated roles are independent reviewers or that real-world operational safeguards are complete.
 
 ## Implementation changes in this branch
 
 - Clarifies the boundary between browser-local fictional demo and restricted connected staging.
 - Removes the unverified “private company” description and the account-free product promise.
 - Removes the fictional-demo banner from the connected Neon reviewer workspace and hides fictional role controls in the connected build.
-- Disables the staging real-information partner-demo flag and changes connected workspace copy to fictional-only owner-run testing.
+- Earlier disables the staging real-information partner-demo flag and changes connected workspace copy to fictional-only owner-run testing; the current staging-only configuration and connected UI have since been refreshed to the restricted one-account mode described above.
 - Adds a separate Cloudflare owner-demo preview build that ignores preview base configuration and carries no Neon bindings or secrets; its reports remain in browser memory.
 - Disables the connected-cloud intake toggle in the owner-demo build. The form remains fictional-only and clearly says the temporary operator can demonstrate its simulated review workflow.
 - Isolates the owner-demo route experience: the pilot path is an explanatory page, reviewer sign-in offers simulated fictional roles only, and the home/help/report metadata no longer implies a connected database or staging intake.

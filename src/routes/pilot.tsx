@@ -12,9 +12,9 @@ export const Route = createFileRoute("/pilot")({
   head: () => ({
     meta: [
       { title: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Owner-run demo — Whispers" : "Connected pilot — Whispers" },
-      { name: "description", content: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Fictional browser-only demonstration. No connected services or staff sign-in." : "Owner-run staging workspace for fictional test records only. Real intake is disabled." },
+      { name: "description", content: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Fictional browser-only demonstration. No connected services or staff sign-in." : "Connected Whispers reporting and review workspace for invited accounts. Intake limits are shown before submission." },
       { property: "og:title", content: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Owner-run demo — Whispers" : "Connected pilot — Whispers" },
-      { property: "og:description", content: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Fictional browser-only demonstration. No connected services or staff sign-in." : "Owner-run staging workspace for fictional test records only. Real intake is disabled." },
+      { property: "og:description", content: import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true" ? "Fictional browser-only demonstration. No connected services or staff sign-in." : "Connected Whispers reporting and review workspace for invited accounts. Intake limits are shown before submission." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -29,7 +29,7 @@ function Pilot() {
   }
 
   if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") {
-    return <CitizenShell sensitive><h1>Connected fictional pilot</h1><p className="card p-4 mt-4">This is an owner-run demonstration. The account owner is the temporary operator. Only fictional test reports are accepted in this connected staging workspace; real-information intake is disabled. All other staff, reports, and review outcomes shown in the demo are fictional.</p><NeonReviewerWorkspace /></CitizenShell>;
+    return <CitizenShell sensitive><h1>Connected Whispers pilot</h1><p className="card p-4 mt-4">This workspace uses live Neon services and account-based access. Only invited accounts can open the reviewer workspace. The citizen report form checks the current intake mode before it sends anything. Reports are not automatically published, and this is not an emergency response service.</p><NeonReviewerWorkspace /></CitizenShell>;
   }
 
   return (

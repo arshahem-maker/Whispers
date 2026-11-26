@@ -541,5 +541,20 @@
   "For organizations",
   "About Whispers",
   "Only send information you can share safely. This report is stored for authorized review and is not automatically published. This is not an emergency response service.",
-  "Connected pilot testing accepts fictional information only. Use no real names, locations, or case details."
+  "Connected pilot testing accepts fictional information only. Use no real names, locations, or case details.",
+  "Connected reporting pilot — current access and accepted information are shown before sending.",
+  "The app uses a live Neon service. Report access is limited to an invited account, and the report form explains what the current intake mode accepts.",
+  "Open connected reporting",
+  "Only the invited account can submit to the connected pilot. The report form checks the current intake mode and explains whether fictional or real information is accepted. This is not an emergency response service.",
+  "Whispers is a connected reporting pilot.",
+  "Check a report with your private code",
+  "Describe what happened in your own words.",
+  "Choose a broad area and time, if safe to share.",
+  "Review the intake notice before submitting.",
+  "Whispers is a live application connected to Neon database and authentication services. The current pilot accepts submissions only from an invited account; the report form shows whether the current intake mode accepts fictional or real information. This is not an emergency response service.",
+  "Whispers is an owner-run demonstration. Reports in this build stay in the browser. This is not an emergency or response service.",
+  "How the connected Whispers pilot handles reports, access, privacy and removal.",
+  "A report submitted through the connected pilot is stored in the private Neon workspace and can be seen by authorized reviewers. Only the invited account can submit in this pilot. The intake mode shown before sending determines whether real information is accepted. Reports are not automatically published, and nobody is dispatched to respond.",
+  "Whispers is an early-stage reporting application with a live Neon backend. Connected access is limited to invited accounts, and current intake limits appear before submission. This is not an emergency response service.",
+  "What the Whispers demo does and what it cannot guarantee."
 ]

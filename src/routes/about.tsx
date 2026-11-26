@@ -1,7 +1,7 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
-import { DEMO_CONTROLS_ENABLED } from "@/lib/whispers/context";
+import { CONNECTED_BACKEND, DEMO_CONTROLS_ENABLED } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import { groupCode } from "@/lib/whispers/crypto";
 import { FIXTURE_CODES } from "@/lib/whispers/demo-data";
@@ -24,7 +24,9 @@ export const Route = createFileRoute("/about")({
 function About() {
   useTranslationVersion();
   const { store } = useWhispers();
-  if (!DEMO_CONTROLS_ENABLED) return <CitizenShell><h1>{tr("About Whispers")}</h1><p className="mt-3">{tr("Whispers is an owner-run demonstration. The connected staging workspace accepts fictional test records only from the authorized account. Real-information intake is disabled. The account owner is the temporary operator; there is no emergency or response service.")}</p><Link className="btn btn-secondary mt-5" to="/partners">{tr("For organizations")}</Link></CitizenShell>;
+  if (!DEMO_CONTROLS_ENABLED) return <CitizenShell><h1>{tr("About Whispers")}</h1><p className="mt-3">{tr(CONNECTED_BACKEND
+    ? "Whispers is a live application connected to Neon database and authentication services. The current pilot accepts submissions only from an invited account; the report form shows whether the current intake mode accepts fictional or real information. This is not an emergency response service."
+    : "Whispers is an owner-run demonstration. Reports in this build stay in the browser. This is not an emergency or response service.")}</p><Link className="btn btn-secondary mt-5" to="/partners">{tr("For organizations")}</Link></CitizenShell>;
   const me = store.staff(store.actorId);
   return (
     <CitizenShell>
