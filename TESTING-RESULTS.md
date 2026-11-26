@@ -42,6 +42,18 @@
   role rows, unrelated storage, or project settings were changed.
 - The Lovable-managed Supabase database remains enabled. This cleanup does not
   verify that the rest of the old project can be disabled safely.
+- A read-only aggregate inventory of the remaining source database found one
+  auth user and one active admin role (the owner account already has a Neon
+  admin mapping); one expired, revoked, unaccepted expert invitation; eight
+  ready Swahili translation-cache rows with a stale catalog; a voice control
+  paused after status 402; and a release flag with live intake disabled. Eleven
+  audit events remain for historical pilot submissions, contributor messages,
+  and staff/operator actions. No reports, linked records, expert requests,
+  public updates, or private storage objects remain. Report text, photo contents,
+  translation phrases, contact details, and audit UUIDs were not inspected.
+- The historical audit entries should be preserved or explicitly dispositioned
+  before disabling the old database. The expired invitation and stale
+  translation cache are not active app state; voice stays disabled in Neon.
 
 ## Staging access and data audit — 26 November 2026
 

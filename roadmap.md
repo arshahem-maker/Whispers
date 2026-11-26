@@ -91,7 +91,10 @@ marked historical there.
 4. **Finish the legacy source retirement.** The five fictional reports and
    their three photo objects were deleted from both Neon staging and the
    original Lovable Supabase source. Do not re-import them. The Lovable-managed
-   database remains enabled; inventory any remaining app dependencies and
+   database remains enabled. Its owner/admin identity is already mapped to
+   Neon; the outstanding source state includes eleven historical audit events,
+   an expired/revoked invitation, and stale translations. Preserve or explicitly
+   disposition the audit history, then confirm the old project dependencies and
    settings before disabling it.
 5. **Run current staging verification.** With fictional fixtures and separate
    citizen, reviewer, expert, publisher, and administrator accounts, verify
@@ -110,8 +113,9 @@ marked historical there.
   a separate authorized test account and end-to-end verification.
 - Legacy report cleanup is complete in both source and Neon. No report rows or
   private photo objects remain in the source database. The Lovable-managed
-  database itself is still enabled, and legacy Supabase compatibility code
-  remains in the repository.
+  database itself is still enabled. Its eleven historical audit events remain
+  in that database; do not disable it until that history is preserved or its
+  disposition is clear. Legacy Supabase compatibility code remains in the repo.
 - Lovable still reports its Supabase database enabled. The app retains legacy
   Supabase compatibility code; the active Neon path does not use it for the
   tested reviewer, staff, retention, or public-feed flows. Translation
