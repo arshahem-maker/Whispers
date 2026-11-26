@@ -11,8 +11,9 @@ marked historical there.
 - A separate Neon Free-plan project, `Whispers Staging`, has its own `main`
   database. The 14 checked-in migrations are applied, and Neon Auth, Object
   Storage, Functions, Realtime, AI Gateway, and the hourly retention trigger
-  are provisioned. No legacy data is active. The previously imported restricted snapshot and
-  three private photo copies were deleted from staging at the owner's direction.
+  are provisioned. No legacy data is active. The previously imported restricted
+  snapshot and three private photo copies were deleted from staging at the
+  owner's direction.
   The original Lovable Supabase source remains enabled.
 - Staging checks returned HTTP 200 from the database health Function and Neon
   Auth session endpoint, HTTP 401 from unauthenticated submission/reviewer
@@ -43,8 +44,11 @@ marked historical there.
   enabled. Supabase must not be disabled until a verified data cutover.
 - Real-source intake is not approved or enabled.
 - The unverified staging report was revoked through the administrator retention
-  workflow and its body was redacted. Its storage cleanup is queued behind the
-  configured 24-hour grace period. No active reports remain in the app tables.
+  workflow and its body was redacted. The last recorded database check showed
+  its storage cleanup queued and no active reports. Review found the deployed
+  worker could delete revoked media before the documented 24-hour grace period.
+  A local code and test fix now waits from the original revocation time; it has
+  not been pushed or deployed, so the hosted behavior is not yet corrected.
 - The code now corrects public demo wording, adds Worker/static-asset security
   headers and a request-body ceiling, pins migration file checksums, bounds
   voice-output arrays, and refreshes vulnerable dependencies. Local typecheck,

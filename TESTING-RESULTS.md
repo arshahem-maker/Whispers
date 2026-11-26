@@ -1,5 +1,17 @@
 # Whispers verification results
 
+## Local retention-grace correction — 26 November 2026
+
+- Fixed the Neon cleanup worker so revoked media is not listed or deleted until
+  24 hours after the report's original `revoked_at` time. The worker now uses
+  that timestamp for revoked reports, even if retries refresh the queue time.
+- Added regression checks for a revoked report just inside the grace period and
+  one just beyond it. The full Vitest suite passed: 49 tests across 14 files.
+  Typecheck, lint, and the production build also passed.
+- This correction is in the local `staging/neon` working tree only. It has not
+  been committed, pushed, or deployed, so the hosted staging worker has not yet
+  been verified against this behavior.
+
 ## Staging access and data audit — 26 November 2026
 
 - A guarded, read-only audit confirmed all 14 recorded migrations are present.
@@ -15,8 +27,10 @@
 - A separate active staging report in `general` had an application-set
   `fictional=true` marker and no attached records. Its source was unknown, so
   the admin retention action revoked it, redacted its stored body, and queued
-  the private-storage cleanup. The cleanup queue honors a 24-hour grace period.
-  No report content was inspected. The live app now has zero active reports.
+  the private-storage cleanup. No report content was inspected. The live app
+  now has zero active reports. The later retention-code review found that the
+  deployed worker did not honor the documented 24-hour media grace period; see
+  the local correction above, which has not yet been deployed.
   Reviewer access and citizen follow-up remain unverified.
 - At the owner's direction, the five-report restricted snapshot and its three
   private photo copies were deleted from Neon staging. Verification confirmed

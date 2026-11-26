@@ -9,6 +9,11 @@ interface CleanupJob {
 }
 const graceMs = 86_400_000;
 
+function cleanupReady(job: CleanupJob, now: number) {
+  const eligibleAt = job.revoked_at?.getTime() ?? Date.parse(job.queued_at);
+  return Number.isFinite(eligibleAt) && eligibleAt <= now - graceMs;
+}
+
 export async function runNeonRetention() {
   const db = neonDatabase();
   const [result] = await db<{ expired: number }[]>`select public.whispers_expire_private() as expired`;
@@ -16,20 +21,22 @@ export async function runNeonRetention() {
     select job.report_id, job.queued_at::text, report.revoked_at
     from public.whispers_media_cleanup job
     left join public.whispers_reports report on report.id=job.report_id
-    where report.revoked_at is not null or job.queued_at <= now() - interval '1 day'
+    where (report.revoked_at is not null and report.revoked_at <= now() - interval '1 day')
+      or (report.revoked_at is null and job.queued_at <= now() - interval '1 day')
     order by job.queued_at
     limit 100
   `;
   const storage = neonStorage();
-  const cutoff = Date.now() - graceMs;
+  const now = Date.now();
+  const cutoff = now - graceMs;
   let failed = false;
-  for (const job of jobs) {
+  for (const job of jobs.filter((candidate) => cleanupReady(candidate, now))) {
     try {
       const keep = new Set((await db<{ key: string }[]>`
         select body->>'key' as key from public.whispers_records where report_id=${job.report_id} and kind='photo'
       `).map((row) => row.key));
       const keys: { Key: string }[] = [];
-      let retry = Boolean(job.revoked_at && job.revoked_at.getTime() > cutoff);
+      let retry = false;
       let cursor: string | undefined;
       do {
         const page = await storage.send(new ListObjectsV2Command({
