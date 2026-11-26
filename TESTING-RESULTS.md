@@ -1,5 +1,28 @@
 # Whispers verification results
 
+## Connected staging refresh — 26 November 2026
+
+- Refreshed the Cloudflare staging Worker from the current connected-build
+  candidate. Cloudflare version `1103ea61` is at
+  <https://1103ea61-whispers-neon-pilot.whispers-by-arsh.workers.dev>; the
+  stable preview remains
+  <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+- Staging Neon reports `mode=real` and `partnerDemo=true`. This server-side
+  mode is limited by the existing staging database and allowlist to one
+  authorized account. Public visitors cannot submit. Photos and public
+  sharing are disabled; the full release gate remains off. No report was
+  created, and production services and data were not changed.
+- Read-only route checks returned HTTP 200 for `/`, `/report`, `/help`,
+  `/about`, `/partners`, and `/pilot`. The responses had the expected
+  content-security policy, `Cache-Control: no-store`, and `X-Robots-Tag:
+  noindex`. The connected home and report routes no longer default to the
+  browser-only fictional path. A signed-in report submission, removal, and
+  private-media flow have not been exercised end to end.
+- Local verification after the UI and mode changes passed: 49 tests across
+  14 files, type checking, lint, and the staging production build. This checks
+  the code and routes but does not substitute for the unperformed signed-in
+  submission/removal flow or a production release review.
+
 ## Owner-run fictional demo preview — 26 November 2026
 
 - Published a separate Cloudflare Preview at

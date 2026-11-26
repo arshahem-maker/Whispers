@@ -4,10 +4,11 @@ import type { Category, Impact, KnowledgeBasis, TimeBucket } from "./types";
 import { emptyDraft } from "./draft";
 import { WhispersContext } from "./whispers-context";
 
-// This app keeps its local fictional demonstration available in every build.
-// The separate connected staff workspace must not inherit fake role controls.
-export const DEMO_MODE = true;
-export const DEMO_CONTROLS_ENABLED = import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] !== "neon";
+// Connected deployments open on the connected reporting path. Browser-local
+// sample reporting is reserved for local development and the explicit demo build.
+export const CONNECTED_BACKEND = import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon";
+export const DEMO_MODE = !CONNECTED_BACKEND;
+export const DEMO_CONTROLS_ENABLED = !CONNECTED_BACKEND;
 export const DEMO_ONLY_BUILD = import.meta.env["VITE_WHISPERS_DEMO_ONLY"] === "true";
 
 export interface ProcessedPhoto {
@@ -52,13 +53,13 @@ export function WhispersProvider({ children }: { children: ReactNode }) {
   const [draft, setDraftState] = useState<Draft>(emptyDraft);
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [heldCode, setHeldCode] = useState<string | null>(null);
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(CONNECTED_BACKEND);
   const setDraft = useCallback((fn: (d: Draft) => Draft) => setDraftState(fn), []);
   const wipe = useCallback(() => {
     setDraftState((d) => { d.photos.forEach((p) => URL.revokeObjectURL(p.url)); return emptyDraft(); });
     setSubmission(null);
     setHeldCode(null);
-    setConnected(false);
+    setConnected(CONNECTED_BACKEND);
   }, []);
   return <WhispersContext.Provider value={{ store, draft, setDraft, submission, setSubmission, heldCode, setHeldCode, wipe, connected, setConnected }}>{children}</WhispersContext.Provider>;
 }

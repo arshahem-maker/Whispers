@@ -3,7 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { FileText, Newspaper, LifeBuoy, LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { Wordmark } from "./Brand";
-import { DEMO_MODE } from "@/lib/whispers/context";
+import { CONNECTED_BACKEND, DEMO_MODE } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import { t } from "@/lib/whispers/i18n";
 import { LanguageButton } from "./LanguagePicker";
@@ -33,8 +33,15 @@ export function CitizenShell({ children, sensitive = false, hideNav = false }: {
             )}
           </div>
         </div>
+        {path !== "/pilot" && CONNECTED_BACKEND && (
+          <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">
+            {tr("Connected reporting pilot — current access and accepted information are shown before sending.")}
+          </div>
+        )}
         {DEMO_MODE && path !== "/pilot" && (
-          <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">{connected ? tr("Connected pilot — follow the intake and privacy notice shown before sending.") : t("demo.banner")}</div>
+          <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">
+            {connected ? tr("Connected pilot — follow the intake and privacy notice shown before sending.") : t("demo.banner")}
+          </div>
         )}
       </header>
       <main className={`flex-1 mx-auto w-full max-w-xl px-5 py-6 ${hideNav ? "pb-8" : "pb-28"}`}>{children}</main>

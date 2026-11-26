@@ -5,7 +5,7 @@ import { ImagePlus, X } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { ActionBar, StepHeader } from "@/components/whispers/Form";
 import { PhotoEditor } from "@/components/whispers/PhotoEditor";
-import { DEMO_MODE, DEMO_ONLY_BUILD } from "@/lib/whispers/context";
+import { CONNECTED_BACKEND, DEMO_MODE, DEMO_ONLY_BUILD } from "@/lib/whispers/context";
 import { useWhispers } from "@/lib/whispers/use-whispers";
 import { generatePrivateCode, hashCode, randomId } from "@/lib/whispers/crypto";
 import { BASIS_LABEL, CATEGORY_LABEL, IMPACT_LABEL, TIME_LABEL, t } from "@/lib/whispers/i18n";
@@ -22,9 +22,9 @@ export const Route = createFileRoute("/report/review")({
   head: () => ({
     meta: [
       { title: "Check your report — Whispers" },
-      { name: "description", content: "Review your fictional report before saving it in the Whispers demonstration." },
+      { name: "description", content: CONNECTED_BACKEND ? "Review your report and the current intake notice before sending it to the connected Whispers pilot." : "Review your fictional report before saving it in the Whispers demonstration." },
       { property: "og:title", content: "Check your report — Whispers" },
-      { property: "og:description", content: "Review your fictional report before saving it in the Whispers demonstration." },
+      { property: "og:description", content: CONNECTED_BACKEND ? "Review your report and the current intake notice before sending it to the connected Whispers pilot." : "Review your fictional report before saving it in the Whispers demonstration." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -180,7 +180,7 @@ function Review() {
           {fictionalErr && <p role="alert" className="text-destructive">{tr("Please confirm this is fictional information.")}</p>}
           <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. The project owner can show it in a simulated reviewer workspace; nothing reaches a live response team.")}</p>
         </> : <>
-          <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.partnerDemo
+          <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={CONNECTED_BACKEND || !!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.partnerDemo
             ? tr("I understand this real-information demo is private, unmonitored, and offers no response or emergency help.")
             : intakeMode.data?.mode === "real" ? tr("I understand this report contains real information and will be stored for authorized review.") : tr("I confirm this contains only fictional test information.")}</label>
           {connected && <Link to={import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? "/pilot" : "/review/sign-in"} className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
