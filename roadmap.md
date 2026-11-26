@@ -50,8 +50,9 @@ marked historical there.
   its storage cleanup queued and no active reports. Review found the deployed
   worker could delete revoked media before the documented 24-hour grace period.
   Commit `b70f9c1` now waits from the original revocation time and includes
-  regression tests. It is pushed but not deployed, so hosted behavior is not yet
-  corrected.
+  regression tests. It is deployed to staging Function `whispersapi` (deployment
+  5). The health Function returned HTTP 200 and unauthenticated manual retention
+  returned HTTP 401. The next scheduled run remains the live cleanup-path check.
 - The code now corrects public demo wording, adds Worker/static-asset security
   headers and a request-body ceiling, pins migration file checksums, bounds
   voice-output arrays, and refreshes vulnerable dependencies. Local typecheck,

@@ -1,5 +1,22 @@
 # Whispers verification results
 
+## Staging retention correction deployment — 26 November 2026
+
+- Deployed the updated Neon policy to the explicit staging project
+  `wild-mountain-69998844`, branch `main`, using `.env.staging.local`. Production
+  project `flat-firefly-70862043` was not targeted. Neon reports the updated
+  `whispersapi` deployment (ID 5) and health Function deployment (ID 4)
+  completed at 05:31 UTC.
+- The staging health Function returned HTTP 200 with `{"ok":true}`. An
+  unauthenticated POST to the manual retention route returned HTTP 401, as
+  expected, without invoking cleanup. The boundary regression tests described
+  below cover behavior just before and after the 24-hour grace period.
+- The scheduled cleanup has not been manually invoked as a test. Hosted checks
+  prove deployment and authorization behavior; the test suite proves the grace
+  boundary. The next scheduled run remains the live retention-path check. GitHub
+  Verify workflow run 112 passed on commit `7d73c96` before these deployment-note
+  edits.
+
 ## Local retention-grace correction — 26 November 2026
 
 - Fixed the Neon cleanup worker so revoked media is not listed or deleted until
@@ -8,9 +25,8 @@
 - Added regression checks for a revoked report just inside the grace period and
   one just beyond it. The full Vitest suite passed: 49 tests across 14 files.
   Typecheck, lint, and the production build also passed.
-- This correction is committed and pushed to `staging/neon` as `b70f9c1`. It
-  has not been deployed, so the hosted staging worker has not yet been verified
-  against this behavior.
+- This correction is committed and pushed to `staging/neon` as `b70f9c1` and is
+  now deployed to the staging Neon Function as noted above.
 
 ## Legacy fictional data cleanup — 26 November 2026
 
@@ -43,9 +59,9 @@
   `fictional=true` marker and no attached records. Its source was unknown, so
   the admin retention action revoked it, redacted its stored body, and queued
   the private-storage cleanup. No report content was inspected. The live app
-  now has zero active reports. The later retention-code review found that the
-  deployed worker did not honor the documented 24-hour media grace period; see
-  the `b70f9c1` correction above, which has not yet been deployed.
+  now has zero active reports. The older deployed worker did not honor the
+  documented 24-hour media grace period. The `b70f9c1` correction has since been
+  deployed; its next scheduled cleanup run is the live retention-path check.
   Reviewer access and citizen follow-up remain unverified.
 - At the owner's direction, the five-report restricted snapshot and its three
   private photo copies were deleted from Neon staging. Verification confirmed
