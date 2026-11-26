@@ -4,8 +4,8 @@ Status checked 26 November 2026. This roadmap describes the maintained `staging/
 
 ## Current state
 
-- The maintained code is on GitHub branch `staging/neon`. PR #2 targets `main`, is open and ready for review, and is not merged. The production branch and production Neon project have not been changed by the staging pilot.
-- GitHub Verify passed on the previous committed head `bd3a1e0` (run [45776091229](https://github.com/arshahem-maker/Whispers/actions/runs/45776091229)). The changes in this worktree still need local verification and a new GitHub run after they are committed.
+- The maintained code is on GitHub branch `staging/neon`. PR #2 targets `main`, is open and ready for review, and is not merged. The staging preview contains the application changes from `22dac77`; documentation updates have also been pushed. The production branch and production Neon project have not been changed by the staging pilot.
+- GitHub Verify passed on application revision `22dac77` in runs [45781044608](https://github.com/arshahem-maker/Whispers/actions/runs/45781044608) and [45781036447](https://github.com/arshahem-maker/Whispers/actions/runs/45781036447). The documentation update at `12d5965` also passed in runs [45781311487](https://github.com/arshahem-maker/Whispers/actions/runs/45781311487) and [45781302383](https://github.com/arshahem-maker/Whispers/actions/runs/45781302383).
 - The Cloudflare staging preview is public to anyone who has the URL and is marked `noindex`. It must not be described as access-controlled. Its Neon partner-demo intake is limited to one verified, allowlisted account and the isolated staging database.
 - The partner-demo mode accepts real-information submissions from that one account, but reports are unmonitored and there is no response commitment. Photos, public sharing, and follow-up messages are disabled. Full real intake remains gated; production intake is unchanged.
 - Staging has no active reports. No submission, response, deletion, or private-photo end-to-end flow has been proven in the hosted environment.
