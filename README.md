@@ -12,8 +12,9 @@ This is not an emergency or response service.
   26 November 2026. Since then, the owner-demo route isolation and subsequent
   hardening have also been merged. At the latest repository sync, `main` and
   `staging/neon` matched their GitHub branches, the dependency batch in PR #11
-  was merged, and its GitHub Verify run passed. This source sync does not
-  itself deploy either branch. The production Neon project remains separate.
+  and the status-documentation update in PR #12 were merged, and GitHub Verify
+  passed on the resulting `main`. This source sync does not itself deploy
+  either branch. The production Neon project remains separate.
   A second Free-plan project, `Whispers Staging`,
   provides the app schema and Neon services. The restricted migration snapshot
   and its three private photo copies were deleted from staging at the owner's
@@ -29,8 +30,12 @@ This is not an emergency or response service.
   still enabled. All five source reports were explicitly marked fictional and
   have been deleted with their three private photo objects. Verification found
   zero report rows and zero objects in `whispers-private`; no report content was
-  inspected. Do not disable the database until remaining app dependencies and
-  configuration have been reconciled.
+  inspected. A read-only source comparison on 26 November found that its latest
+  internal commit changed only a Lovable planning file, there were no pending
+  drafts, and its file tree lacks many Neon/backend files present in this
+  repository. GitHub is the current code source; this repository sync did not
+  bring the Lovable editor or preview up to date. Do not disable the database
+  until remaining app dependencies and configuration have been reconciled.
 - Full real-source release and real-information partner intake are disabled.
   Connected staging accepts fictional test reports from the one verified,
   allowlisted account. The account owner is the temporary demo operator and
