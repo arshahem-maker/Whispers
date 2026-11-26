@@ -44,7 +44,15 @@ marked historical there.
   control with no working Neon catalog.
 - The Lovable project is unpublished and its managed Supabase database remains
   enabled. Supabase must not be disabled until a verified data cutover.
-- Real-source intake is not approved or enabled.
+- Real-source intake is not approved or enabled. The branch now has a separate
+  real-report mode, but it remains fail-closed: the Neon Function must be
+  explicitly configured, the database release row must be enabled, a named
+  operator must be saved, and translation, security, legal/privacy,
+  safeguarding, and operations reviews must be recorded by at least two
+  reviewers who are not the operator. A different administrator must activate
+  intake. The mode still requires authenticated allowlisted pilot IDs, so this
+  is not yet anonymous public intake. The new migration and function/UI changes
+  have not been deployed to staging; production remains unchanged.
 - The unverified staging report was revoked through the administrator retention
   workflow and its body was redacted. The last recorded database check showed
   its storage cleanup queued and no active reports. Review found the deployed
@@ -106,8 +114,12 @@ marked historical there.
    and restore. Record the exact revision and results in `TESTING-RESULTS.md`.
 6. **Complete human release gates.** Obtain named native-language, security,
    legal/privacy, safeguarding, and operational reviews; confirm the operator,
-   incident escalation, retention policy, and monitoring. Keep real intake
-   disabled until these reviews and the technical checks are complete.
+   incident escalation, retention policy, and monitoring. The new release gate
+   enforces recorded references and separate reviewer accounts, but it cannot
+   authenticate the quality or independence of those human reviews. Decide
+   whether public reporting should be anonymous; the current real-report pilot
+   still requires sign-in and an allowlisted account. Keep intake disabled
+   until these decisions, reviews, and technical checks are complete.
 
 ## Current blockers
 

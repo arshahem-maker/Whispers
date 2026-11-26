@@ -26,7 +26,7 @@ export const Route = createFileRoute("/help")({
 });
 
 const QA: { id?: string; q: string; a: string; more?: string }[] = [
-  { id: "use", q: tr("Who receives my report?"), a: "The default demo stays in this browser tab. If you explicitly confirm fictional test information, the report is saved to Cloud and accessible to authorised pilot staff. No live humanitarian review team is connected.",
+  { id: "use", q: tr("Who receives my report?"), a: "The default demo stays in this browser tab. A connected submission is sent only after you choose it and review the intake notice. The mode may accept fictional test information or, when the release gates are approved, real pilot reports for authorized staff. This is not an emergency response service.",
     more: tr(OPERATOR_RECEIPT_NOTE) },
   { q: tr("Do I need to give my name?"), a: tr("No. There is no account, email or phone number.") },
   { id: "privacy", q: tr("Can this app guarantee anonymity?"), a: tr("No. Whispers does not require your name or an account. Your device, network, hosting service, or details in your report may still reveal information about you. This prototype does not guarantee anonymity."),

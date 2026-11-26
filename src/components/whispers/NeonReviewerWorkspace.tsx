@@ -123,7 +123,7 @@ export function NeonReviewerWorkspace() {
       {signedIn && canReview && !error && reports.length === 0 && <p>No reports are available in your assigned workspaces.</p>}
       {reports.map((report) => (
         <article className="card grid gap-2 p-4" key={report.id}>
-          <h2>{report.category || "Fictional report"}</h2>
+          <h2>{report.category || "Report"}</h2>
           <p className="hint">{report.workspace} · {report.received_at.slice(0, 10)}</p>
           <NeonReportDetail id={report.id} />
           {report.photos.map((id) => <NeonReviewerPhoto key={id} id={id} />)}
@@ -134,7 +134,9 @@ export function NeonReviewerWorkspace() {
 }
 
 interface InvitationAdminData {
-  releaseReviews: { kind: string }[] | null;
+  releaseReviews: { kind: string; reviewer_id: string; reference: string; reviewed_at: string }[] | null;
+  release: { live_intake: boolean; operator_name: string | null; operator_contact: string | null; operator_user_id: string | null } | null;
+  readiness: { ready: boolean; enabled: boolean; missing: string[] } | null;
   scopes: Extract<NeonInvitationCommand, { action: "invite_staff" }>["invitation"]["workspace"][];
   staff: { id: string; email: string }[];
   invitations: {
@@ -143,11 +145,24 @@ interface InvitationAdminData {
   }[];
 }
 
+const releaseGateLabels: Record<string, string> = {
+  server_enable_flag: "explicit server enablement",
+  release_state_unavailable: "available release records",
+  named_operator: "named operator and contact",
+  translation: "native-language review",
+  security: "security review",
+  legal: "legal and privacy review",
+  safeguarding: "safeguarding review",
+  operations: "operational review",
+  two_independent_reviewers: "two independent reviewers who are not the operator",
+};
+
 function NeonInvitationAdmin() {
   const [data, setData] = useState<InvitationAdminData>();
   const [loadedAt, setLoadedAt] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [operator, setOperator] = useState({ name: "", contact: "" });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -236,10 +251,24 @@ function NeonInvitationAdmin() {
     </details>}
     {data.releaseReviews && <details className="grid gap-2">
       <summary>Release reviews</summary>
-      <p>Record a completed human review. Real intake stays disabled.</p>
+      <p>Only record reviews completed by the named independent reviewers. Real intake requires all five review areas, two reviewers who are not the named operator, an explicit server setting, and activation by an administrator other than the operator.</p>
+      <p role="status">Real intake: {data.readiness?.enabled ? "active" : "off"}. {data.readiness?.missing.length ? `Still required: ${data.readiness.missing.map(gate => releaseGateLabels[gate] ?? gate).join(", ")}.` : "Release prerequisites are recorded."}</p>
+      <p className="hint">Named operator: {data.release?.operator_name || "not set"}{data.release?.operator_contact ? ` · ${data.release.operator_contact}` : ""}</p>
+      <form className="grid gap-2" onSubmit={event => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        const name = String(form.get("operator-name") ?? "").trim();
+        const contact = String(form.get("operator-contact") ?? "").trim();
+        if (name.length >= 2 && contact.length >= 5) void update({ action: "operator", name, contact });
+      }}>
+        <label>Named operator<input name="operator-name" className="field" minLength={2} maxLength={150} required value={operator.name || data.release?.operator_name || ""} onChange={event => setOperator({ ...operator, name: event.target.value })} /></label>
+        <label>Operator contact<input name="operator-contact" className="field" minLength={5} maxLength={250} required value={operator.contact || data.release?.operator_contact || ""} onChange={event => setOperator({ ...operator, contact: event.target.value })} /></label>
+        <Button type="submit" disabled={busy}>Save operator (keeps intake off)</Button>
+      </form>
       <ul>{releaseReviewKinds.map(kind => <li key={kind}>
         {kind}: {data.releaseReviews?.some(review => review.kind === kind) ? "Recorded" : "Pending"}
       </li>)}</ul>
+      {data.releaseReviews?.map(review => <p className="hint break-all" key={`${review.kind}-${review.reviewer_id}-${review.reviewed_at}`}>{review.kind} · reviewer {review.reviewer_id} · {review.reference}</p>)}
       <form className="grid gap-2" onSubmit={event => {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
@@ -256,6 +285,9 @@ function NeonInvitationAdmin() {
         <label><input type="checkbox" name="completed" required /> A human reviewer completed this review.</label>
         <Button type="submit" disabled={busy}>Record review</Button>
       </form>
+      <Button variant={data.release?.live_intake ? "destructive" : "secondary"} disabled={busy || (!data.release?.live_intake && !data.readiness?.ready)} onClick={() => void update({ action: "live_intake", enabled: !data.release?.live_intake })}>
+        {data.release?.live_intake ? "Turn real intake off" : "Enable real intake after all gates"}
+      </Button>
     </details>}
     {data.invitations.map(invitation => {
       const state = invitation.accepted_at ? "Accepted" : invitation.revoked_at ? "Revoked"

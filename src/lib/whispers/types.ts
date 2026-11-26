@@ -154,7 +154,7 @@ export interface PublicUpdate {
   publisherId?: string | undefined;
   publishedAt?: string | undefined;
   corrections: { date: string; note: string }[];
-  demo: true;
+  demo: boolean;
 }
 
 export interface PublicUpdateView {
@@ -168,7 +168,7 @@ export interface PublicUpdateView {
   publishedAt: string;
   corrections: { date: string; note: string }[];
   withdrawn: boolean;
-  demo: true;
+  demo: boolean;
 }
 
 export interface AuditEvent {

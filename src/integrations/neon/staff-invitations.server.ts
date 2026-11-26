@@ -1,6 +1,7 @@
 import type { NeonInvitationCommand } from "@/lib/whispers/staff-invitations";
 import { neonDatabase } from "./database.server";
 import type { neonIdentity } from "./identity.server";
+import { liveIntakeReadiness } from "./live-intake.server";
 
 type Identity = NonNullable<Awaited<ReturnType<typeof neonIdentity>>>;
 
@@ -60,13 +61,22 @@ export async function manageNeonInvitations({ issuer, subject }: Identity, comma
         order by email, a.id limit 100
       `;
       const releaseReviews = releaseAdmin ? await sql`
-        select distinct kind from public.whispers_release_reviews order by kind
+        select kind, reviewer_id, reference, reviewed_at from public.whispers_release_reviews order by kind, reviewed_at
       ` : null;
-      return { scopes: admin.contexts, invitations, staff, releaseReviews };
+      const [release] = releaseAdmin ? await sql`
+        select live_intake, operator_name, operator_contact, operator_user_id
+        from public.whispers_release where id='pilot'
+      ` : [];
+      const readiness = releaseAdmin ? await liveIntakeReadiness() : null;
+      return { scopes: admin.contexts, invitations, staff, releaseReviews, release: release ?? null, readiness };
     }
 
     if (command.action === "release_review") {
       if (!releaseAdmin) return null;
+      const [operator] = await sql<{ operator_user_id: string | null }[]>`
+        select operator_user_id from public.whispers_release where id='pilot'
+      `;
+      if (operator?.operator_user_id === admin.id) throw new Error("The named operator cannot record their own release review.");
       const [review] = await sql<{ id: string }[]>`
         insert into public.whispers_release_reviews (kind,reference,reviewer_id)
         values (${command.kind},${command.reference},${admin.id}) returning id
@@ -74,6 +84,35 @@ export async function manageNeonInvitations({ issuer, subject }: Identity, comma
       if (!review) throw new Error("Review was not recorded.");
       await sql`insert into public.whispers_audit(actor_id,action,workspace,target_id)
         values (${admin.id},'release_review','general',${review.id})`;
+    } else if (command.action === "operator") {
+      if (!releaseAdmin) return null;
+      await sql`insert into public.whispers_release
+        (id, live_intake, operator_name, operator_contact, reviewed_at, operator_user_id)
+        values ('pilot', false, ${command.name}, ${command.contact}, now(), ${admin.id})
+        on conflict (id) do update set live_intake=false, operator_name=excluded.operator_name,
+          operator_contact=excluded.operator_contact, reviewed_at=excluded.reviewed_at,
+          operator_user_id=excluded.operator_user_id`;
+      await sql`insert into public.whispers_audit(actor_id,action,workspace)
+        values (${admin.id},'operator','general')`;
+    } else if (command.action === "live_intake") {
+      if (!releaseAdmin) return null;
+      if (command.enabled) {
+        const readiness = await liveIntakeReadiness();
+        if (!readiness.ready) throw new Error("Real intake is not ready. Complete the operator and independent review gates first.");
+        const [operator] = await sql<{ operator_user_id: string | null }[]>`
+          select operator_user_id from public.whispers_release where id='pilot'
+        `;
+        if (operator?.operator_user_id === admin.id) {
+          throw new Error("The named operator cannot activate real intake.");
+        }
+      }
+      const [updated] = await sql<{ id: string }[]>`
+        update public.whispers_release set live_intake=${command.enabled}, reviewed_at=now()
+        where id='pilot' returning id
+      `;
+      if (!updated) throw new Error("Save the named operator before changing intake mode.");
+      await sql`insert into public.whispers_audit(actor_id,action,workspace)
+        values (${admin.id},${command.enabled ? 'enable_live_intake' : 'disable_live_intake'},'general')`;
     } else if (command.action === "staff_role") {
       if (!admin.contexts.includes(command.workspace) || (admin.id === command.userId && command.role === "admin")) {
         return null;

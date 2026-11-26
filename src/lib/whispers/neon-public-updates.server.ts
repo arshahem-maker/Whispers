@@ -9,6 +9,7 @@ export interface PublicUpdateRow {
   sources: unknown;
   published_at: string | Date;
   withdrawn: boolean;
+  fictional: boolean;
 }
 
 export async function readNeonPublicUpdates(): Promise<PublicUpdateRow[]> {
@@ -16,7 +17,7 @@ export async function readNeonPublicUpdates(): Promise<PublicUpdateRow[]> {
   if (!connection) throw new Error("Neon updates are unavailable.");
   const sql = neon(connection);
   const rows = await sql`
-    select id, title, summary, known, uncertain, sources, published_at, withdrawn
+    select id, title, summary, known, uncertain, sources, published_at, withdrawn, fictional
     from public.whispers_public_updates
     order by published_at desc
     limit 100

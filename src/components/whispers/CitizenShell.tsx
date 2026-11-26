@@ -34,7 +34,7 @@ export function CitizenShell({ children, sensitive = false, hideNav = false }: {
           </div>
         </div>
         {DEMO_MODE && (
-          <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">{connected ? tr("Connected pilot — fictional data only. Real-source intake remains disabled.") : t("demo.banner")}</div>
+          <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">{connected ? tr("Connected pilot — follow the intake and privacy notice shown before sending.") : t("demo.banner")}</div>
         )}
       </header>
       <main className={`flex-1 mx-auto w-full max-w-xl px-5 py-6 ${hideNav ? "pb-8" : "pb-28"}`}>{children}</main>

@@ -1,5 +1,5 @@
 export function callWhispersBackend(
-  path: "/receipt" | "/submit",
+  path: "/receipt" | "/submit" | "/intake-status",
   data: object,
   authorization?: string | null,
 ): Promise<unknown> | undefined {

@@ -1,4 +1,4 @@
-import { pilotReceiptSchema, pilotSubmitSchema } from "./src/lib/whispers/pilot-schema";
+import { pilotReceiptSchema, connectedSubmitSchema } from "./src/lib/whispers/pilot-schema";
 import { parseTriggerDelivery } from "@neon/functions/triggers";
 import { neonDatabase } from "./src/integrations/neon/database.server";
 import { timingSafeEqual } from "node:crypto";
@@ -101,12 +101,16 @@ export default {
       return reviewerHandlers[request.method]({ request: new Request(url, request) });
     }
     if (
-      (source.pathname === "/receipt" || source.pathname === "/submit") &&
+      (source.pathname === "/receipt" || source.pathname === "/submit" || source.pathname === "/intake-status") &&
       request.method === "POST"
     ) {
       const parsedBody = await readBoundedJson(request);
       if (!parsedBody.ok) return new Response(null, { status: parsedBody.tooLarge ? 413 : 400, headers });
       const input = parsedBody.value;
+      if (source.pathname === "/intake-status") {
+        const { currentNeonIntakeMode } = await import("./src/integrations/neon/live-intake.server");
+        return Response.json({ mode: await currentNeonIntakeMode() }, { headers });
+      }
       const citizen = await import("./src/lib/whispers/neon-citizen.server");
       try {
         if (source.pathname === "/receipt") {
@@ -114,7 +118,7 @@ export default {
           if (data.success)
             return Response.json(await citizen.receiptNeonPilot(data.data), { headers });
         } else {
-          const data = pilotSubmitSchema.safeParse(input);
+          const data = connectedSubmitSchema.safeParse(input);
           if (data.success)
             return Response.json(await citizen.submitNeonPilot(data.data, request), { headers });
         }

@@ -13,8 +13,9 @@ import { decodeImage, ImageError } from "@/lib/whispers/image";
 import { broadAreaLabel } from "@/lib/whispers/locations";
 import { ValidationError } from "@/lib/whispers/store";
 import { useServerFn } from "@tanstack/react-start";
-import { submitPilotReport, submitNeonPilotReport } from "@/lib/whispers/pilot.functions";
-import { pilotReportSchema } from "@/lib/whispers/pilot-schema";
+import { useQuery } from "@tanstack/react-query";
+import { pilotIntakeMode, submitPilotReport, submitNeonPilotReport } from "@/lib/whispers/pilot.functions";
+import { pilotReportSchema, pilotSubmitSchema } from "@/lib/whispers/pilot-schema";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/report/review")({
@@ -48,9 +49,12 @@ function Row({ label, value, edit }: { label: string; value: string; edit: () =>
 function Review() {
   useTranslationVersion();
   const { draft, setDraft, store, submission, setSubmission, connected, setConnected } = useWhispers();
-  const submitConnected = useServerFn(import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? submitNeonPilotReport : submitPilotReport);
+  const submitNeonConnected = useServerFn(submitNeonPilotReport);
+  const submitLegacyConnected = useServerFn(submitPilotReport);
+  const getIntakeMode = useServerFn(pilotIntakeMode);
+  const intakeMode = useQuery({ queryKey: ["pilot-intake-mode"], queryFn: () => getIntakeMode(), enabled: connected, retry: false, staleTime: 10_000 });
   const navigate = useNavigate();
-  const [state, setState] = useState<"idle" | "sending" | "failed" | "timeout" | "offline">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "failed" | "timeout" | "offline" | "mode-changed">("idle");
   const [ackErr, setAckErr] = useState(false);
   const [photoErr, setPhotoErr] = useState<string | null>(null);
   const [editing, setEditing] = useState<ImageBitmap | null>(null);
@@ -87,7 +91,17 @@ function Review() {
           publicSummaryPermission: draft.publicPermission, acknowledged: draft.ack,
         },
       };
-      if (sub.provider === "pilot") await submitConnected({ data: { ...input, payload: pilotReportSchema.parse(input.payload), fictional: true } });
+      if (sub.provider === "pilot") {
+        const status = await getIntakeMode();
+        if (status.mode !== intakeMode.data?.mode) {
+          await intakeMode.refetch();
+          setState("mode-changed");
+          return;
+        }
+        const connectedInput = { ...input, payload: pilotReportSchema.parse(input.payload), fictional: status.mode === "fictional" ? true as const : false as const };
+        if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") await submitNeonConnected({ data: connectedInput });
+        else await submitLegacyConnected({ data: pilotSubmitSchema.parse(connectedInput) });
+      }
       else await store.submitReport(input);
       setSubmission({ ...sub, accepted: true });
       navigate({ to: "/report/sent", replace: true });
@@ -145,9 +159,9 @@ function Review() {
 
       <p className="card p-4 mt-6">{t("s3.safe")}</p>
       <section className="mt-5 border-y py-4">
-        <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{tr("I confirm this contains only fictional test information.")}</label>
+        <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.mode === "real" ? tr("I understand this report contains real information and will be stored for authorized review.") : tr("I confirm this contains only fictional test information.")}</label>
         {connected && <Link to={import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? "/pilot" : "/review/sign-in"} className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
-        <p className="hint mt-2">{connected ? tr("Invited pilot testers only. Sign in before sending. Use fictional information only.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
+        <p className="hint mt-2">{connected ? intakeMode.isPending ? tr("Checking the connected intake mode…") : intakeMode.data?.mode === "real" ? tr("Only invited, signed-in pilot accounts can submit real reports. Authorized staff can review them. This is not an emergency response service.") : tr("Invited pilot testers only. Sign in before sending. Use fictional information only.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
       </section>
 
       <div className="mt-6 grid gap-3">
@@ -166,6 +180,7 @@ function Review() {
 
       <div aria-live="polite" className="mt-4 mb-28">
         {state === "failed" && <p role="alert" className="text-destructive">⚠ {t("s3.failed")}</p>}
+        {state === "mode-changed" && <p role="alert" className="text-warning">⚠ {tr("The intake mode changed. Review the updated notice before sending.")}</p>}
         {state === "timeout" && <p role="alert" className="text-warning">⚠ {t("s3.timeout")}</p>}
         {state === "offline" && <p role="alert" className="text-warning">⚠ {t("s3.offline")}</p>}
         {DEMO_MODE && !connected && <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>}
@@ -173,8 +188,8 @@ function Review() {
 
       <ActionBar>
         <button className="btn btn-secondary" onClick={() => go(2)} disabled={state === "sending"}>{t("common.back")}</button>
-        <Button className="flex-1 min-h-12" onClick={send} disabled={state === "sending"} aria-busy={state === "sending"}>
-          {state === "sending" ? t("s3.sending") : connected ? tr("Save fictional report to Cloud") : t("s3.sendDemo")}
+        <Button className="flex-1 min-h-12" onClick={send} disabled={state === "sending" || (connected && (intakeMode.isPending || intakeMode.isError))} aria-busy={state === "sending"}>
+          {state === "sending" ? t("s3.sending") : connected ? intakeMode.data?.mode === "real" ? tr("Send report for review") : tr("Save fictional report to Cloud") : t("s3.sendDemo")}
         </Button>
       </ActionBar>
 

@@ -15,6 +15,8 @@ export default defineConfig({
       env: {
         WHISPERS_BACKEND_SECRET: { value: process.env.WHISPERS_BACKEND_SECRET, required: true },
         WHISPERS_APP_ORIGIN: { value: process.env.WHISPERS_APP_ORIGIN, required: true },
+        // Default closed. Real intake requires the matching database release gate.
+        WHISPERS_LIVE_INTAKE_ENABLED: { value: process.env.WHISPERS_LIVE_INTAKE_ENABLED ?? "false", required: false },
         // Staging-only allowlist. Missing means no connected pilot submissions
         // are accepted; production must not need this setting to provision.
         WHISPERS_PILOT_TESTER_IDS: { value: process.env.WHISPERS_PILOT_TESTER_IDS, required: false },

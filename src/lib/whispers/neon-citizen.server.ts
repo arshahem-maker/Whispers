@@ -3,7 +3,8 @@ import { neonDatabase } from "@/integrations/neon/database.server";
 import { neonIdentity } from "@/integrations/neon/identity.server";
 import { hashCode, isWellFormedCode, normalizeCode, sha256Hex } from "./crypto";
 import { broadAreaLabel, PILOT_COUNTRIES, workspaceFor } from "./locations";
-import type { pilotSubmitSchema } from "./pilot-schema";
+import type { connectedSubmitSchema } from "./pilot-schema";
+import { requireNeonIntakeMode } from "@/integrations/neon/live-intake.server";
 import type { TimeBucket } from "./types";
 
 type ReceiptAction = "open" | "message" | "removal";
@@ -16,7 +17,8 @@ interface Report {
   removal_requested_at: Date | null;
 }
 
-export async function submitNeonPilot(input: z.infer<typeof pilotSubmitSchema>, request: Request) {
+export async function submitNeonPilot(input: z.infer<typeof connectedSubmitSchema>, request: Request) {
+  const intakeMode = await requireNeonIntakeMode(input.fictional);
   const identity = await neonIdentity(request);
   if (!identity) throw new Error("Sign in as an invited tester.");
   const testers = (process.env["WHISPERS_PILOT_TESTER_IDS"] ?? "").split(",").map((id) => id.trim());
@@ -55,7 +57,7 @@ export async function submitNeonPilot(input: z.infer<typeof pilotSubmitSchema>, 
     const workspace = workspaceFor(payload.countryCode);
     const body = { ...payload, processingState: "received", evidenceState: "unassessed",
       sensitivity: payload.category === "safety" || payload.category === "aid_concern" ? "restricted" : "standard",
-      fictional: true };
+      fictional: intakeMode === "fictional" };
     const [report] = await sql<{ id: string }[]>`
       insert into public.whispers_reports (workspace, body, code_hash, idempotency_key, payload_hash)
       values (${workspace}, ${sql.json(body)}, ${input.codeHash}, ${input.idempotencyKey}, ${payloadHash}) returning id

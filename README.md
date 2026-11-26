@@ -19,7 +19,13 @@ review, private media, and reviewed public updates.
   zero report rows and zero objects in `whispers-private`; no report content was
   inspected. Do not disable the database until remaining app dependencies and
   configuration have been reconciled.
-- Real-source intake remains disabled. The hosted `workers.dev` site is a
+- Real-source intake remains disabled. The code now supports a separate real-
+  report mode behind a server flag and database approval gate; it stays off
+  until an operator is named, five release reviews are recorded, and two
+  independent reviewers (not the operator) approve it. A separate administrator
+  must activate it. Even then, submissions remain restricted to authenticated
+  pilot IDs; this is not an anonymous public intake channel. The hosted
+  `workers.dev` site is a
   public staging preview at
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
   Cloudflare marks it `noindex`; anyone with the URL can visit it. The home and

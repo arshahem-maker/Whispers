@@ -18,6 +18,7 @@ const migrations = [
   "drizzle/neon/0010_public_projection.sql",
   "drizzle/neon/0011_retention_status.sql",
   "drizzle/neon/0012_legacy_snapshot.sql",
+  "drizzle/neon/0013_live_intake_release_gate.sql",
 ];
 
 // 0006 was applied to the isolated staging database under its old path before

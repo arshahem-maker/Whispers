@@ -1,7 +1,7 @@
 import { createMiddleware, createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { pilotSubmitSchema, pilotCommandSchema, pilotReceiptSchema } from "./pilot-schema";
+import { pilotSubmitSchema, connectedSubmitSchema, pilotCommandSchema, pilotReceiptSchema } from "./pilot-schema";
 
 export const submitPilotReport = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).validator((input) => pilotSubmitSchema.parse(input)).handler(async ({ data, context }) => {
   if (process.env["WHISPERS_PILOT_BACKEND"] === "neon") throw new Error("Use the Neon sign-in to submit a report.");
@@ -21,7 +21,7 @@ const attachNeonSession = createMiddleware({ type: "function" }).client(async ({
 
 export const submitNeonPilotReport = createServerFn({ method: "POST" })
   .middleware([attachNeonSession])
-  .validator((input) => pilotSubmitSchema.parse(input))
+  .validator((input) => connectedSubmitSchema.parse(input))
   .handler(async ({ data }) => {
     const { getRequest, setResponseHeader } = await import("@tanstack/react-start/server");
     setResponseHeader("Cache-Control", "no-store");
@@ -32,6 +32,14 @@ export const submitNeonPilotReport = createServerFn({ method: "POST" })
     const { submitNeonPilot } = await import("./neon-citizen.server");
     return submitNeonPilot(data, getRequest());
   });
+export const pilotIntakeMode = createServerFn({ method: "POST" }).handler(async () => {
+  if (process.env["WHISPERS_PILOT_BACKEND"] !== "neon") return { mode: "fictional" as const };
+  const { callWhispersBackend } = await import("./backend-forward.server");
+  const forwarded = callWhispersBackend("/intake-status", {});
+  if (forwarded) return (await forwarded) as { mode: "fictional" | "real" };
+  const { currentNeonIntakeMode } = await import("@/integrations/neon/live-intake.server");
+  return { mode: await currentNeonIntakeMode() };
+});
 export const pilotReceipt = createServerFn({ method: "POST" }).validator((input) => pilotReceiptSchema.parse(input)).handler(async ({ data }) => {
   const { setResponseHeader } = await import("@tanstack/react-start/server"); setResponseHeader("Cache-Control", "no-store");
   if (process.env["WHISPERS_PILOT_BACKEND"] === "neon") {
@@ -100,7 +108,7 @@ export const pilotPublicUpdates = createServerFn({ method: "GET" }).handler(asyn
     || process.env["WHISPERS_PUBLIC_FEED_BACKEND"] === "neon"
     ? await (await import("./neon-public-updates.server")).readNeonPublicUpdates()
     : await readSupabasePublicUpdates();
-  return rows.map((u) => ({ id: String(u.id), title: String(u.title ?? ""), summary: String(u.summary ?? ""), known: String(u.known ?? ""), uncertain: String(u.uncertain ?? ""), sources: Array.isArray(u.sources) ? u.sources.filter((s): s is string => typeof s === "string") : [], publishedAt: String(u.published_at), withdrawn: Boolean(u.withdrawn), demo: true as const, broadContext: "Fictional connected pilot", corrections: [] }));
+  return rows.map((u) => { const demo = typeof u.fictional === "boolean" ? u.fictional : true; return { id: String(u.id), title: String(u.title ?? ""), summary: String(u.summary ?? ""), known: String(u.known ?? ""), uncertain: String(u.uncertain ?? ""), sources: Array.isArray(u.sources) ? u.sources.filter((s): s is string => typeof s === "string") : [], publishedAt: String(u.published_at), withdrawn: Boolean(u.withdrawn), demo, broadContext: demo ? "Fictional connected pilot" : "Reviewed report", corrections: [] }; });
 });
 async function readSupabasePublicUpdates() {
   const { createClient } = await import("@supabase/supabase-js");
