@@ -18,12 +18,11 @@
   the private-storage cleanup. The cleanup queue honors a 24-hour grace period.
   No report content was inspected. The live app now has zero active reports.
   Reviewer access and citizen follow-up remain unverified.
-- The restricted legacy snapshot remains separate from app tables. All three
-  source photos were copied to the private staging bucket and compared byte for
-  byte with the downloaded archives. The Neon import preflight now passes with
-  five reports, three photos, and one mapped account. The reports remain
-  inactive because their origin is unknown. The staging audit did not inspect
-  report text or file contents.
+- At the owner's direction, the five-report restricted snapshot and its three
+  private photo copies were deleted from Neon staging. Verification confirmed
+  zero remaining snapshots, zero active app reports, and deletion of all three
+  photo objects. The original Lovable Supabase source remains enabled. Report
+  contents were not inspected.
 
 ## Bundle and hosted route verification — 26 November 2026
 

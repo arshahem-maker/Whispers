@@ -8,10 +8,10 @@ review, private media, and reviewed public updates.
 
 - `staging/neon` is the current Neon implementation branch. The production
   Neon project remains separate. A second Free-plan project, `Whispers Staging`,
-  provides the app schema and Neon services. A restricted source snapshot is
-  stored in its private `whispers_legacy_import` schema for preflight; no legacy
-  report rows have been activated in the app tables. All three legacy photo
-  objects are copied and byte-verified in private staging storage. The local
+  provides the app schema and Neon services. The restricted migration snapshot
+  and its three private photo copies were deleted from staging at the owner's
+  direction. No legacy report rows have
+  been activated in app tables. The local
   `.neon` and `.env.local` still point to production; use the ignored
   `.env.staging.local` for staging-only work.
 - The Lovable project is not published, and its managed Supabase database is
@@ -67,9 +67,9 @@ branch, and the 14 ordered migrations have been applied there. Its Auth,
 Object Storage, Functions, Realtime, and AI Gateway are provisioned. Schema-only
 branch creation was rejected for the production project's legacy database
 role, so staging was isolated in a separate project. A restricted source
-snapshot was copied there for preflight only; report rows remain inactive. The
-three legacy photo objects have been copied and byte-verified in its private
-storage bucket.
+snapshot was copied there for preflight. Its five unrecognized reports and
+three associated photo copies were later deleted from staging. The original
+Lovable Supabase source remains enabled. No report rows are active in Neon.
 
 Staging credentials are in the ignored `.env.staging.local`; do not replace the
 production `.neon` or `.env.local` link for routine staging work. The staging
@@ -146,26 +146,8 @@ the two timestamps to detect a failed attempt and check that scheduled
 successes continue hourly. The table contains no report IDs or text.
 Verify that successful runs are monitored before opening intake.
 
-The restricted source snapshot is available for preflight, but it is not an
-active app data import. The source snapshot has five reports, six records,
-eight Swahili translation-cache entries, one legacy account, and three private
-photo references. Those cached translations use an obsolete catalog hash and
-are excluded from activation because this cache is rebuildable. Import preflight
-refuses activation because the three private photo objects are missing in Neon
-and the legacy account is not mapped to a verified Neon Auth user. The source's
-`fictional` field is set by application code and is not proof of report content;
-the report text has not been reviewed. Do not activate rows until a responsible
-operator reviews the source data, attests that it is synthetic, and both photo
-and identity checks pass. The final command requires
-`--apply --confirm-fictional-source`. To stage a new export, use
-`node --env-file=.env.staging.local
-scripts/store-neon-legacy-snapshot.mjs <local-export.json>`; keep exports out of
-Git and retain them only as long as necessary. Transfer private files with
-`node --env-file=.env.staging.local scripts/copy-neon-legacy-photos.mjs <downloaded-files>`.
-Run `node --env-file=.env.staging.local scripts/import-neon-legacy.mjs` to check
-photo completeness, staff identity, and record eligibility. Reconcile the final
-source snapshot before running the same command with `--apply
---confirm-fictional-source`. After activation,
-verify report and attachment counts, replay the staff and receipt checks, and
-rehearse restore with a disposable environment. Set an explicit access and
-retention policy for the restricted snapshot and downloaded files after cutover.
+The five unrecognized legacy reports and their photo copies were deleted from
+Neon staging at the owner's direction. The original Lovable Supabase source
+remains enabled. Their origin and retention status are unknown, so do not export
+or activate them again unless that is established. The earlier verified account
+mapping does not resolve the reports' origin.

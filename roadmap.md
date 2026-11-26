@@ -11,9 +11,9 @@ marked historical there.
 - A separate Neon Free-plan project, `Whispers Staging`, has its own `main`
   database. The 14 checked-in migrations are applied, and Neon Auth, Object
   Storage, Functions, Realtime, AI Gateway, and the hourly retention trigger
-  are provisioned. A restricted source snapshot is stored privately for
-  preflight; it has not activated legacy data in app tables. Three private
-  legacy photo objects are now copied and byte-verified in staging storage.
+  are provisioned. No legacy data is active. The previously imported restricted snapshot and
+  three private photo copies were deleted from staging at the owner's direction.
+  The original Lovable Supabase source remains enabled.
 - Staging checks returned HTTP 200 from the database health Function and Neon
   Auth session endpoint, HTTP 401 from unauthenticated submission/reviewer
   endpoints, and passed a temporary Object Storage put/get/delete check.
@@ -80,18 +80,10 @@ marked historical there.
    voice disabled until its Neon path and cost controls are implemented and
    reviewed. Identify and remove runtime Supabase dependencies only after each
    route has a tested Neon replacement.
-4. **Reconcile legacy data.** The restricted source snapshot currently contains
-   five reports, six records, eight Swahili translation-cache entries, one
-   legacy account, and references to three private photos. The cached
-   translations have an obsolete catalog hash and are excluded from activation
-   because the cache is rebuildable. Import preflight passes because all three
-   photos are copied and verified in Neon staging, and the legacy account maps
-   to a verified Neon Auth user. The report
-   origin remains unknown. Their `fictional` marker is application-set, not
-   independent proof, and no report text has been reviewed. Do not activate
-   the reports until a responsible operator establishes their origin and
-   determines whether they should be retained. The importer requires an
-   explicit confirmation flag for activation, which has not been given.
+4. **Resolve the legacy source.** The owner does not recognize the five reports,
+   so their Neon archive and private photo copies were deleted. The original
+   Lovable Supabase source remains enabled. Do not export or activate those
+   reports again unless their origin and retention status are established.
 5. **Run current staging verification.** With fictional fixtures and separate
    citizen, reviewer, expert, publisher, and administrator accounts, verify
    submissions, private-code follow-up, photo retry/viewing, removal, retention,
@@ -107,10 +99,9 @@ marked historical there.
 - Google sign-in works on staging, but only an administrator account is
   available. Reviewer-specific permissions and citizen report flows still need
   a separate authorized test account and end-to-end verification.
-- Legacy records are held only in a restricted preflight snapshot; none are
-  active. Their source content has not been reviewed. Three private photos are
-  now byte-verified in staging, and the legacy account has a verified Neon
-  identity mapping. The source and retention decision remain unresolved.
+- The original legacy reports remain in Lovable Supabase. Their origin and
+  retention status are unknown, and no legacy data is active in Neon. The Neon
+  archive copy and photo copies were deleted at the owner's direction.
 - Lovable still reports its Supabase database enabled. The app retains legacy
   Supabase compatibility code; the active Neon path does not use it for the
   tested reviewer, staff, retention, or public-feed flows. Translation
