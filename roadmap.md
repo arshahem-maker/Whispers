@@ -28,7 +28,7 @@ Status checked 26 November 2026. This roadmap describes the maintained `staging/
 ## Work requiring a responsible human or external account
 
 1. Confirm the legal operator and legal form, public contact for privacy requests, and who is accountable for the service.
-2. For future real-world use, an organization must decide who monitors reports, how quickly, what action is possible, and what escalation and incident procedures apply. The current account owner runs demonstrations only; no real submissions are accepted.
+2. Before expanding beyond the one-account staging path, an accountable operator or organization must decide who monitors reports, how quickly, what action is possible, and what escalation and incident procedures apply. Staging has no response operation and is not open for other people to submit.
 3. Complete legal/privacy, safeguarding, native-language, security, and operational reviews with independent reviewers. Recorded references alone do not prove review quality.
 4. Decide whether the product requires verified accounts, anonymous intake, or organization-managed access. Build and test the selected model before expanding the tester allowlist.
 5. Rotate the Google OAuth client secret that was shared in conversation history, update the Neon Auth provider, and confirm sign-in still works. Credential entry and final submission must be completed by the account owner in Google/Neon settings.

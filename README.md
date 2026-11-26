@@ -12,10 +12,11 @@ fictional and browser-only. Neither mode is an emergency service.
 - The original Neon implementation entered `main` through PR #2 on
   26 November 2026. Since then, the owner-demo route isolation and subsequent
   hardening have also been merged. At the latest repository sync, `main` and
-  `staging/neon` matched their GitHub branches, the dependency batch in PR #11
-  and the status-documentation update in PR #12 were merged, and GitHub Verify
-  passed on the resulting `main`. This source sync does not itself deploy
-  either branch. The production Neon project remains separate.
+  `staging/neon` matched their GitHub branches. PR #14 refreshed connected
+  staging behavior and PR #15 recorded the verification status; both Verify
+  runs passed. The staging preview was separately refreshed from PR #14's
+  source commit. GitHub source merges do not automatically deploy either
+  branch. The production Neon project remains separate.
   A second Free-plan project, `Whispers Staging`,
   provides the app schema and Neon services. The restricted migration snapshot
   and its three private photo copies were deleted from staging at the owner's
