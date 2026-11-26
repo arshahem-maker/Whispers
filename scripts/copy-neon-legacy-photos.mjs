@@ -1,5 +1,4 @@
 import { requireStagingTarget } from "./staging-target.mjs";
-import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
@@ -48,7 +47,12 @@ try {
       }));
     }
     const saved = existing ?? await storage.send(new GetObjectCommand(target));
-    assert.deepEqual(Buffer.from(await saved.Body.transformToByteArray()), bytes, "Existing object failed integrity check.");
+    if (saved.ContentLength !== undefined && saved.ContentLength !== bytes.length) {
+      saved.Body.destroy();
+      throw new Error("Stored photo size differs from the source.");
+    }
+    const stored = Buffer.from(await saved.Body.transformToByteArray());
+    if (!stored.equals(bytes)) throw new Error("Stored photo differs from the source.");
     verified++;
   }
   console.log(`Verified ${verified} private photo(s) in Neon at their original storage paths.`);
