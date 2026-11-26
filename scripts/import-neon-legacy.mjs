@@ -66,7 +66,8 @@ try {
     }
     try {
       const object = await storage.send(new HeadObjectCommand({ Bucket: "whispers-private", Key: key }));
-      if (object.ContentType !== "image/jpeg" || !object.ContentLength) {
+      if (object.ContentType !== "image/jpeg" || !Number.isSafeInteger(object.ContentLength) ||
+          object.ContentLength < 4 || object.ContentLength > 1_500_000) {
         throw new Error("Copied photo has unexpected properties.");
       }
     } catch (error) {

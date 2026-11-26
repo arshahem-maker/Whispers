@@ -14,9 +14,10 @@ const db = postgres(target.href, { ssl: false });
 const [reportId, recordId, userId, snapshotId] = Array.from({ length: 4 }, randomUUID);
 const key = reportId + "/" + recordId + ".jpg";
 let photoPresent = false;
+let photoSize = 12;
 const storage = createServer((request, response) => {
   const found = photoPresent && request.method === "HEAD" && request.url?.split("?")[0] === "/whispers-private/" + key;
-  response.writeHead(found ? 200 : 404, found ? { "Content-Type": "image/jpeg", "Content-Length": "12" } : {});
+  response.writeHead(found ? 200 : 404, found ? { "Content-Type": "image/jpeg", "Content-Length": String(photoSize) } : {});
   response.end();
 });
 await new Promise(resolve => storage.listen(0, "127.0.0.1", resolve));
@@ -62,6 +63,9 @@ try {
   await assert.rejects(importer("--apply"), /--confirm-fictional-source/);
   await assert.rejects(importer("--apply", "--confirm-fictional-source"), /Preflight blocked activation/);
   photoPresent = true;
+  photoSize = 1_500_001;
+  await assert.rejects(importer(), /unexpected properties/);
+  photoSize = 12;
   const check = await importer();
   assert.match(check.stdout, /Preflight passed/);
 
