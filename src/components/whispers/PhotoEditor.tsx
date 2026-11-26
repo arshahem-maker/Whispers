@@ -13,6 +13,9 @@ export function PhotoEditor({ bitmap, onDone, onCancel }: {
   const [crop, setCrop] = useState<Rect | null>(null);
   const [drag, setDrag] = useState<{ x0: number; y0: number; r: Rect } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [selection, setSelection] = useState({ x: 25, y: 25, w: 50, h: 50 });
+  const [error, setError] = useState(false);
+  const keyboardRect = { x: selection.x / 100, y: selection.y / 100, w: Math.min(selection.w, 100 - selection.x) / 100, h: Math.min(selection.h, 100 - selection.y) / 100 };
 
   useEffect(() => {
     const c = canvasRef.current!;
@@ -31,7 +34,10 @@ export function PhotoEditor({ bitmap, onDone, onCancel }: {
       ctx.strokeStyle = "#A6E4D9"; ctx.lineWidth = 2;
       ctx.strokeRect(cr.x * c.width, cr.y * c.height, cr.w * c.width, cr.h * c.height);
     }
-  }, [bitmap, masks, crop, drag, mode]);
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = "#fff";
+    ctx.strokeRect(keyboardRect.x * c.width, keyboardRect.y * c.height, keyboardRect.w * c.width, keyboardRect.h * c.height);
+  }, [bitmap, masks, crop, drag, mode, keyboardRect.x, keyboardRect.y, keyboardRect.w, keyboardRect.h]);
 
   const pos = (e: React.PointerEvent) => {
     const b = canvasRef.current!.getBoundingClientRect();
@@ -39,9 +45,15 @@ export function PhotoEditor({ bitmap, onDone, onCancel }: {
   };
   const rect = (x0: number, y0: number, x1: number, y1: number): Rect => ({ x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) });
 
+  const apply = (area: Rect) => {
+    if (mode === "mask") setMasks((previous) => [...previous, area]);
+    else setCrop(area);
+  };
+
   const done = async () => {
     setBusy(true);
-    try { onDone(await processImage(bitmap, crop, masks)); } finally { setBusy(false); }
+    setError(false);
+    try { onDone(await processImage(bitmap, crop, masks)); } catch { setError(true); } finally { setBusy(false); }
   };
 
   return (
@@ -57,15 +69,27 @@ export function PhotoEditor({ bitmap, onDone, onCancel }: {
           aria-label={tr("Photo preview. Drag to draw a rectangle.")}
           onPointerDown={(e) => { const p = pos(e); (e.target as Element).setPointerCapture(e.pointerId); setDrag({ x0: p.x, y0: p.y, r: rect(p.x, p.y, p.x, p.y) }); }}
           onPointerMove={(e) => { if (!drag) return; const p = pos(e); setDrag({ ...drag, r: rect(drag.x0, drag.y0, p.x, p.y) }); }}
+          onPointerCancel={() => setDrag(null)}
           onPointerUp={() => {
-            if (drag && drag.r.w > 0.01 && drag.r.h > 0.01) mode === "mask" ? setMasks((m) => [...m, drag.r]) : setCrop(drag.r);
+            if (drag && drag.r.w > 0.01 && drag.r.h > 0.01) apply(drag.r);
             setDrag(null);
           }} />
         <div className="flex flex-wrap gap-2 mt-3">
           <button className="btn btn-secondary btn-sm" disabled={!masks.length} onClick={() => setMasks((m) => m.slice(0, -1))}>{tr("Undo cover")}</button>
           <button className="btn btn-secondary btn-sm" disabled={!crop} onClick={() => setCrop(null)}>{tr("Reset crop")}</button>
         </div>
-        <p className="hint mt-4">{tr("Keyboard users: covering by keyboard isn’t available yet; you can crop or remove the photo instead.")}</p>
+        <fieldset className="mt-4 grid grid-cols-2 gap-2">
+          <legend className="label">{tr("Adjust selection using percentages")}</legend>
+          {([["x", "Left"], ["y", "Top"], ["w", "Width"], ["h", "Height"]] as const).map(([key, label]) => (
+            <label key={key}>{tr(label)} <input className="field" type="number" min={key === "x" || key === "y" ? 0 : 1} max={key === "x" || key === "y" ? 99 : 100} value={selection[key]} onChange={(event) => {
+              const position = key === "x" || key === "y";
+              const value = Math.max(position ? 0 : 1, Math.min(position ? 99 : 100, Number(event.target.value)));
+              setSelection((previous) => ({ ...previous, [key]: value }));
+            }} /></label>
+          ))}
+          <button className="btn btn-secondary" type="button" onClick={() => apply(keyboardRect)}>{tr("Apply selection")}</button>
+        </fieldset>
+        {error && <p role="alert">{tr("The photo could not be prepared. Please try again.")}</p>}
         <div className="flex gap-3 mt-6">
           <button className="btn btn-secondary" onClick={onCancel}>{tr("Remove photo")}</button>
           <button className="btn btn-primary flex-1" disabled={busy} onClick={done}>{busy ? "Processing…" : "Use this photo"}</button>

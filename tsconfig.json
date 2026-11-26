@@ -2,6 +2,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "whispers-api.ts",
     "vite.config.ts",
     "vitest.config.ts",
     "eslint.config.js"

@@ -2,7 +2,7 @@ import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { StaffShell } from "@/components/whispers/StaffShell";
-import { useWhispers } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import type { ExpertChoice } from "@/lib/whispers/types";
 
 export const Route = createFileRoute("/expert/assignments/$id")({

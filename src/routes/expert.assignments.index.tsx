@@ -1,7 +1,7 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { StaffShell } from "@/components/whispers/StaffShell";
-import { useWhispers } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 
 export const Route = createFileRoute("/expert/assignments/")({
   head: () => ({

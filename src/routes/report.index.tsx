@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Shield, Home as HomeIcon, Droplets, Stethoscope, Radio, AlertTriangle, MoreHorizontal } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { ActionBar, MultiToggle, RadioGroup, StepHeader } from "@/components/whispers/Form";
-import { useWhispers } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { BASIS_LABEL, CATEGORY_LABEL, IMPACT_LABEL, TIME_LABEL, t } from "@/lib/whispers/i18n";
 import { PILOT_COUNTRIES } from "@/lib/whispers/locations";
 import type { Category, Impact, KnowledgeBasis, TimeBucket } from "@/lib/whispers/types";
@@ -14,9 +14,9 @@ export const Route = createFileRoute("/report/")({
   head: () => ({
     meta: [
       { title: "Make a report — Whispers" },
-      { name: "description", content: "Describe what happened in your own words. No name or account required." },
+      { name: "description", content: "Create a fictional Whispers demo report, or use restricted staging intake if you are an authorized tester." },
       { property: "og:title", content: "Make a report — Whispers" },
-      { property: "og:description", content: "Describe what happened in your own words." },
+      { property: "og:description", content: "Create a fictional demo report or use restricted staging intake if you are an authorized tester." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

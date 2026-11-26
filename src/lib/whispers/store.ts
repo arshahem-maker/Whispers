@@ -97,6 +97,8 @@ export class WhispersStore {
   subscribe = (fn: () => void) => { this.listeners.add(fn); return () => this.listeners.delete(fn); };
   getVersion = () => this.version;
   private emit() { this.version++; this.listeners.forEach((l) => l()); }
+  setNetworkSimulation(network: NetworkSim) { this.network = network; this.emit(); }
+  toggleNextPhotoFailure() { this.photoSim = this.photoSim === "fail_next" ? "normal" : "fail_next"; this.emit(); }
 
   // ---------- auth helpers ----------
   staff(id: string | null) { return this.state.staff.find((s) => s.id === id && s.active) ?? null; }

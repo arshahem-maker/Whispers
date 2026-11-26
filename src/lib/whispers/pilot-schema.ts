@@ -10,6 +10,9 @@ export const pilotReportSchema = z.object({
   publicSummaryPermission: z.boolean(), acknowledged: z.literal(true),
 }).strict();
 export const pilotSubmitSchema = z.object({ payload: pilotReportSchema, codeHash: z.string().regex(/^[0-9a-f]{64}$/), idempotencyKey: z.string().min(8).max(100), fictional: z.literal(true) }).strict();
+const connectedSubmitBase = z.object({ payload: pilotReportSchema, codeHash: z.string().regex(/^[0-9a-f]{64}$/), idempotencyKey: z.string().min(8).max(100) }).strict();
+export const realSubmitSchema = connectedSubmitBase.extend({ fictional: z.literal(false) });
+export const connectedSubmitSchema = z.union([pilotSubmitSchema, realSubmitSchema]);
 export const pilotCommandSchema = z.object({
   action: z.enum(["reply","assess","note","evidence","request_experts","interpret","expert_response","draft_update","submit_update","disclosure","approve","publish","withdraw","remove","extend","resume_voice","staff_role","release_review","operator","invite_staff","revoke_invitation"]),
   invitation: invitationSchema.optional(),
@@ -29,3 +32,9 @@ export function publicationProblems(report: { revoked_at: string | null; expires
   if (report.body['sensitivity'] === "restricted") problems.push("Restricted reports cannot be published.");
   return problems;
 }
+
+export const pilotReceiptSchema = z.object({
+  code: z.string().max(80),
+  action: z.enum(["open", "message", "removal"]),
+  text: z.string().max(2000).optional(),
+}).strict();

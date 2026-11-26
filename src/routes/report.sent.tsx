@@ -3,11 +3,14 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy, AlertTriangle, Loader2 } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
-import { DEMO_MODE, emptyDraft, useWhispers } from "@/lib/whispers/context";
+import { DEMO_MODE } from "@/lib/whispers/context";
+import { emptyDraft } from "@/lib/whispers/draft";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { groupCode } from "@/lib/whispers/crypto";
 import { t } from "@/lib/whispers/i18n";
 import { useServerFn } from "@tanstack/react-start";
-import { pilotUpload } from "@/lib/whispers/pilot.functions";
+import { pilotIntakeMode, pilotUpload } from "@/lib/whispers/pilot.functions";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/report/sent")({
   head: () => ({
@@ -26,10 +29,13 @@ export const Route = createFileRoute("/report/sent")({
 
 function Sent() {
   useTranslationVersion();
-  const { submission, draft, setDraft, store, setSubmission, setHeldCode } = useWhispers();
+  const { submission, draft, setDraft, store, setSubmission, setHeldCode, connected } = useWhispers();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const uploadConnected = useServerFn(pilotUpload);
+  const getIntakeMode = useServerFn(pilotIntakeMode);
+  const intakeMode = useQuery({ queryKey: ["pilot-intake-mode"], queryFn: () => getIntakeMode(), enabled: connected && submission?.provider === "pilot", retry: false, staleTime: 10_000 });
+  const partnerDemo = intakeMode.data?.partnerDemo === true;
   const started = useRef(false);
 
   const upload = async (id: string) => {
@@ -39,7 +45,16 @@ function Sent() {
     setDraft((d) => ({ ...d, photos: d.photos.map((x) => (x.id === id ? { ...x, status: "sending" } : x)) }));
     let ok = false;
     try {
-      if (submission.provider === "pilot") ok = (await uploadConnected({ data: { code: submission.code, bytes: Array.from(p.bytes), uploadId: p.id } })).ok;
+      if (submission.provider === "pilot" && import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") {
+        const form = new FormData();
+        form.set("code", submission.code);
+        form.set("uploadId", p.id);
+        form.set("photo", new Blob([new Uint8Array(p.bytes)], { type: "image/jpeg" }), "photo.jpg");
+        const response = await fetch("/api/public/neon-photo", { method: "POST", body: form });
+        ok = response.ok;
+      } else if (submission.provider === "pilot") {
+        ok = (await uploadConnected({ data: { code: submission.code, bytes: Array.from(p.bytes), uploadId: p.id } })).ok;
+      }
       else ok = (await store.addAttachment(submission.code, { bytes: p.bytes, width: p.width, height: p.height, type: "image/jpeg", previewUrl: p.url })).ok;
     } catch { ok = false; }
     setDraft((d) => ({ ...d, photos: d.photos.map((x) => (x.id === id ? { ...x, status: ok ? "processed" : "failed" } : x)) }));
@@ -48,7 +63,7 @@ function Sent() {
   useEffect(() => {
     if (started.current || !submission?.accepted) return;
     started.current = true;
-    (async () => { for (const p of draft.photos) if (p.status === "local") await upload(p.id); })();
+    (async () => { if (!partnerDemo) for (const p of draft.photos) if (p.status === "local") await upload(p.id); })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submission]);
 
@@ -76,8 +91,10 @@ function Sent() {
 
   return (
     <CitizenShell sensitive>
-      <h1 tabIndex={-1} ref={(el) => el?.focus()}>{DEMO_MODE ? t("sent.titleDemo") : t("sent.title")}</h1>
-      <p className="mt-2 text-muted-foreground">{t("sent.keep")}</p>
+      <h1 tabIndex={-1} ref={(el) => el?.focus()}>{submission.provider === "demo" ? t("sent.titleDemo") : t("sent.title")}</h1>
+      <p className="mt-2 text-muted-foreground">{partnerDemo
+        ? tr("This real-information partner-demo report is private and unmonitored. Keep your code only if you want to request removal; nobody is monitoring replies.")
+        : t("sent.keep")}</p>
 
       <div className="card p-5 mt-6">
         <p className="label mb-2">{t("check.label")}</p>
@@ -108,7 +125,7 @@ function Sent() {
       </ul>
 
       <div className="mt-8 grid gap-3">
-        <button className="btn btn-secondary w-full" onClick={() => finish("/check")}>{t("sent.check")}</button>
+        <button className="btn btn-secondary w-full" onClick={() => finish("/check")}>{partnerDemo ? tr("Open report to request removal") : t("sent.check")}</button>
         <button className="btn-ghost w-full" onClick={() => finish("/")}>{t("sent.done")}</button>
       </div>
     </CitizenShell>

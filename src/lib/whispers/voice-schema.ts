@@ -3,13 +3,13 @@ import { PILOT_COUNTRIES } from "./locations";
 import type { Draft } from "./context";
 
 export const voiceResultSchema = z.object({
-  language: z.string(), originalTranscript: z.string(), englishTranscript: z.string(),
-  sounds: z.array(z.string()),
+  language: z.string().max(80), originalTranscript: z.string().max(6000), englishTranscript: z.string().max(6000),
+  sounds: z.array(z.string().max(300)).max(8),
   category: z.enum(["safety", "shelter", "food_water", "health", "infrastructure", "aid_concern", "other", "not_selected"]),
   basis: z.enum(["saw", "happened_to_me", "told", "not_sure"]).nullable(),
-  country: z.string().nullable(), area: z.string().nullable(),
+  country: z.string().max(60).nullable(), area: z.string().max(60).nullable(),
   time: z.enum(["today", "yesterday", "last_week", "earlier", "not_sure"]).nullable(),
-  impacts: z.array(z.enum(["safety", "food_water", "healthcare", "movement", "shelter", "not_sure"])),
+  impacts: z.array(z.enum(["safety", "food_water", "healthcare", "movement", "shelter", "not_sure"])).max(6),
 }).strict();
 export type VoiceResult = z.infer<typeof voiceResultSchema>;
 export const VOICE_MAX_BYTES = 12 * 1024 * 1024;

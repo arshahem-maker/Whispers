@@ -1,0 +1,27 @@
+name: Verify
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.5'
+      - run: bun install --frozen-lockfile
+      - run: bun audit
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: bash scripts/test-pilot-db.sh
+      - run: bash scripts/test-neon-db.sh
+      - run: bash scripts/test-neon-import.sh
+      - run: npm run build

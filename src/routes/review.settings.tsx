@@ -2,8 +2,9 @@ import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { StaffShell } from "@/components/whispers/StaffShell";
-import { useWhispers } from "@/lib/whispers/context";
-import { Panel, useAct } from "@/components/whispers/Panel";
+import { useWhispers } from "@/lib/whispers/use-whispers";
+import { Panel } from "@/components/whispers/Panel";
+import { useAct } from "@/components/whispers/use-act";
 import {
   OPERATOR_PURPOSE,
   OPERATOR_PURPOSE_LABEL,

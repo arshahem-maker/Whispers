@@ -15,7 +15,6 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { WhispersProvider } from "../lib/whispers/context";
 import { LanguageProvider } from "@/components/whispers/LanguagePicker";
-import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   useTranslationVersion();
@@ -125,12 +124,25 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (!["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"].includes(event)) return;
-      void router.invalidate();
-      if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
+    if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon"
+      || !import.meta.env["VITE_SUPABASE_URL"] || !import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"]) return;
+    let cancelled = false;
+    let unsubscribe = () => {};
+    void import("@/integrations/supabase/client").then(({ supabase }) => {
+      if (cancelled) return;
+      const { data } = supabase.auth.onAuthStateChange((event) => {
+        if (!["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"].includes(event)) return;
+        void router.invalidate();
+        if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
+      });
+      unsubscribe = () => data.subscription.unsubscribe();
+    }).catch((error: unknown) => {
+      if (!cancelled) console.error("Unable to initialize the legacy authentication listener", error);
     });
-    return () => data.subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, [router, queryClient]);
 
   return (

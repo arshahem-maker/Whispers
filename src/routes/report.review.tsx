@@ -1,28 +1,30 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { ActionBar, StepHeader } from "@/components/whispers/Form";
 import { PhotoEditor } from "@/components/whispers/PhotoEditor";
-import { DEMO_MODE, useWhispers } from "@/lib/whispers/context";
+import { DEMO_MODE } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { generatePrivateCode, hashCode, randomId } from "@/lib/whispers/crypto";
 import { BASIS_LABEL, CATEGORY_LABEL, IMPACT_LABEL, TIME_LABEL, t } from "@/lib/whispers/i18n";
 import { decodeImage, ImageError } from "@/lib/whispers/image";
 import { broadAreaLabel } from "@/lib/whispers/locations";
 import { ValidationError } from "@/lib/whispers/store";
 import { useServerFn } from "@tanstack/react-start";
-import { submitPilotReport } from "@/lib/whispers/pilot.functions";
-import { pilotReportSchema } from "@/lib/whispers/pilot-schema";
+import { useQuery } from "@tanstack/react-query";
+import { pilotIntakeMode, submitPilotReport, submitNeonPilotReport } from "@/lib/whispers/pilot.functions";
+import { pilotReportSchema, pilotSubmitSchema } from "@/lib/whispers/pilot-schema";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/report/review")({
   head: () => ({
     meta: [
       { title: "Check your report — Whispers" },
-      { name: "description", content: "Review your report before sending it to the review team." },
+      { name: "description", content: "Review your report before saving it in the Whispers demo or restricted staging pilot." },
       { property: "og:title", content: "Check your report — Whispers" },
-      { property: "og:description", content: "Review your report before sending it." },
+      { property: "og:description", content: "Review your report before saving it in the Whispers demo or restricted staging pilot." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -47,13 +49,15 @@ function Row({ label, value, edit }: { label: string; value: string; edit: () =>
 function Review() {
   useTranslationVersion();
   const { draft, setDraft, store, submission, setSubmission, connected, setConnected } = useWhispers();
-  const submitConnected = useServerFn(submitPilotReport);
+  const submitNeonConnected = useServerFn(submitNeonPilotReport);
+  const submitLegacyConnected = useServerFn(submitPilotReport);
+  const getIntakeMode = useServerFn(pilotIntakeMode);
+  const intakeMode = useQuery({ queryKey: ["pilot-intake-mode"], queryFn: () => getIntakeMode(), enabled: connected, retry: false, staleTime: 10_000 });
   const navigate = useNavigate();
-  const [state, setState] = useState<"idle" | "sending" | "failed" | "timeout" | "offline">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "failed" | "timeout" | "offline" | "mode-changed">("idle");
   const [ackErr, setAckErr] = useState(false);
   const [photoErr, setPhotoErr] = useState<string | null>(null);
   const [editing, setEditing] = useState<ImageBitmap | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { document.getElementById("step-title")?.focus(); }, []);
   if (draft.text.trim().length < 10 || !draft.basis) {
@@ -69,11 +73,14 @@ function Review() {
     setPhotoErr(null);
     if (!f) return;
     try { setEditing(await decodeImage(f)); } catch (e) { setPhotoErr(e instanceof ImageError ? e.message : "This photo couldn’t be opened."); }
-    if (fileRef.current) fileRef.current.value = "";
   };
 
   const send = async () => {
     if (!draft.ack) { setAckErr(true); document.getElementById("ack")?.focus(); return; }
+    if (intakeMode.data?.partnerDemo && draft.photos.length > 0) {
+      setPhotoErr("Remove all photos before sending a partner-demo report. Photos are disabled in this mode.");
+      return;
+    }
     if (typeof navigator !== "undefined" && !navigator.onLine) { setState("offline"); return; }
     setState("sending");
     if (!draft.basis) { setState("failed"); return; }
@@ -85,10 +92,20 @@ function Review() {
         payload: {
           text: draft.text, category: draft.category, knowledgeBasis: draft.basis, countryCode: draft.country ?? "not_shared",
           areaId: draft.area, timeBucket: draft.time ?? "not_sure", impacts: draft.impacts,
-          publicSummaryPermission: draft.publicPermission, acknowledged: draft.ack,
+          publicSummaryPermission: intakeMode.data?.partnerDemo ? false : draft.publicPermission, acknowledged: draft.ack,
         },
       };
-      if (sub.provider === "pilot") await submitConnected({ data: { ...input, payload: pilotReportSchema.parse(input.payload), fictional: true } });
+      if (sub.provider === "pilot") {
+        const status = await getIntakeMode();
+        if (status.mode !== intakeMode.data?.mode || status.partnerDemo !== intakeMode.data?.partnerDemo) {
+          await intakeMode.refetch();
+          setState("mode-changed");
+          return;
+        }
+        const connectedInput = { ...input, payload: pilotReportSchema.parse(input.payload), fictional: status.mode === "fictional" ? true as const : false as const };
+        if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon") await submitNeonConnected({ data: connectedInput });
+        else await submitLegacyConnected({ data: pilotSubmitSchema.parse(connectedInput) });
+      }
       else await store.submitReport(input);
       setSubmission({ ...sub, accepted: true });
       navigate({ to: "/report/sent", replace: true });
@@ -102,6 +119,13 @@ function Review() {
   };
 
   const go = (step: 1 | 2) => navigate({ to: "/report", search: step === 2 ? { step: 2 } : {} });
+  const intakeNotice = !connected
+    ? t("s3.safe")
+    : intakeMode.data?.partnerDemo
+      ? tr("Partner demo: real-information submissions are accepted only from the single currently allowlisted account and stay in private staging. Nobody is monitoring them or guaranteeing a reply. Do not include names, contact details, exact locations, other identifying details, sensitive case information, or emergency requests. Photos and public sharing are disabled.")
+      : intakeMode.data?.mode === "real"
+        ? tr("Only send information you can share safely. This report is stored for authorized review and is not automatically published. This is not an emergency response service.")
+        : tr("Connected pilot testing accepts fictional information only. Use no real names, locations, or case details.");
 
   return (
     <CitizenShell sensitive hideNav>
@@ -130,20 +154,29 @@ function Review() {
             ))}
           </ul>
         )}
-        {draft.photos.length < 3 && (
+        {draft.photos.length < 3 && !intakeMode.data?.partnerDemo && (
           <>
-            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" id="photo" onChange={(e) => pick(e.target.files?.[0])} />
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" id="photo" onChange={(event) => {
+              const file = event.currentTarget.files?.[0];
+              event.currentTarget.value = "";
+              void pick(file);
+            }} />
             <label htmlFor="photo" className="btn btn-secondary btn-sm cursor-pointer"><ImagePlus className="h-4 w-4" aria-hidden /> {t("s3.addPhoto")}</label>
           </>
         )}
-        <p className="hint mt-2">{tr("Up to 3 still photos (JPEG, PNG or WebP). A photo is never required.")}</p>
+        <p className="hint mt-2">{intakeMode.data?.partnerDemo
+          ? tr("Photos are disabled for real-information reports in this private partner demo.")
+          : tr("Up to 3 still photos (JPEG, PNG or WebP). A photo is never required.")}</p>
         {photoErr && <p role="alert" className="text-destructive mt-2">⚠ {photoErr}</p>}
       </section>
 
-      <p className="card p-4 mt-6">{t("s3.safe")}</p>
+      <p className="card p-4 mt-6">{intakeNotice}</p>
       <section className="mt-5 border-y py-4">
-        <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{tr("I confirm this contains only fictional test information.")}</label>
-        <p className="hint mt-2">{connected ? tr("Fictional information only. No live humanitarian review team is connected.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
+        <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={connected} disabled={!!submission || state === "sending"} onChange={(e) => setConnected(e.target.checked)} />{intakeMode.data?.partnerDemo
+          ? tr("I understand this real-information demo is private, unmonitored, and offers no response or emergency help.")
+          : intakeMode.data?.mode === "real" ? tr("I understand this report contains real information and will be stored for authorized review.") : tr("I confirm this contains only fictional test information.")}</label>
+        {connected && <Link to={import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon" ? "/pilot" : "/review/sign-in"} className="btn-ghost">{tr("Sign in for the connected pilot")}</Link>}
+        <p className="hint mt-2">{connected ? intakeMode.isPending ? tr("Checking the connected intake mode…") : intakeMode.data?.partnerDemo ? tr("One invited account can use real-information intake for partner demonstrations. Submissions stay private, are not monitored, and cannot be published from this mode.") : intakeMode.data?.mode === "real" ? tr("Only invited, signed-in pilot accounts can submit real reports. Authorized staff can review them. This is not an emergency response service.") : tr("Invited pilot testers only. Sign in before sending. Use fictional information only.") : tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>
       </section>
 
       <div className="mt-6 grid gap-3">
@@ -153,24 +186,29 @@ function Review() {
         </button>
         <Link to="/help" hash="use" className="btn-ghost !px-0 w-fit">{t("s3.ackLink")}</Link>
         {ackErr && <p id="ack-err" role="alert" className="text-destructive">⚠ {t("s3.errAck")}</p>}
-        <button type="button" role="switch" aria-checked={draft.publicPermission} className="choice" aria-describedby="pub-help"
-          onClick={() => setDraft((d) => ({ ...d, publicPermission: !d.publicPermission }))}>
-          <Box on={draft.publicPermission} /> <span>{t("s3.public")}</span>
-        </button>
-        <p id="pub-help" className="hint">{t("s3.publicHelp")}</p>
+        {intakeMode.data?.partnerDemo
+          ? <p id="pub-help" className="hint">{tr("Public use is disabled for all partner-demo reports.")}</p>
+          : <>
+            <button type="button" role="switch" aria-checked={draft.publicPermission} className="choice" aria-describedby="pub-help"
+              onClick={() => setDraft((d) => ({ ...d, publicPermission: !d.publicPermission }))}>
+              <Box on={draft.publicPermission} /> <span>{t("s3.public")}</span>
+            </button>
+            <p id="pub-help" className="hint">{t("s3.publicHelp")}</p>
+          </>}
       </div>
 
       <div aria-live="polite" className="mt-4 mb-28">
         {state === "failed" && <p role="alert" className="text-destructive">⚠ {t("s3.failed")}</p>}
+        {state === "mode-changed" && <p role="alert" className="text-warning">⚠ {tr("The intake mode changed. Review the updated notice before sending.")}</p>}
         {state === "timeout" && <p role="alert" className="text-warning">⚠ {t("s3.timeout")}</p>}
         {state === "offline" && <p role="alert" className="text-warning">⚠ {t("s3.offline")}</p>}
-        {DEMO_MODE && <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>}
+        {DEMO_MODE && !connected && <p className="hint mt-2">{tr("Demo: this is saved only in this browser tab. No review team receives it.")}</p>}
       </div>
 
       <ActionBar>
         <button className="btn btn-secondary" onClick={() => go(2)} disabled={state === "sending"}>{t("common.back")}</button>
-        <Button className="flex-1 min-h-12" onClick={send} disabled={state === "sending"} aria-busy={state === "sending"}>
-          {state === "sending" ? t("s3.sending") : connected ? tr("Save fictional report to Cloud") : t("s3.sendDemo")}
+        <Button className="flex-1 min-h-12" onClick={send} disabled={state === "sending" || (connected && (intakeMode.isPending || intakeMode.isError))} aria-busy={state === "sending"}>
+          {state === "sending" ? t("s3.sending") : connected ? intakeMode.data?.partnerDemo ? tr("Submit to private staging demo") : intakeMode.data?.mode === "real" ? tr("Send report for review") : tr("Save fictional report to Cloud") : t("s3.sendDemo")}
         </Button>
       </ActionBar>
 

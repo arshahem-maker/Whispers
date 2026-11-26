@@ -1,9 +1,11 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Panel, useAct } from "@/components/whispers/Panel";
-import { StaffShell, fmtTime } from "@/components/whispers/StaffShell";
-import { useWhispers } from "@/lib/whispers/context";
+import { Panel } from "@/components/whispers/Panel";
+import { useAct } from "@/components/whispers/use-act";
+import { StaffShell } from "@/components/whispers/StaffShell";
+import { fmtTime } from "@/components/whispers/format-time";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { DEMO_RISK } from "@/lib/whispers/demo-data";
 import { BASIS_LABEL, CATEGORY_LABEL, EVIDENCE_LABEL, IMPACT_LABEL, PROCESSING_LABEL, TIME_LABEL } from "@/lib/whispers/i18n";
 import { broadAreaLabel, WORKSPACE_LABEL } from "@/lib/whispers/locations";

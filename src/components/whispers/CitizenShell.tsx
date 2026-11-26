@@ -1,21 +1,13 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { FileText, Newspaper, LifeBuoy, LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { Wordmark } from "./Brand";
-import { DEMO_MODE, useWhispers } from "@/lib/whispers/context";
+import { DEMO_MODE } from "@/lib/whispers/context";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { t } from "@/lib/whispers/i18n";
 import { LanguageButton } from "./LanguagePicker";
-
-export function useLeave() {
-  const { wipe } = useWhispers();
-  const navigate = useNavigate();
-  return () => {
-    wipe();
-    document.querySelectorAll("dialog[open]").forEach((d) => (d as HTMLDialogElement).close());
-    navigate({ to: "/closed", replace: true });
-  };
-}
+import { useLeave } from "./use-leave";
 
 export function CitizenShell({ children, sensitive = false, hideNav = false }: { children: ReactNode; sensitive?: boolean; hideNav?: boolean }) {
   useTranslationVersion();
@@ -41,8 +33,8 @@ export function CitizenShell({ children, sensitive = false, hideNav = false }: {
             )}
           </div>
         </div>
-        {DEMO_MODE && (
-          <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">{connected ? tr("Connected pilot — fictional data only. Real-source intake remains disabled.") : t("demo.banner")}</div>
+        {DEMO_MODE && path !== "/pilot" && (
+          <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">{connected ? tr("Connected pilot — follow the intake and privacy notice shown before sending.") : t("demo.banner")}</div>
         )}
       </header>
       <main className={`flex-1 mx-auto w-full max-w-xl px-5 py-6 ${hideNav ? "pb-8" : "pb-28"}`}>{children}</main>

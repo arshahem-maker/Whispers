@@ -32,22 +32,33 @@ async function report(client: Client,user: string,id: string,role="reviewer") {
   if (!r) throw new Error("Report unavailable.");
   return r;
 }
+// Pilot quotas are separate from voice limits (see drizzle/neon/0006).
+export const PILOT_QUOTAS = { intake:{limit:6,window:3600}, receipt:{limit:30,window:3600}, message:{limit:10,window:3600}, removal:{limit:3,window:3600}, upload:{limit:12,window:3600} } as const;
+type QuotaKind = keyof typeof PILOT_QUOTAS;
+// New RPCs are not in generated types until the proposed migration is applied.
+const rpc = (name: string, args: Record<string, unknown>) => (admin.rpc as unknown as (n: string, a: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>)(name, args);
+async function quota(kind: QuotaKind, key: string) {
+  const q = PILOT_QUOTAS[kind];
+  return checked(await rpc("whispers_reserve_pilot_quota", { p_bucket: kind + ":" + key, p_limit: q.limit, p_window_seconds: q.window })) === true;
+}
 async function update(r:Row,body:Record<string,unknown>) {
   const success=checked(await admin.rpc("whispers_update_report",{p_id:r.id,p_version:r.version,p_body:json(body)}));
   if(!success) throw new Error("This report changed. Refresh before saving.");
 }
 export async function submitPilot(input: z.infer<typeof pilotSubmitSchema>, request: Request) {
-  const secret = process.env['LOVABLE_API_KEY'];
+  const secret = process.env['WHISPERS_INTAKE_SECRET'] ?? process.env['LOVABLE_API_KEY'];
   if (!secret) throw new Error("Connected reporting unavailable.");
   const signingKey = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const signature = await crypto.subtle.sign("HMAC", signingKey, new TextEncoder().encode(":intake:" + (request.headers.get("cf-connecting-ip") ?? "local-preview")));
   const bucket = Array.from(new Uint8Array(signature), (b) => b.toString(16).padStart(2, "0")).join("");
-  const permitted = checked(await admin.rpc("reserve_voice_request", { p_bucket: "intake:" + bucket }));
-  if (!permitted) throw new Error("Submission limit reached. Please try later.");
   const p=input.payload;
+  const payloadHash=await sha256Hex(JSON.stringify(p)+input.codeHash);
+  // Idempotent retries of an accepted submission never consume intake quota.
+  const earlier=checked(await admin.from("whispers_reports").select("payload_hash").eq("idempotency_key",input.idempotencyKey).maybeSingle());
+  if(earlier){ if(earlier.payload_hash===payloadHash) return {accepted:true as const}; throw new Error("Report was not saved; the attempt may conflict with an earlier draft."); }
+  if (!(await quota("intake", bucket))) throw new Error("Submission limit reached. Please try later.");
   const pilot=PILOT_COUNTRIES.find((c)=>c.code===p.countryCode);
   if(p.areaId!=="unknown" && !pilot?.areas.some((a)=>a.id===p.areaId)) throw new Error("Select a matching broad area.");
-  const payloadHash=await sha256Hex(JSON.stringify(p)+input.codeHash);
   const body={...p,processingState:"received",evidenceState:"unassessed",sensitivity:p.category==="safety"||p.category==="aid_concern"?"restricted":"standard",fictional:true};
   const saved=await admin.from("whispers_reports").insert({workspace:workspaceFor(p.countryCode),body:json(body),code_hash:input.codeHash,idempotency_key:input.idempotencyKey,payload_hash:payloadHash}).select("id").single();
   if(saved.error) {
@@ -56,11 +67,10 @@ export async function submitPilot(input: z.infer<typeof pilotSubmitSchema>, requ
   } else await audit(null,"pilot_submit",workspaceFor(p.countryCode),saved.data.id);
   return {accepted:true as const};
 }
-async function capability(code:string) {
+async function capability(code:string,kind:QuotaKind="receipt") {
   const n=normalizeCode(code); if(!isWellFormedCode(n)) return null;
   const hash=await hashCode(n);
-  const {data:permitted,error}=await admin.rpc("reserve_voice_request",{p_bucket:"receipt:"+hash});
-  if(error||!permitted) return null;
+  if(kind !== "upload" && !(await quota(kind,hash))) return null;
   return checked(await admin.from("whispers_reports").select("*").eq("code_hash",hash).is("revoked_at",null).gt("expires_at",new Date().toISOString()).maybeSingle());
 }
 async function contributor(r:Row) {
@@ -69,23 +79,23 @@ async function contributor(r:Row) {
   return {text:String(b['text']??""),area:broadAreaLabel(String(b['countryCode']??"not_shared"),String(b['areaId']??"unknown")),time: String(b['timeBucket'] ?? "not_sure") as TimeBucket,receivedAt:r.received_at,state:String(b['processingState']??"received"),removalRequested:!!r.removal_requested_at,messages:records.filter((x)=>x.kind==="message").map((x)=>({id:x.id,text:String(object(x.body)['text']??""),sender:String(object(x.body)['sender']??""),at:x.created_at})),photos:records.filter((x)=>x.kind==="photo").length};
 }
 export async function receiptPilot(data:{code:string;action:"open"|"message"|"removal";text?:string | undefined}) {
-  const r=await capability(data.code); if(!r) return null;
+  const r=await capability(data.code,data.action==="open"?"receipt":data.action); if(!r) return null;
   if(data.action==="message") {
     const text=data.text?.trim(); if(!text||r.removal_requested_at) throw new Error("Cannot add this message.");
     checked(await admin.from("whispers_records").insert({report_id:r.id,workspace:r.workspace,kind:"message",body:{sender:"contributor",text}}));
     await audit(null,"contributor_message",r.workspace,r.id);
   }
   if(data.action==="removal") {
-    r.removal_requested_at=new Date().toISOString();
-    checked(await admin.from("whispers_reports").update({removal_requested_at:r.removal_requested_at}).eq("id",r.id));
-    await audit(null,"removal_requested",r.workspace,r.id);
+    if(checked(await rpc("whispers_request_removal",{p_id:r.id}))!==true) return null;
+    r.removal_requested_at=r.removal_requested_at??new Date().toISOString();
   }
   return contributor(r);
 }
 export async function uploadPilot(data:{code:string;bytes:number[];uploadId:string}) {
-  const r=await capability(data.code);if(!r||r.removal_requested_at) throw new Error("Report unavailable.");
+  const r=await capability(data.code,"upload");if(!r||r.removal_requested_at) throw new Error("Report unavailable.");
   const prior=checked(await admin.from("whispers_records").select("id").eq("report_id",r.id).eq("upload_id",data.uploadId).maybeSingle());
   if(prior)return {ok:true};
+  if (!(await quota("upload", r.id))) throw new Error("Photo upload limit reached.");
   const existing=checked(await admin.from("whispers_records").select("id").eq("report_id",r.id).eq("kind","photo"))??[];
   if(existing.length>=3) throw new Error("At most three photos are permitted.");
   const decoded=jpeg.decode(new Uint8Array(data.bytes),{useTArray:true,maxResolutionInMP:3,maxMemoryUsageInMB:32,tolerantDecoding:false});
@@ -98,10 +108,12 @@ export async function uploadPilot(data:{code:string;bytes:number[];uploadId:stri
   if(save.error){const cleanup=await admin.storage.from("whispers-private").remove([key]);if(cleanup.error)checked(await admin.from("whispers_media_cleanup").upsert({report_id:r.id}));const retry=checked(await admin.from("whispers_records").select("id").eq("report_id",r.id).eq("upload_id",data.uploadId).maybeSingle());if(retry)return {ok:true};throw new Error("Photo was not saved.");}
   return {ok:true};
 }
-export async function readPilot(client:Client,user:string) {
+export async function readPilot(client:Client,user:string, page: number) {
   const membership=await roles(client,user);
-  const reports=checked(await client.from("whispers_reports").select("id,workspace,body,received_at,expires_at,removal_requested_at,version"))??[];
-  const records=checked(await client.from("whispers_records").select("id,report_id,kind,body,created_at"))??[];
+  const pageSize = 50;
+  const reports=checked(await client.from("whispers_reports")
+    .select("id,workspace,received_at,expires_at,category:body->>category")
+    .order("received_at",{ascending:false}).order("id").range(page * pageSize, (page + 1) * pageSize))??[];
   const requests=checked(await client.from("whispers_expert_requests").select("*"))??[];
   const assignments=checked(await client.from("whispers_expert_assignments").select("request_id").eq("expert_id",user))??[];
   const packets=[];
@@ -114,15 +126,35 @@ export async function readPilot(client:Client,user:string) {
   }
   const updates=checked(await client.from("whispers_updates").select("*"))??[];
   const auditRows=checked(await client.from("whispers_audit").select("*").order("at",{ascending:false}).limit(100))??[];
-  for(const r of reports) await audit(user,"read_report",r.workspace,r.id);
   const isAdmin=membership.some((m)=>m.role==="admin");
   const adminScopes=membership.filter((m)=>m.role==="admin").flatMap((m)=>m.contexts);
   const staff=isAdmin?(checked(await admin.from("user_roles").select("user_id,role,contexts,active"))??[]).filter((s)=>s.contexts.some((ws)=>adminScopes.includes(ws))).map((s)=>({...s,contexts:s.contexts.filter((ws)=>adminScopes.includes(ws))})):[];
   const invitations=isAdmin?checked(await client.from("whispers_staff_invitations").select("id,email,role,workspace,expires_at,accepted_at,revoked_at").order("created_at",{ascending:false}).limit(100))??[]:[];
   const release=isAdmin?checked(await admin.from("whispers_release").select("*").eq("id","pilot").maybeSingle()):null;
   const reviews=isAdmin?checked(await client.from("whispers_release_reviews").select("*"))??[]:[];
-  return {userId:user,membership,reports,records,requests,packets,updates,audit:auditRows,staff,release,reviews,invitations};
+  return {userId:user,membership,reports: reports.slice(0, pageSize), hasMoreReports: reports.length > pageSize,requests,packets,updates,audit:auditRows,staff,release,reviews,invitations};
 }
+export async function readPilotReport(client: Client, user: string, id: string) {
+  const report = checked(await client.from("whispers_reports")
+    .select("id,workspace,body,received_at,expires_at,removal_requested_at,version")
+    .eq("id", id).maybeSingle());
+  if (!report) return null;
+  const records = checked(await client.from("whispers_records")
+    .select("id,report_id,kind,body,created_at").eq("report_id", report.id)
+    .order("created_at").limit(250)) ?? [];
+  await audit(user, "read_report", report.workspace, report.id);
+  return { report, records };
+}
+
+export async function readPilotAssessments(client: Client, user: string, requestId: string) {
+  const request = checked(await client.from("whispers_expert_requests")
+    .select("workspace").eq("id", requestId).maybeSingle());
+  if (!request) throw new Error("Assessment unavailable.");
+  await allowed(client, user, request.workspace, "reviewer");
+  return checked(await client.from("whispers_expert_responses")
+    .select("choice,explanation").eq("request_id", requestId).limit(100)) ?? [];
+}
+
 export async function commandPilot(client:Client,user:string,d:z.infer<typeof pilotCommandSchema>) {
   if(d.action==="invite_staff"||d.action==="revoke_invitation") {
     const scopes=(await roles(client,user)).filter((m)=>m.role==="admin").flatMap((m)=>m.contexts);
@@ -145,9 +177,12 @@ export async function commandPilot(client:Client,user:string,d:z.infer<typeof pi
     if(!scopes.length)throw new Error("Administrator access required.");
     if(d.action==="staff_role") {
       if(!d.staff||d.staff.contexts.some((ws)=>!scopes.includes(ws)))throw new Error("Select an authorised workspace.");
+      const staff=d.staff;
       if(d.staff.userId===user&&d.staff.role==="admin")throw new Error("Another administrator must change your own admin access.");
       const account=await admin.auth.admin.getUserById(d.staff.userId);if(account.error||!account.data.user)throw new Error("This staff account must sign in first.");
-      checked(await admin.from("user_roles").upsert({user_id:d.staff.userId,role:d.staff.role,contexts:d.staff.contexts,active:d.staff.active}));
+      // Atomic: only the selected workspaces change; the function audits each workspace.
+      checked(await rpc("whispers_set_staff_scope",{p_actor:user,p_target:staff.userId,p_role:staff.role,p_contexts:staff.contexts,p_active:staff.active}));
+      return {ok:true};
     } else if(d.action==="release_review") {
       if(!d.review)throw new Error("Human review reference required.");
       checked(await admin.from("whispers_release_reviews").insert({...d.review,reviewer_id:user}));
@@ -175,11 +210,8 @@ export async function commandPilot(client:Client,user:string,d:z.infer<typeof pi
     }
     if(d.action==="request_experts"){
       if(!d.packet)throw new Error("Redacted packet required.");
-      const x=checked(await admin.from("whispers_expert_requests").insert({workspace:r.workspace,report_ids:[r.id],packet:json(d.packet)}).select("id").single());
-      const experts=checked(await admin.from("user_roles").select("user_id").eq("role","expert").eq("active",true).contains("contexts",[r.workspace]))??[];
-      if(!x)throw new Error("Request was not saved.");
-      if(experts.length)checked(await admin.from("whispers_expert_assignments").insert(experts.map((e)=>({request_id:x.id,expert_id:e.user_id}))));
-      await update(r,{...b,processingState:"awaiting_expert"});
+      checked(await rpc("whispers_create_expert_request", { p_id: r.id, p_actor: user, p_packet: json(d.packet) }));
+      return { ok: true };
     }
     if(d.action==="draft_update"){
       if(!d.update)throw new Error("Update content required.");
@@ -191,22 +223,17 @@ export async function commandPilot(client:Client,user:string,d:z.infer<typeof pi
     if(d.action==="extend"){
       const next=d.nextReview?new Date(d.nextReview).getTime():0;
       if(!d.nextReview||!d.text?.trim()||next<=Date.now()||next>Date.now()+30*86400000)throw new Error("Provide an extension reason and next review within 30 days.");
-      checked(await admin.from("whispers_reports").update({expires_at:d.nextReview,body:json({...b,extension:{owner:user,reason:d.text,nextReview:d.nextReview}})}).eq("id",r.id));
+      checked(await rpc("whispers_extend_retention",{p_id:r.id,p_actor:user,p_until:d.nextReview,p_reason:d.text}));
+      return {ok:true};
     }
     await audit(user,d.action,r.workspace,r.id);return {ok:true};
   }
-  if(d.action==="expert_response"||d.action==="interpret"){
-    const member=await roles(client,user);
-    const scope=member.filter((m)=>m.role===(d.action==="expert_response"?"expert":"reviewer")).flatMap((m)=>m.contexts);
-    if(!scope.length)throw new Error("Access required.");
-    const x=checked(await admin.from("whispers_expert_requests").select("*").eq("id",d.id).in("workspace",scope).maybeSingle());
-    if(!x)throw new Error("Assignment unavailable.");
-    if(d.action==="expert_response"){
-      const assignment=checked(await client.from("whispers_expert_assignments").select("request_id").eq("request_id",x.id).eq("expert_id",user).maybeSingle());
-      if(!assignment||x.state!=="open"||!d.choice||!d.text?.trim()||d.text.length>600)throw new Error("Cannot submit this assessment.");
-      checked(await admin.from("whispers_expert_responses").insert({request_id:x.id,expert_id:user,choice:d.choice,explanation:d.text}));
-    }else{if(!d.text?.trim())throw new Error("Interpretation required.");checked(await admin.from("whispers_expert_requests").update({interpretation:d.text,state:"closed"}).eq("id",x.id));}
-    await audit(user,d.action,x.workspace,x.id);return {ok:true};
+  if (d.action === "expert_response" || d.action === "interpret") {
+    const saved = checked(await rpc("whispers_resolve_expert_request", {
+      p_id: d.id, p_actor: user, p_action: d.action, p_text: d.text?.trim() ?? "", p_choice: d.choice ?? null,
+    }));
+    if (saved !== true) throw new Error("The assessment could not be saved. Refresh the request and check your access.");
+    return { ok: true };
   }
   const transitioned=checked(await admin.rpc("whispers_publication_transition",{p_id:d.id,p_actor:user,p_action:d.action}));
   if(!transitioned)throw new Error("Publication state changed. Refresh before retrying.");

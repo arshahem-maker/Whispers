@@ -1,13 +1,15 @@
 import { tr, useTranslationVersion } from "@/lib/whispers/translation";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Eye, EyeOff, CheckCircle2, Circle } from "lucide-react";
-import { CitizenShell, useLeave } from "@/components/whispers/CitizenShell";
-import { useWhispers } from "@/lib/whispers/context";
+import { CitizenShell } from "@/components/whispers/CitizenShell";
+import { useLeave } from "@/components/whispers/use-leave";
+import { useWhispers } from "@/lib/whispers/use-whispers";
 import { TIME_LABEL, t } from "@/lib/whispers/i18n";
 import type { ContributorStatus, ContributorView } from "@/lib/whispers/types";
 import { useServerFn } from "@tanstack/react-start";
-import { pilotReceipt } from "@/lib/whispers/pilot.functions";
+import { useQuery } from "@tanstack/react-query";
+import { pilotIntakeMode, pilotReceipt } from "@/lib/whispers/pilot.functions";
 import { Button } from "@/components/ui/button";
 import { pilotContributorView } from "@/lib/whispers/pilot-adapter";
 
@@ -32,6 +34,8 @@ function CheckPage() {
   useTranslationVersion();
   const { store, heldCode, setHeldCode, connected, setConnected } = useWhispers();
   const receipt = useServerFn(pilotReceipt);
+  const getIntakeMode = useServerFn(pilotIntakeMode);
+  const intakeMode = useQuery({ queryKey: ["pilot-intake-mode"], queryFn: () => getIntakeMode(), enabled: connected, retry: false, staleTime: 10_000 });
   const [code, setCode] = useState("");
   const [show, setShow] = useState(false);
   const [view, setView] = useState<ContributorView | null>(null);
@@ -40,30 +44,43 @@ function CheckPage() {
   const [busy, setBusy] = useState(false);
   const [reply, setReply] = useState("");
   const [confirmRemove, setConfirmRemove] = useState(false);
-  const read = async (c: string, action: "open" | "message" | "removal" = "open") => {
+  const read = useCallback(async (c: string, action: "open" | "message" | "removal" = "open") => {
     if (connected) return pilotContributorView(await receipt({ data: { code: c, action, ...(action === "message" ? { text: reply } : {}) } }));
     if (action === "message") return store.addContributorMessage(c, reply);
     if (action === "removal") return store.requestRemoval(c);
     return store.openReceipt(c);
-  };
+  }, [connected, receipt, reply, store]);
 
-  const open = async (c: string) => {
+  const open = useCallback(async (c: string) => {
     setBusy(true); setErr(false);
     try {
       const v = await read(c);
       if (!v) { setErr(true); return; }
       setView(v); setActive(c); setCode("");
     } catch { setErr(true); } finally { setBusy(false); }
-  };
+  }, [read]);
 
-  useEffect(() => { if (heldCode) { const c = heldCode; setHeldCode(null); void open(c); } /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+  useEffect(() => {
+    if (!heldCode) return;
+    const timeout = window.setTimeout(() => {
+      setHeldCode(null);
+      void open(heldCode);
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [heldCode, open, setHeldCode]);
   // Refresh when the store changes (e.g. demo reviewer reply).
   useWhispers();
   useEffect(() => { if (active && !connected) store.openReceipt(active).then((v) => (v ? setView(v) : (setView(null), setActive(null)))); }, [store.version, active, store, connected]);
   const act = async (action: "open" | "message" | "removal") => {
     if (!active) return;
     setBusy(true); setErr(false);
-    try { setView(await read(active, action)); if (action === "message") setReply(""); setConfirmRemove(false); }
+    try {
+      const refreshed = await read(active, action);
+      if (!refreshed) { setView(null); setCode(active); setActive(null); setErr(true); return; }
+      setView(refreshed);
+      if (action === "message") setReply("");
+      setConfirmRemove(false);
+    }
     catch { setErr(true); } finally { setBusy(false); }
   };
 
@@ -89,7 +106,7 @@ function CheckPage() {
           <button className="btn btn-primary w-full mt-6" disabled={busy || !code.trim()}>{busy ? "…" : t("check.open")}</button>
         </form>
       ) : (
-        <ContributorPanel view={view} reply={reply} setReply={setReply} confirmRemove={confirmRemove} setConfirmRemove={setConfirmRemove}
+        <ContributorPanel view={view} partnerDemo={connected && intakeMode.data?.partnerDemo === true} reply={reply} setReply={setReply} confirmRemove={confirmRemove} setConfirmRemove={setConfirmRemove}
           onSend={() => { if (!busy && reply.trim()) void act("message"); }}
           onRemove={() => { if (!busy) void act("removal"); }}
           onClose={close} />
@@ -100,7 +117,8 @@ function CheckPage() {
   );
 }
 
-function ContributorPanel({ view, reply, setReply, onSend, onRemove, onClose, confirmRemove, setConfirmRemove }: {
+function ContributorPanel({ view, partnerDemo, reply, setReply, onSend, onRemove, onClose, confirmRemove, setConfirmRemove }: {
+  partnerDemo: boolean;
   view: ContributorView; reply: string; setReply: (s: string) => void; onSend: () => void; onRemove: () => void; onClose: () => void;
   confirmRemove: boolean; setConfirmRemove: (b: boolean) => void;
 }) {
@@ -145,7 +163,9 @@ function ContributorPanel({ view, reply, setReply, onSend, onRemove, onClose, co
             ))}
           </ul>
         )}
-        {!view.removalRequested && (
+        {!view.removalRequested && partnerDemo
+          ? <p className="hint mt-4">{tr("Replies are disabled in this private demo. Use the removal request below if you want this report deleted.")}</p>
+          : !view.removalRequested && (
           <div className="mt-4">
             <label htmlFor="reply" className="label block mb-2">{t("check.add")}</label>
             <p className="hint mb-2">{tr("Leave out names or details that could identify you. Don’t take risks to find out more.")}</p>

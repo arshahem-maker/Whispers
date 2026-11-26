@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: whispers-staging
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: pilot/launch-hardening
+    buildCommand: npx --yes bun@1.4.5 install --frozen-lockfile && npm run build
+    startCommand: node .output/server/index.mjs
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "24.16.0"
+      - key: NITRO_PRESET
+        value: node-server
+      - key: VITE_WHISPERS_EXTERNAL_AUTH
+        value: "true"
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: WHISPERS_PILOT_TESTER_IDS
+        sync: false
+      - key: WHISPERS_INTAKE_SECRET
+        generateValue: true
+      - key: LOVABLE_CRON_SECRET
+        generateValue: true

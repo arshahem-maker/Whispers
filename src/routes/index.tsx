@@ -4,15 +4,16 @@ import { ShieldCheck } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { Wordmark } from "@/components/whispers/Brand";
 import { t } from "@/lib/whispers/i18n";
+import { DEMO_CONTROLS_ENABLED } from "@/lib/whispers/context";
 import { VoiceRecorder } from "@/components/whispers/VoiceRecorder";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Whispers — Share what’s happening around you" },
-      { name: "description", content: "Send a private report to a humanitarian review team. No name or account required." },
+      { name: "description", content: "Explore a fictional Whispers reporting demo. No live response team receives reports from this demo." },
       { property: "og:title", content: "Whispers — Share what’s happening around you" },
-      { property: "og:description", content: "Send a private report to a humanitarian review team. No name or account required." },
+      { property: "og:description", content: "Explore a fictional Whispers reporting demo. No live response team receives reports from this demo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -32,7 +33,8 @@ function Home() {
         </div>
         <div className="mt-4 grid gap-2">
           <Link to="/report" className="btn btn-primary btn-sm w-full">{t("home.make")}</Link>
-          <VoiceRecorder />
+          {import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] !== "neon"
+            && import.meta.env["VITE_WHISPERS_VOICE_ENABLED"] === "true" && <VoiceRecorder />}
           <Link to="/check" className="btn btn-secondary btn-sm w-full">{t("home.check")}</Link>
         </div>
         <ol className="mt-6 grid gap-2.5 text-sm">
@@ -47,6 +49,7 @@ function Home() {
           <p className="flex gap-2.5"><ShieldCheck className="h-5 w-5 text-primary shrink-0" aria-hidden />{t("home.privacy")}</p>
           <Link to="/help" hash="privacy" className="btn-ghost inline-flex items-center !px-0 !min-h-0 mt-1 text-sm">{t("home.privacyLink")}</Link>
         </div>
+        {!DEMO_CONTROLS_ENABLED && <Link to="/partners" className="btn btn-secondary w-full mt-4">{tr("For organizations: discuss an evaluation")}</Link>}
         <p className="mt-4 hint text-sm">{t("home.notEmergency")}</p>
       </section>
     </CitizenShell>

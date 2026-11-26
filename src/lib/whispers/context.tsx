@@ -1,8 +1,13 @@
-import { createContext, useContext, useState, useSyncExternalStore, useCallback, type ReactNode } from "react";
+import { useState, useCallback, type ReactNode } from "react";
 import { WhispersStore } from "./store";
 import type { Category, Impact, KnowledgeBasis, TimeBucket } from "./types";
+import { emptyDraft } from "./draft";
+import { WhispersContext } from "./whispers-context";
 
-export const DEMO_MODE = true; // Cloud powers interface translation; report intake still uses the demo provider.
+// This app keeps its local fictional demonstration available in every build.
+// The separate connected staff workspace must not inherit fake role controls.
+export const DEMO_MODE = true;
+export const DEMO_CONTROLS_ENABLED = import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] !== "neon";
 
 export interface ProcessedPhoto {
   id: string;
@@ -26,14 +31,9 @@ export interface Draft {
   photos: ProcessedPhoto[];
 }
 
-export const emptyDraft = (): Draft => ({
-  text: "", category: "not_selected", basis: null, country: null, area: "unknown", time: null, impacts: [],
-  publicPermission: false, ack: false, photos: [],
-});
-
 interface Submission { code: string; idempotencyKey: string; accepted: boolean; provider?: "demo" | "pilot" }
 
-interface Ctx {
+export interface WhispersContextValue {
   store: WhispersStore;
   draft: Draft;
   setDraft: (fn: (d: Draft) => Draft) => void;
@@ -45,8 +45,6 @@ interface Ctx {
   connected: boolean;
   setConnected: (connected: boolean) => void;
 }
-
-const C = createContext<Ctx | null>(null);
 
 export function WhispersProvider({ children }: { children: ReactNode }) {
   const [store] = useState(() => new WhispersStore());
@@ -61,12 +59,5 @@ export function WhispersProvider({ children }: { children: ReactNode }) {
     setHeldCode(null);
     setConnected(false);
   }, []);
-  return <C.Provider value={{ store, draft, setDraft, submission, setSubmission, heldCode, setHeldCode, wipe, connected, setConnected }}>{children}</C.Provider>;
-}
-
-export function useWhispers() {
-  const c = useContext(C);
-  if (!c) throw new Error("WhispersProvider missing");
-  useSyncExternalStore(c.store.subscribe, c.store.getVersion, c.store.getVersion);
-  return c;
+  return <WhispersContext.Provider value={{ store, draft, setDraft, submission, setSubmission, heldCode, setHeldCode, wipe, connected, setConnected }}>{children}</WhispersContext.Provider>;
 }
