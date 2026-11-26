@@ -14,11 +14,11 @@
 
 - The connected staging build now defaults to its live Neon-backed path; the browser-only fictional flow remains isolated in the owner-demo build.
 - The staging partner-demo flag is enabled only for one authorized, allowlisted account. It accepts real information into private staging, blocks photos and public sharing, and offers no monitoring or response. The full real-intake release gate remains off.
-- The owner-run in-memory demo resets on refresh. Staging is not anonymous public intake and has not completed end-to-end real-report submission and removal verification.
+- The owner-run in-memory demo resets on refresh. A synthetic staging submission-to-removal flow passed; no real case data or photos were used. Staging is still not anonymous public intake, and private-media behavior is not enabled or verified.
 - The preview URL is public to anyone who knows it. `noindex` affects indexing behavior; it is not an access-control mechanism.
 - Cloudflare also serves an older production deployment at `https://whispers-neon-pilot.whispers-by-arsh.workers.dev`. The Worker URL is enabled for anyone, and its public home and report pages identify the experience as a fictional demo. The checked production HTML responses lacked `Content-Security-Policy`, `X-Robots-Tag`, and `Cache-Control`; `/partners` returned 404. The unauthenticated reviewer API returned 401 with `Cache-Control: no-store`. The production Worker is not the current staging revision and has no reviewed production release configuration in this repository.
 - Full release intake remains gated. The public production Worker is an older fictional-demo deployment, not an operational intake service. Production report data was not inspected as part of this staging refresh.
-- The isolated owner-run preview has passed an end-to-end fictional report-to-review workflow in one browser tab. This is an in-memory demo only. Connected staging has not yet passed a full submission-to-removal, response, or private-media flow.
+- The isolated owner-run preview has passed an end-to-end fictional report-to-review workflow in one browser tab. This is an in-memory demo only. Connected staging passed a synthetic submission-to-removal flow, but it has no response operation; private-media behavior remains disabled and untested.
 - No independent reviewers are needed to demonstrate simulated workflows, and none are represented as having completed reviews. The account owner is the temporary presenter/operator; seeded staff and review roles are fictional. Real-world operational release still requires independent reviews and an accountable organization.
 
 ## Readiness register
