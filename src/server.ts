@@ -7,26 +7,42 @@ type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
+type HtmlRewriteElement = {
+  setAttribute: (name: string, value: string) => void;
+  prepend: (content: string, options: { html: true }) => void;
+};
+type HtmlRewriterInstance = {
+  on: (selector: string, handlers: { element: (element: HtmlRewriteElement) => void }) => HtmlRewriterInstance;
+  transform: (response: Response) => Response;
+};
+type HtmlRewriterConstructor = new () => HtmlRewriterInstance;
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 function withSecurityHeaders(request: Request, response: Response): Response {
   const headers = new Headers(response.headers);
+  const isHtml = (headers.get("content-type") ?? "").includes("text/html");
+  // Workers can add a fresh nonce to the streamed SSR HTML without buffering it.
+  // Local Node previews do not expose HTMLRewriter, so keep their dev-only CSP usable.
+  const HtmlRewriter = (globalThis as typeof globalThis & { HTMLRewriter?: HtmlRewriterConstructor }).HTMLRewriter;
+  const nonce = isHtml && response.body && HtmlRewriter
+    ? crypto.randomUUID().replaceAll("-", "")
+    : undefined;
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "DENY");
   headers.set("Referrer-Policy", "no-referrer");
   headers.set("Permissions-Policy", "camera=(), geolocation=(), microphone=(self), payment=()");
   // Keep browser execution and network access on the app's own origin and the
-  // two configured Neon Auth origins. The application shell currently emits
-  // inline hydration scripts and styles, so those are explicitly allowed until
-  // the framework can supply per-response nonces.
+  // two configured Neon Auth origins. On Cloudflare Workers every SSR script and
+  // style tag receives a fresh per-response nonce through HTMLRewriter.
   headers.set("Content-Security-Policy", [
     "default-src 'self'",
     "base-uri 'self'",
     "object-src 'none'",
     "frame-ancestors 'none'",
     "form-action 'self'",
-    "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
+    `script-src 'self' ${nonce ? `'nonce-${nonce}'` : "'unsafe-inline'"}`,
+    `style-src 'self' 'unsafe-inline'${nonce ? ` 'nonce-${nonce}'` : ""}`,
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
     "media-src 'self' blob:",
@@ -39,14 +55,30 @@ function withSecurityHeaders(request: Request, response: Response): Response {
   if (new URL(request.url).hostname.endsWith(".workers.dev")) {
     headers.set("X-Robots-Tag", "noindex, nofollow");
   }
-  if ((headers.get("content-type") ?? "").includes("text/html")) {
+  if (isHtml) {
     headers.set("Cache-Control", "no-store");
   }
-  return new Response(response.status === 204 || response.status === 304 ? null : response.body, {
+  let secured = new Response(response.status === 204 || response.status === 304 ? null : response.body, {
     status: response.status,
     statusText: response.statusText,
     headers,
   });
+  if (nonce) {
+    // Rewriting changes the entity, so discard validators/length from the original.
+    secured.headers.delete("Content-Length");
+    secured.headers.delete("ETag");
+    secured = new (HtmlRewriter as HtmlRewriterConstructor)()
+      .on("script", { element: (element) => element.setAttribute("nonce", nonce) })
+      .on("style", { element: (element) => element.setAttribute("nonce", nonce) })
+      .on("head", {
+        element: (element) => element.prepend(
+          `<meta property="csp-nonce" content="${nonce}">`,
+          { html: true },
+        ),
+      })
+      .transform(secured);
+  }
+  return secured;
 }
 
 async function getServerEntry(): Promise<ServerEntry> {

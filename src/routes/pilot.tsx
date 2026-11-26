@@ -11,9 +11,9 @@ export const Route = createFileRoute("/pilot")({
   head: () => ({
     meta: [
       { title: "Connected pilot — Whispers" },
-      { name: "description", content: "Connected report storage and authorized staff workflows." },
+      { name: "description", content: "Restricted staging workspace for one authorized account. Submissions are unmonitored and this is not an emergency or response service." },
       { property: "og:title", content: "Connected pilot — Whispers" },
-      { property: "og:description", content: "Connected report storage and authorized staff workflows." },
+      { property: "og:description", content: "Restricted staging workspace for one authorized account. Submissions are unmonitored and this is not an emergency or response service." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
