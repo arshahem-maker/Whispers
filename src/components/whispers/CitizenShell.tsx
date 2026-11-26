@@ -4,7 +4,6 @@ import { FileText, Newspaper, LifeBuoy, LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { Wordmark } from "./Brand";
 import { CONNECTED_BACKEND, DEMO_MODE } from "@/lib/whispers/context";
-import { useWhispers } from "@/lib/whispers/use-whispers";
 import { t } from "@/lib/whispers/i18n";
 import { LanguageButton } from "./LanguagePicker";
 import { useLeave } from "./use-leave";
@@ -12,7 +11,6 @@ import { useLeave } from "./use-leave";
 export function CitizenShell({ children, sensitive = false, hideNav = false }: { children: ReactNode; sensitive?: boolean; hideNav?: boolean }) {
   useTranslationVersion();
   const leave = useLeave();
-  const { connected } = useWhispers();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const items = [
     { to: "/" as const, label: t("nav.report"), icon: FileText, active: path === "/" || path.startsWith("/report") || path === "/check" },
@@ -40,7 +38,7 @@ export function CitizenShell({ children, sensitive = false, hideNav = false }: {
         )}
         {DEMO_MODE && path !== "/pilot" && (
           <div className="bg-warning/15 text-warning text-sm text-center py-1.5 px-4">
-            {connected ? tr("Connected pilot — follow the intake and privacy notice shown before sending.") : t("demo.banner")}
+            {CONNECTED_BACKEND ? tr("Connected pilot — follow the intake and privacy notice shown before sending.") : t("demo.banner")}
           </div>
         )}
       </header>

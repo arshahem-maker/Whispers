@@ -35,7 +35,7 @@
 | Language and accessibility | English-only Neon path; translation and voice unavailable | Obtain native-language review and field-test accessibility, low-bandwidth, device, and safety assumptions. |
 | Technical security | Server-side identity and authorization, private object checks, request limits, baseline headers, CSP nonces for scripts in Worker HTML, and CI checks are present | Review the full threat model and production origins, remove or tightly constrain remaining inline style allowances, independently assess access boundaries, and establish alerting. |
 | Recovery | Database and private-object restore have not been rehearsed for this staging deployment | Perform and document a synthetic restore of both database and private objects; verify access revocation and cleanup. |
-| Legacy services | Lovable/Supabase project remains enabled and is not current source of truth | Reconcile residual metadata/configuration and dependencies before retirement. |
+| Legacy services | Supabase/Lovable runtime code and direct dependencies have been removed from the GitHub app; the unpublished Lovable project and managed database remain enabled | Reconcile residual metadata, settings, accounts, and historical audit records before retirement. Do not infer the database is empty or disable it yet. |
 | Credentials | OAuth client secret appeared in conversation history | Owner rotates the secret in Google Cloud, updates Neon Auth, verifies staging login, and removes the old credential. Do not use the current credential for launch. |
 
 ## Launch decision and required gates
@@ -62,6 +62,8 @@ Before open public or organization-backed use, a responsible operator must compl
 For demonstrations, use the owner-run fictional preview for synthetic workflows. The connected staging account can accept real information, but that path is private, limited to one authorized account, unmonitored, and has no response commitment; do not invite other people to submit reports. The project owner is the temporary presenter/operator; do not claim that simulated roles are independent reviewers or that real-world operational safeguards are complete.
 
 ## Implementation changes in this branch
+
+- Removes Supabase-backed auth, reviewer, retention, voice-AI, translation, and error-reporting code from the maintained app runtime. Database/import artifacts are retained for pending legacy-data reconciliation. No remote records or services were changed.
 
 - Clarifies the boundary between browser-local fictional demo and restricted connected staging.
 - Removes the unverified “private company” description and the account-free product promise.

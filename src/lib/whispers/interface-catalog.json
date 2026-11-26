@@ -81,7 +81,7 @@
   "Close",
   "Close private photo",
   "Close report",
-  "Cloud submission and voice limits use a hashed network-derived identifier, not a raw address. Private-code lookups use a code hash for limits. These are still pseudonymous metadata; daily cleanup removes limit records older than one day. Hosting services may keep their own connection records.",
+  "Cloud submissions and private-code lookups use pseudonymous rate-limit records rather than storing raw network addresses or report codes in those records. Daily cleanup removes old limit records. Hosting services may keep their own connection records.",
   "Complete",
   "Complete removal",
   "Completing removal deletes the text, messages, notes and photos from the app and revokes the private code. Backups and any published summary are handled separately.",

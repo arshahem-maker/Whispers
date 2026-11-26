@@ -9,10 +9,9 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { WhispersProvider } from "../lib/whispers/context";
 import { LanguageProvider } from "@/components/whispers/LanguagePicker";
 
@@ -41,9 +40,6 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   useTranslationVersion();
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -122,29 +118,6 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   useTranslationVersion();
   const { queryClient } = Route.useRouteContext();
-  const router = useRouter();
-  useEffect(() => {
-    if (import.meta.env["VITE_WHISPERS_REVIEWER_BACKEND"] === "neon"
-      || !import.meta.env["VITE_SUPABASE_URL"] || !import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"]) return;
-    let cancelled = false;
-    let unsubscribe = () => {};
-    void import("@/integrations/supabase/client").then(({ supabase }) => {
-      if (cancelled) return;
-      const { data } = supabase.auth.onAuthStateChange((event) => {
-        if (!["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"].includes(event)) return;
-        void router.invalidate();
-        if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
-      });
-      unsubscribe = () => data.subscription.unsubscribe();
-    }).catch((error: unknown) => {
-      if (!cancelled) console.error("Unable to initialize the legacy authentication listener", error);
-    });
-    return () => {
-      cancelled = true;
-      unsubscribe();
-    };
-  }, [router, queryClient]);
-
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}

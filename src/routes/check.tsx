@@ -5,6 +5,7 @@ import { Eye, EyeOff, CheckCircle2, Circle } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { useLeave } from "@/components/whispers/use-leave";
 import { useWhispers } from "@/lib/whispers/use-whispers";
+import { CONNECTED_BACKEND } from "@/lib/whispers/context";
 import { TIME_LABEL, t } from "@/lib/whispers/i18n";
 import type { ContributorStatus, ContributorView } from "@/lib/whispers/types";
 import { useServerFn } from "@tanstack/react-start";
@@ -32,10 +33,10 @@ const ORDER: ContributorStatus[] = ["received", "under_review", "more_info", "co
 
 function CheckPage() {
   useTranslationVersion();
-  const { store, heldCode, setHeldCode, connected, setConnected } = useWhispers();
+  const { store, heldCode, setHeldCode } = useWhispers();
   const receipt = useServerFn(pilotReceipt);
   const getIntakeMode = useServerFn(pilotIntakeMode);
-  const intakeMode = useQuery({ queryKey: ["pilot-intake-mode"], queryFn: () => getIntakeMode(), enabled: connected, retry: false, staleTime: 10_000 });
+  const intakeMode = useQuery({ queryKey: ["pilot-intake-mode"], queryFn: () => getIntakeMode(), enabled: CONNECTED_BACKEND, retry: false, staleTime: 10_000 });
   const [code, setCode] = useState("");
   const [show, setShow] = useState(false);
   const [view, setView] = useState<ContributorView | null>(null);
@@ -45,11 +46,11 @@ function CheckPage() {
   const [reply, setReply] = useState("");
   const [confirmRemove, setConfirmRemove] = useState(false);
   const read = useCallback(async (c: string, action: "open" | "message" | "removal" = "open") => {
-    if (connected) return pilotContributorView(await receipt({ data: { code: c, action, ...(action === "message" ? { text: reply } : {}) } }));
+    if (CONNECTED_BACKEND) return pilotContributorView(await receipt({ data: { code: c, action, ...(action === "message" ? { text: reply } : {}) } }));
     if (action === "message") return store.addContributorMessage(c, reply);
     if (action === "removal") return store.requestRemoval(c);
     return store.openReceipt(c);
-  }, [connected, receipt, reply, store]);
+  }, [receipt, reply, store]);
 
   const open = useCallback(async (c: string) => {
     setBusy(true); setErr(false);
@@ -70,7 +71,7 @@ function CheckPage() {
   }, [heldCode, open, setHeldCode]);
   // Refresh when the store changes (e.g. demo reviewer reply).
   useWhispers();
-  useEffect(() => { if (active && !connected) store.openReceipt(active).then((v) => (v ? setView(v) : (setView(null), setActive(null)))); }, [store.version, active, store, connected]);
+  useEffect(() => { if (active && !CONNECTED_BACKEND) store.openReceipt(active).then((v) => (v ? setView(v) : (setView(null), setActive(null)))); }, [store.version, active, store]);
   const act = async (action: "open" | "message" | "removal") => {
     if (!active) return;
     setBusy(true); setErr(false);
@@ -91,7 +92,6 @@ function CheckPage() {
       {!view ? (
         <form onSubmit={(e) => { e.preventDefault(); void open(code); }} autoComplete="off">
           <h1>{t("check.title")}</h1>
-          <label className="flex gap-3 mt-4 text-sm"><input type="checkbox" checked={connected} onChange={(e) => setConnected(e.target.checked)} />{tr("Open saved pilot report")}</label>
           <label htmlFor="code" className="label block mt-6 mb-2">{t("check.label")}</label>
           <div className="flex gap-2">
             <input id="code" className="field font-mono tracking-wider" type={show ? "text" : "password"} value={code}
@@ -106,12 +106,12 @@ function CheckPage() {
           <button className="btn btn-primary w-full mt-6" disabled={busy || !code.trim()}>{busy ? "…" : t("check.open")}</button>
         </form>
       ) : (
-        <ContributorPanel view={view} partnerDemo={connected && intakeMode.data?.partnerDemo === true} reply={reply} setReply={setReply} confirmRemove={confirmRemove} setConfirmRemove={setConfirmRemove}
+        <ContributorPanel view={view} partnerDemo={CONNECTED_BACKEND && intakeMode.data?.partnerDemo === true} reply={reply} setReply={setReply} confirmRemove={confirmRemove} setConfirmRemove={setConfirmRemove}
           onSend={() => { if (!busy && reply.trim()) void act("message"); }}
           onRemove={() => { if (!busy) void act("removal"); }}
           onClose={close} />
       )}
-      {view && connected && <Button className="mt-4" variant="outline" disabled={busy} onClick={() => void act("open")}>{tr("Refresh")}</Button>}
+      {view && CONNECTED_BACKEND && <Button className="mt-4" variant="outline" disabled={busy} onClick={() => void act("open")}>{tr("Refresh")}</Button>}
       {view && err && <p role="alert" className="text-destructive mt-3">{t("check.generic")}</p>}
     </CitizenShell>
   );
