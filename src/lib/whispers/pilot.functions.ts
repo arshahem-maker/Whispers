@@ -110,7 +110,19 @@ export const pilotPublicUpdates = createServerFn({ method: "GET" }).handler(asyn
     : await readSupabasePublicUpdates();
   return rows.map((u) => { const demo = typeof u.fictional === "boolean" ? u.fictional : true; return { id: String(u.id), title: String(u.title ?? ""), summary: String(u.summary ?? ""), known: String(u.known ?? ""), uncertain: String(u.uncertain ?? ""), sources: Array.isArray(u.sources) ? u.sources.filter((s): s is string => typeof s === "string") : [], publishedAt: String(u.published_at), withdrawn: Boolean(u.withdrawn), demo, broadContext: demo ? "Fictional connected pilot" : "Reviewed report", corrections: [] }; });
 });
-async function readSupabasePublicUpdates() {
+type LegacyPublicUpdate = {
+  id: unknown;
+  title: unknown;
+  summary: unknown;
+  known: unknown;
+  uncertain: unknown;
+  sources: unknown;
+  published_at: unknown;
+  withdrawn: unknown;
+  fictional?: boolean;
+};
+
+async function readSupabasePublicUpdates(): Promise<LegacyPublicUpdate[]> {
   const { createClient } = await import("@supabase/supabase-js");
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
   const url = process.env["SUPABASE_URL"];
@@ -123,7 +135,7 @@ async function readSupabasePublicUpdates() {
   } } });
   const result = await client.from("whispers_public_updates").select("id,title,summary,known,uncertain,sources,published_at,withdrawn").order("published_at", { ascending: false }).limit(100);
   if (result.error) throw new Error("Updates unavailable.");
-  return result.data ?? [];
+  return (result.data ?? []) as LegacyPublicUpdate[];
 }
 
 export const pilotCommand = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).validator((input) => pilotCommandSchema.parse(input)).handler(async ({ data,context }) => {

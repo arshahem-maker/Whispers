@@ -110,7 +110,11 @@ not put them in Git or the browser bundle.
 Administrators with all three workspaces can record completed human reviews
 under **Manage staff invitations → Release reviews** on the pilot. The
 record stores the review type, reference, recording administrator and date.
-The panel does not enable real intake.
+After the server flag is enabled and the operator, all five review areas, and
+two independent reviewers are recorded, a separate administrator can activate
+real intake in that panel. The server still rejects real submissions whenever
+any gate is missing. This code path is not yet deployed or activated on the
+hosted staging or production app.
 Invited staff sign in with the matching verified Google account and select
 **Accept staff invitations** on `/pilot`. The reviewer page supports workspace
 scoped reports, private photos, private notes, status changes, and replies.
