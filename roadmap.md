@@ -4,7 +4,7 @@ Status checked 26 November 2026. This roadmap describes the maintained `staging/
 
 ## Current state
 
-- The maintained code is on GitHub branch `staging/neon`. PR #2 targets `main`, is open and ready for review, and is not merged. The staging preview contains the application changes from `c26ca44`; documentation updates have also been pushed. The production branch and production Neon project have not been changed by the staging pilot.
+- The Neon implementation from `staging/neon` was merged into GitHub `main` via PR #2 on 26 November 2026 (merge commit `43d890b`). The staging preview still runs application revision `c26ca44`; the latest documentation update is in the merged source. The separate production Worker was not changed by the merge.
 - GitHub Verify passed on application revision `c26ca44` in runs [45788162408](https://github.com/arshahem-maker/Whispers/actions/runs/45788162408) and [45788154662](https://github.com/arshahem-maker/Whispers/actions/runs/45788154662).
 - The Cloudflare staging preview is public to anyone who has the URL and is marked `noindex`. It must not be described as access-controlled. Its Neon partner-demo intake is limited to one verified, allowlisted account and the isolated staging database.
 - The partner-demo mode accepts real-information submissions from that one account, but reports are unmonitored and there is no response commitment. Photos, public sharing, and follow-up messages are disabled. Full real intake remains gated; production intake is unchanged.

@@ -6,6 +6,8 @@
 
 **Revision and deployment:** Application revision `c26ca44c7c94f0b74aa272b81453a0dfc60b5825` is deployed to the staging preview. GitHub Verify passed on this exact revision in [runs 45788162408](https://github.com/arshahem-maker/Whispers/actions/runs/45788162408) and [45788154662](https://github.com/arshahem-maker/Whispers/actions/runs/45788154662). The preview is not production and is not access-controlled.
 
+**Source integration:** PR #2 was merged into `main` on 26 November 2026 as merge commit `43d890b`. Verify passed on the final pre-merge branch revision, including documentation updates, in [run 45795861111](https://github.com/arshahem-maker/Whispers/actions/runs/45795861111). This source merge did not deploy or change the production Worker.
+
 ## Verified operating boundary
 
 - The public experience defaults to fictional, browser-local demonstration data.

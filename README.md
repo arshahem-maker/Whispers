@@ -7,7 +7,8 @@ an emergency response service.
 
 ## Current release status — 26 November 2026
 
-- `staging/neon` is the current Neon implementation branch. The production
+- The Neon implementation on `staging/neon` was merged into `main` by PR #2
+  on 26 November 2026 (merge commit `43d890b`). The production
   Neon project remains separate. A second Free-plan project, `Whispers Staging`,
   provides the app schema and Neon services. The restricted migration snapshot
   and its three private photo copies were deleted from staging at the owner's
