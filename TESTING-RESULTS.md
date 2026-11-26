@@ -34,6 +34,23 @@
   also passed on merged source commit `988e1cd` in run 45802150296. This validates
   the owner-run demonstration, not connected Neon submission, private media,
   reply, removal, retention, recovery, or any real-world operation.
+- A follow-up boundary review found connected-staging wording and entry points
+  still visible in the isolated demo. The owner-demo `/pilot` route is now an
+  explanatory page, `/review/sign-in` offers clearly labelled fictional roles
+  without external sign-in, and the reviewer shell hides its connected-pilot
+  link. Home, report metadata, and the privacy FAQ now describe the isolated
+  browser-only behavior accurately, including that report text is not sent to
+  the app server. Direct browser checks confirmed `/`, `/help`, `/pilot`,
+  `/review/sign-in`, and `/review/reports`; the reviewer page showed an access
+  gate for a non-reviewer role, and no report was created. The updated Preview
+  is at the same public URL; its unique version URL is
+  <https://4706a6fe-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+- The follow-up passed `npm run typecheck`, `npm run lint`, and `npm test`
+  (49 tests across 14 files), and `npm run deploy:demo` built and uploaded the
+  isolated preview successfully. Vite still prints the upstream
+  `vite-tsconfig-paths` compatibility notice; Wrangler also identifies
+  `preview` as an open-beta command. The isolated preview remains public to
+  anyone with its URL and is not an access-control boundary.
 
 ## Connected staging intake safeguard — 26 November 2026
 

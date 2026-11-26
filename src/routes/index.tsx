@@ -4,7 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { CitizenShell } from "@/components/whispers/CitizenShell";
 import { Wordmark } from "@/components/whispers/Brand";
 import { t } from "@/lib/whispers/i18n";
-import { DEMO_CONTROLS_ENABLED } from "@/lib/whispers/context";
+import { DEMO_CONTROLS_ENABLED, DEMO_ONLY_BUILD } from "@/lib/whispers/context";
 import { VoiceRecorder } from "@/components/whispers/VoiceRecorder";
 
 export const Route = createFileRoute("/")({
@@ -46,7 +46,7 @@ function Home() {
           ))}
         </ol>
         <div className="card mt-6 p-4 text-sm">
-          <p className="flex gap-2.5"><ShieldCheck className="h-5 w-5 text-primary shrink-0" aria-hidden />{t("home.privacy")}</p>
+          <p className="flex gap-2.5"><ShieldCheck className="h-5 w-5 text-primary shrink-0" aria-hidden />{DEMO_ONLY_BUILD ? tr("This isolated demonstration has no connected database or staff sign-in. Use fictional information only; reports stay in this browser tab and sample roles and reviews are simulated.") : t("home.privacy")}</p>
           <Link to="/help" hash="privacy" className="btn-ghost inline-flex items-center !px-0 !min-h-0 mt-1 text-sm">{t("home.privacyLink")}</Link>
         </div>
         {!DEMO_CONTROLS_ENABLED && <Link to="/partners" className="btn btn-secondary w-full mt-4">{tr("For organizations: discuss an evaluation")}</Link>}
