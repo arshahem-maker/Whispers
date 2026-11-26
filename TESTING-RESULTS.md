@@ -5,6 +5,11 @@
 - Published a separate Cloudflare Preview at
   <https://owner-demo-whispers-neon-pilot.whispers-by-arsh.workers.dev> using
   `wrangler.demo.jsonc` and Wrangler's `--ignore-base-config` option. The
+  tested app source was commit `2d2976c0197f9a4734187d496d409acd337cf958`
+  (unique Preview version URL:
+  <https://ac3a0684-whispers-neon-pilot.whispers-by-arsh.workers.dev>).
+  PR #8 merged this source into `main` as `988e1cd`.
+  The
   dedicated configuration has no Neon bindings or secrets. The build hides
   the connected-cloud intake toggle; reports stay in the browser's in-memory
   demo store and reset on refresh. The preview remains publicly reachable by
@@ -25,7 +30,8 @@
   isolated demo preview.
 - Local validation after the demo-only change passed `npm run typecheck`,
   `npm run lint`, and `npm test` (49 tests across 14 files). The demo production
-  build and Cloudflare Preview upload completed successfully. This validates
+  build and Cloudflare Preview upload completed successfully. GitHub Verify
+  also passed on merged source commit `988e1cd` in run 45802150296. This validates
   the owner-run demonstration, not connected Neon submission, private media,
   reply, removal, retention, recovery, or any real-world operation.
 

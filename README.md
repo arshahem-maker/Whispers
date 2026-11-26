@@ -16,6 +16,11 @@ This is not an emergency or response service.
   direction. No legacy report rows have been activated in app tables. The local
   `.neon` and `.env.local` still point to production; use the ignored
   `.env.staging.local` for staging-only work.
+- The owner-run, fictional-only demo safeguards and presenter flow were merged
+  from `staging/neon` by [PR #8](https://github.com/arshahem-maker/Whispers/pull/8)
+  as `988e1cd`. GitHub Verify passed on the merge commit in run
+  [45802150296](https://github.com/arshahem-maker/Whispers/actions/runs/45802150296).
+  The separate owner-demo preview is built from app revision `2d2976c` below.
 - The Lovable project is not published, and its managed Supabase database is
   still enabled. All five source reports were explicitly marked fictional and
   have been deleted with their three private photo objects. Verification found

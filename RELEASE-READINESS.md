@@ -1,10 +1,10 @@
 # Whispers partner-evaluation readiness
 
 **Assessment date:** 26 November 2026  
-**Scope:** GitHub `staging/neon`, Neon staging, the current Cloudflare preview, and the separately deployed Cloudflare production Worker.
+**Scope:** GitHub `staging/neon`, Neon staging, the connected fictional-only Cloudflare preview, the isolated owner-run Cloudflare demo preview, and the separately deployed Cloudflare production Worker.
 **Decision:** Not ready for live reporting. Suitable for an owner-run product demonstration using fictional data and for non-sensitive partner-evaluation conversations.
 
-**Revision and deployment:** Application revision `c26ca44c7c94f0b74aa272b81453a0dfc60b5825` is deployed to the staging preview. GitHub Verify passed on this exact revision in [runs 45788162408](https://github.com/arshahem-maker/Whispers/actions/runs/45788162408) and [45788154662](https://github.com/arshahem-maker/Whispers/actions/runs/45788154662). The preview is not production and is not access-controlled.
+**Revision and deployment:** Staging app revision `c26ca44c7c94f0b74aa272b81453a0dfc60b5825` remains deployed to the connected staging preview. The isolated owner-demo preview is built from `2d2976c0197f9a4734187d496d409acd337cf958`. The latest source was merged by PR #8 as `988e1cd542fab7bfe9601da43e171e84246f9fa8`; GitHub Verify passed on that merge commit in [run 45802150296](https://github.com/arshahem-maker/Whispers/actions/runs/45802150296). Both previews are public to anyone with their URLs and are not production.
 
 **Source integration:** PR #2 was merged into `main` on 26 November 2026 as merge commit `43d890b`. Verify passed on the final pre-merge branch revision, including documentation updates, in [run 45795861111](https://github.com/arshahem-maker/Whispers/actions/runs/45795861111). This source merge did not deploy or change the production Worker.
 
@@ -71,7 +71,7 @@ For demonstrations, use the owner-run fictional preview or the connected staging
 - Adds a partner-evaluation page with a direct email link, no form, and an explicit request not to email sensitive case details.
 - Adds a fresh nonce to every script and style element in Cloudflare Worker HTML responses; the `script-src` policy no longer permits inline scripts there. Inline style attributes remain allowed for the current styling framework and need a separate production review.
 - The separate production Worker was inspected read-only on 26 November 2026. It still serves an older fictional demo build, has no `/partners` page, and lacks the checked HTML response headers noted above. Keep it separate from real intake until an approved production build and configuration are reviewed and deployed.
-- Corrects the roadmap and adds this readiness register. GitHub CI and the deployed owner-demo revision will be recorded after source changes are pushed; the nonce/header pair was verified on `/`, `/partners`, `/help`, `/report`, and `/pilot` at the earlier staging revision `c26ca44`.
+- Corrects the roadmap and adds this readiness register. GitHub Verify passed on merged source revision `988e1cd`; the nonce/header pair was verified on `/`, `/partners`, `/help`, `/report`, and `/pilot` at the earlier connected-staging revision `c26ca44`.
 
 ## Humanitarian data-responsibility review
 
