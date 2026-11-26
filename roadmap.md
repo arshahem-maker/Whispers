@@ -92,10 +92,12 @@ marked historical there.
    their three photo objects were deleted from both Neon staging and the
    original Lovable Supabase source. Do not re-import them. The Lovable-managed
    database remains enabled. Its owner/admin identity is already mapped to
-   Neon; the outstanding source state includes eleven historical audit events,
-   an expired/revoked invitation, and stale translations. Preserve or explicitly
-   disposition the audit history, then confirm the old project dependencies and
-   settings before disabling it.
+   Neon. The eleven historical audit events have been copied as metadata into
+   the restricted `whispers_legacy_import.snapshots` table on Neon staging; the
+   source rows remain intact. An expired/revoked invitation and stale
+   translations remain in the source but are not active Neon app state. Confirm
+   their disposition and the old project's dependencies/settings before
+   disabling the database.
 5. **Run current staging verification.** With fictional fixtures and separate
    citizen, reviewer, expert, publisher, and administrator accounts, verify
    submissions, private-code follow-up, photo retry/viewing, removal, retention,
@@ -112,10 +114,13 @@ marked historical there.
   available. Reviewer-specific permissions and citizen report flows still need
   a separate authorized test account and end-to-end verification.
 - Legacy report cleanup is complete in both source and Neon. No report rows or
-  private photo objects remain in the source database. The Lovable-managed
-  database itself is still enabled. Its eleven historical audit events remain
-  in that database; do not disable it until that history is preserved or its
-  disposition is clear. Legacy Supabase compatibility code remains in the repo.
+  private photo objects remain in the source database. The eleven source audit
+  events are preserved as metadata in the restricted Neon staging archive; the
+  originals remain in the enabled Lovable-managed database. One expired,
+  revoked invitation and eight stale translation rows also remain there. Keep
+  the old database enabled until these records and remaining project
+  dependencies/settings have been reviewed and a retirement plan is verified.
+  Legacy Supabase compatibility code remains in the repo.
 - Lovable still reports its Supabase database enabled. The app retains legacy
   Supabase compatibility code; the active Neon path does not use it for the
   tested reviewer, staff, retention, or public-feed flows. Translation

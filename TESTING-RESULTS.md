@@ -55,6 +55,23 @@
   before disabling the old database. The expired invitation and stale
   translation cache are not active app state; voice stays disabled in Neon.
 
+## Legacy audit metadata archive — 26 November 2026
+
+- Copied the 11 remaining source audit events to the restricted
+  `whispers_legacy_import.snapshots` table on Neon staging
+  (`wild-mountain-69998844`, branch `main`) in one transaction. The insert
+  reported `INSERT 0 1`; a follow-up aggregate returned `archived_events = 11`;
+  the transaction committed successfully. The archive preserves source event
+  identifiers, actor identifiers, action/target metadata, workspace, outcome,
+  and timestamps.
+- This was a metadata-only archive. Report text, photo contents, translation
+  phrases, contact details, and audit UUIDs were not inspected. Source audit
+  rows were not deleted, and the Lovable-managed database remains enabled.
+  This archive does not establish that the old project's database or settings
+  can be retired safely.
+- The expired invitation and stale Swahili translation cache remain in the old
+  source. They are not active Neon app state; no translation data was copied.
+
 ## Staging access and data audit — 26 November 2026
 
 - A guarded, read-only audit confirmed all 14 recorded migrations are present.
