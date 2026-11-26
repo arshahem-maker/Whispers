@@ -42,12 +42,21 @@ an emergency response service.
 - The operator information describes Whispers as a prototype. The legal
   operator and legal form have not been confirmed, so the app does not claim a
   registered company or present its FAQ as a complete legal privacy notice.
-- The public home and report metadata distinguish local fictional demo from
-  restricted staging partner demo. Worker responses add
-  baseline browser security headers; HTML responses are not cached, and
-  `workers.dev` responses are marked `noindex` in both Worker and static-asset
-  handling. The browser Content Security Policy is narrower; inline scripts and
-  styles remain allowed until the server-rendered app supports response nonces.
+- The maintained staging Worker adds baseline browser security headers, does
+  not cache HTML, marks `workers.dev` responses `noindex`, and applies a fresh
+  response nonce to every script and style tag. Its `script-src` policy does
+  not allow inline scripts. Inline style allowances still need a separate
+  production review.
+- Cloudflare also has a separate, older **production** Worker deployment at
+  <https://whispers-neon-pilot.whispers-by-arsh.workers.dev>. It is publicly
+  reachable, still presents the fictional demo, and has no `/partners` page
+  (that route returns 404). On 26 November 2026, the root, report, help, and
+  `/pilot` routes returned HTTP 200; the unauthenticated Neon reviewer API
+  returned 401. The checked HTML responses had no CSP, `X-Robots-Tag`, or
+  `Cache-Control` header. This is not the current staging build and must not be
+  treated as the production launch. The current repo has no reviewed production
+  release configuration or deployment workflow; do not point real reporters
+  to this Worker.
 - The Neon browser entry is 331 kB raw / 103 kB gzip. The legacy Supabase Auth
   client and pilot UI load separately; the public home and Neon `/pilot` do not
   preload the Supabase client. This is a bundle optimization, not a removal of

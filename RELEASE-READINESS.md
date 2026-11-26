@@ -1,7 +1,7 @@
 # Whispers partner-evaluation readiness
 
 **Assessment date:** 26 November 2026  
-**Scope:** GitHub `staging/neon`, Neon staging, and the Cloudflare `workers.dev` preview.  
+**Scope:** GitHub `staging/neon`, Neon staging, the current Cloudflare preview, and the separately deployed Cloudflare production Worker.
 **Decision:** Not ready for a live launch or as a public or partner reporting channel. Suitable only for a clearly labelled product demonstration and non-sensitive partner-evaluation conversations.
 
 **Revision and deployment:** Application revision `c26ca44c7c94f0b74aa272b81453a0dfc60b5825` is deployed to the staging preview. GitHub Verify passed on this exact revision in [runs 45788162408](https://github.com/arshahem-maker/Whispers/actions/runs/45788162408) and [45788154662](https://github.com/arshahem-maker/Whispers/actions/runs/45788154662). The preview is not production and is not access-controlled.
@@ -12,7 +12,8 @@
 - The connected staging preview accepts real-information submissions only from one authorized, allowlisted account. This is a constrained demonstration of the flow, not organizational access.
 - Staging reports are private, unmonitored, and have no promised response. Photos, public sharing, and follow-up messages are disabled in that mode.
 - The preview URL is public to anyone who knows it. `noindex` affects indexing behavior; it is not an access-control mechanism.
-- Full release intake is still gated and production is not enabled. The database currently has no active reports.
+- Cloudflare also serves an older production deployment at `https://whispers-neon-pilot.whispers-by-arsh.workers.dev`. The Worker URL is enabled for anyone, and its public home and report pages identify the experience as a fictional demo. The checked production HTML responses lacked `Content-Security-Policy`, `X-Robots-Tag`, and `Cache-Control`; `/partners` returned 404. The unauthenticated reviewer API returned 401 with `Cache-Control: no-store`. The production Worker is not the current staging revision and has no reviewed production release configuration in this repository.
+- Full release intake remains gated. The public production Worker is an older fictional-demo deployment, not an operational intake service; the database currently has no active reports.
 - CI passed on the latest GitHub branch revision, but hosted verification is limited to route rendering, status, and authenticated workspace reads. No hosted citizen submission-to-removal flow has been proven end to end.
 - The restricted staging partner-demo switch is a separate exception to the full-release gate. It permits one allowlisted account to submit real information into staging. It does not imply that this data is safe to collect operationally; that account must use synthetic or non-sensitive demonstration content.
 
@@ -35,7 +36,7 @@
 
 ## Launch decision and required gates
 
-This repository has no verified production deployment configuration, production Neon branch, production OAuth setup, custom domain, monitoring team, or response commitment. Staging checks cannot certify those parts. A public `workers.dev` URL with `noindex` is still publicly reachable; it must not be used as the production launch URL.
+An older Cloudflare Worker is deployed in the production environment and publicly reachable, but this repository has no reviewed production release configuration or deployment workflow. A Neon branch named `production` exists, but the current app's production integration and OAuth configuration have not been reviewed or verified. There is no custom domain, monitoring team, or response commitment. Staging checks cannot certify those parts. A public `workers.dev` URL with `noindex` is still publicly reachable; the existing Worker is a fictional demonstration, not an operational launch.
 
 The application's release-review screen is an administrative checklist backed by review references. A reference string and a recorded account do not independently prove reviewer identity, independence, competence, scope, or review quality. A responsible operator must verify the evidence outside the software before enabling an operational service. OCHA's current data-responsibility guidance and the ICRC handbook emphasize understanding data flows, sensitivity, potential harm, sharing safeguards, accountability, and operating context; the app cannot complete that assessment on the operator's behalf.
 
@@ -64,6 +65,7 @@ Until these gates are complete, use the browser-local fictional demonstration an
 - Changes the partner-demo submit action and report-safety text to state that records go to unmonitored private staging.
 - Adds a partner-evaluation page with a direct email link, no form, and an explicit request not to email sensitive case details.
 - Adds a fresh nonce to every script and style element in Cloudflare Worker HTML responses; the `script-src` policy no longer permits inline scripts there. Inline style attributes remain allowed for the current styling framework and need a separate production review.
+- The separate production Worker was inspected read-only on 26 November 2026. It still serves an older fictional demo build, has no `/partners` page, and lacks the checked HTML response headers noted above. Keep it separate from real intake until an approved production build and configuration are reviewed and deployed.
 - Corrects the roadmap and adds this readiness register. Latest GitHub CI passed; the nonce/header pair was verified on `/`, `/partners`, `/help`, `/report`, and `/pilot` at app revision `c26ca44`.
 
 ## Humanitarian data-responsibility review
