@@ -10,18 +10,23 @@
 - Staging Neon reports `mode=real` and `partnerDemo=true`. This server-side
   mode is limited by the existing staging database and allowlist to one
   authorized account. Public visitors cannot submit. Photos and public
-  sharing are disabled; the full release gate remains off. No report was
-  created, and production services and data were not changed.
+  sharing are disabled; the full release gate remains off. A clearly labeled
+  synthetic test report was created and removed through the connected user and
+  reviewer flows; production services and data were not changed.
 - Read-only route checks returned HTTP 200 for `/`, `/report`, `/help`,
   `/about`, `/partners`, and `/pilot`. The responses had the expected
   content-security policy, `Cache-Control: no-store`, and `X-Robots-Tag:
   noindex`. The connected home and report routes no longer default to the
-  browser-only fictional path. A signed-in report submission, removal, and
-  private-media flow have not been exercised end to end.
+  browser-only fictional path.
+- A signed-in end-to-end staging check submitted a clearly labeled synthetic
+  report through the connected form, confirmed receipt and private-code access,
+  requested removal, and removed the record from the reviewer workspace. A
+  refreshed workspace showed no reports remaining. No real case information
+  or photos were used. Private-media behavior remains untested and unavailable
+  in this partner-demo mode.
 - Local verification after the UI and mode changes passed: 49 tests across
   14 files, type checking, lint, and the staging production build. This checks
-  the code and routes but does not substitute for the unperformed signed-in
-  submission/removal flow or a production release review.
+  the code and routes but does not substitute for production release review.
 
 ## Owner-run fictional demo preview — 26 November 2026
 

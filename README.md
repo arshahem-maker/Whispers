@@ -186,8 +186,9 @@ account in a private, unmonitored mode. Other visitors cannot submit.
 Connected staging route checks returned HTTP 200 for `/`, `/report`, `/help`,
 `/about`, `/partners`, and `/pilot`. The protected intake-status endpoint
 reports `mode=real` and `partnerDemo=true`. The connected UI defaults to Neon
-and accurately describes its one-account limits. A real report submission and
-subsequent removal have not been exercised end to end. The separate owner-run preview passed a
+and accurately describes its one-account limits. A signed-in synthetic report
+was submitted and removed end to end; the refreshed reviewer workspace showed
+no remaining reports. No real case information or photos were used. The separate owner-run preview passed a
 fictional report-to-review workflow in one browser tab; that in-memory result
 does not prove connected staging behavior. See `TESTING-RESULTS.md`.
 
