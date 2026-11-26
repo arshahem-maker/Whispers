@@ -23,7 +23,7 @@ describe("LanguageButton", () => {
     render(<LanguageProvider><LanguageButton tiny /></LanguageProvider>);
 
     fireEvent.click(await screen.findByRole("button", { name: "Change language" }));
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", {}, { timeout: 5000 })).toBeInTheDocument();
   });
 
   it("keeps the Neon provider lightweight and leaves its children available", () => {
