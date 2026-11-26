@@ -30,10 +30,11 @@ review, private media, and reviewed public updates.
   `workers.dev` site is a
   public staging preview at
   <https://staging-neon-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
-  Cloudflare marks it `noindex`; anyone with the URL can visit it. The home and
-  `/pilot` return HTTP 200. Google sign-in has been verified on staging and the
-  signed-in administrator can load invitation and retention panels. This does
-  not verify reviewer access or citizen report submission.
+  Cloudflare marks it `noindex`; anyone with the URL can visit it. The home,
+  report, report-review, help, and `/pilot` routes return HTTP 200. Google
+  sign-in and the allowlisted account's reviewer workspace have been verified.
+  The workspace showed no reports awaiting review. Citizen submission has not
+  been exercised end to end.
 - The public home and report metadata distinguish local fictional demo from
   restricted staging partner demo. Worker responses add
   baseline browser security headers; HTML responses are not cached, and
@@ -136,16 +137,16 @@ Function is deployed to the staging branch with the exact preview URL as
 through server-only `WHISPERS_BACKEND_URL` and `WHISPERS_BACKEND_SECRET`
 settings. The function still verifies the user's Neon Auth session and
 workspace permissions. These settings apply to staging only; production
-configuration remains untouched. The preview URL is public, so keep real
-intake disabled and do not put real or sensitive data in it.
+configuration remains untouched. The preview URL is public. Its restricted
+partner-demo mode is active for one allowlisted account; do not use it for
+identifying, sensitive, or urgent information. Other visitors cannot submit.
 
-The latest hosted checks returned HTTP 200 for `/`, `/pilot`, the staging
-database health Function, and the Neon Auth JWKS endpoint. Google sign-in
-successfully reached the Neon-backed workspace; the signed-in account has
-administrator access but no reviewer role. The unauthenticated reviewer API
-returned HTTP 401, and forwarding with the staging backend secret but without a
-user session also returned HTTP 401. Citizen submission, assigned reviewer
-flows, and private-photo authorization still need separate staging verification.
+The latest hosted checks returned HTTP 200 for `/`, `/report`,
+`/report/review`, `/help`, and `/pilot`, and the protected intake-status check
+returned HTTP 200 with `mode=real` and `partnerDemo=true`. The signed-in
+allowlisted account has reviewer workspace access; the workspace displayed no
+reports. Citizen submission, assigned reviewer flows, and private-photo
+authorization still need separate staging verification.
 
 Translation preparation is not enabled on the Neon path. Staging has no
 current-hash Swahili cache: the eight legacy rows are stale and excluded from
@@ -159,7 +160,7 @@ Trigger on `/scheduled-retention`. For local or alternate hosts,
 for manual and scheduled runs in `public.whispers_retention_status`. Compare
 the two timestamps to detect a failed attempt and check that scheduled
 successes continue hourly. The table contains no report IDs or text.
-Verify that successful runs are monitored before opening intake.
+Verify that successful runs are monitored before any broader release.
 
 The five fictional legacy reports and their three private photo copies were
 deleted from both Neon staging and the original Lovable Supabase source at the

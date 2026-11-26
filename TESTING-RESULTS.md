@@ -1,5 +1,28 @@
 # Whispers verification results
 
+## Restricted staging partner-demo intake — 26 November 2026
+
+- Commit `1c56655f7c0f84f6e28695f903c483a9bb4e5ce8` enables real-information
+  intake only in the isolated staging partner-demo mode. GitHub Verify passed
+  on this commit: [run 45775043702](https://github.com/arshahem-maker/Whispers/actions/runs/45775043702).
+- The protected staging intake-status endpoint returned HTTP 200 with
+  `mode=real` and `partnerDemo=true`. Home, report, report-review, help, and
+  pilot routes returned HTTP 200. The preview remains `noindex` and is public
+  to anyone with its URL.
+- A fresh authenticated browser session showed the sole allowlisted account's
+  reviewer workspace, invitation controls, and retention panel. The workspace
+  reported no reports available or awaiting review. No fabricated test report
+  or human review was created.
+- The server allows this mode only when the backend is connected to the
+  configured staging database and exactly one account is allowlisted. The full
+  release gate and production intake remain off. Partner-demo reports are
+  private, cannot be published, and reject photos and follow-up messages; users
+  can request removal with their private code. The flow clearly states that no
+  one monitors submissions or guarantees a response.
+- Citizen submission, assigned reviewer actions, and private-photo
+  authorization have not been exercised end to end. Do not treat this preview
+  as a public reporting or emergency response service.
+
 ## Staging retention correction deployment — 26 November 2026
 
 - Deployed the updated Neon policy to the explicit staging project
