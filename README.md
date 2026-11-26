@@ -12,8 +12,8 @@ review, private media, and reviewed public updates.
   stored in its private `whispers_legacy_import` schema for preflight; no legacy
   report rows have been activated in the app tables. All three legacy photo
   objects are copied and byte-verified in private staging storage. The local
-  `.neon` and `.env.local` still point to
-  production; use the ignored `.env.staging.local` for staging-only work.
+  `.neon` and `.env.local` still point to production; use the ignored
+  `.env.staging.local` for staging-only work.
 - The Lovable project is not published, and its managed Supabase database is
   still enabled. Its source snapshot has not been activated in Neon and its
   report origin remains unverified. Do not disable it until the data and
@@ -67,8 +67,9 @@ branch, and the 14 ordered migrations have been applied there. Its Auth,
 Object Storage, Functions, Realtime, and AI Gateway are provisioned. Schema-only
 branch creation was rejected for the production project's legacy database
 role, so staging was isolated in a separate project. A restricted source
-snapshot was copied there for preflight only; report rows remain inactive, and
-private files were not copied.
+snapshot was copied there for preflight only; report rows remain inactive. The
+three legacy photo objects have been copied and byte-verified in its private
+storage bucket.
 
 Staging credentials are in the ignored `.env.staging.local`; do not replace the
 production `.neon` or `.env.local` link for routine staging work. The staging

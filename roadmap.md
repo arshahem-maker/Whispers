@@ -12,8 +12,8 @@ marked historical there.
   database. The 14 checked-in migrations are applied, and Neon Auth, Object
   Storage, Functions, Realtime, AI Gateway, and the hourly retention trigger
   are provisioned. A restricted source snapshot is stored privately for
-  preflight; it has not activated legacy data in app tables, and private files
-  have not been transferred.
+  preflight; it has not activated legacy data in app tables. Three private
+  legacy photo objects are now copied and byte-verified in staging storage.
 - Staging checks returned HTTP 200 from the database health Function and Neon
   Auth session endpoint, HTTP 401 from unauthenticated submission/reviewer
   endpoints, and passed a temporary Object Storage put/get/delete check.
@@ -51,8 +51,8 @@ marked historical there.
   build, lint, and Bun audit results are recorded at the top of
   `TESTING-RESULTS.md`. Lint has 0 errors and 0 warnings; Bun audit reported no
   vulnerabilities across the 639 locked packages.
-- Commit `520d0ef` is the current pushed staging head. GitHub Verify passed;
-  the public home and `/pilot` were smoke-tested. The Neon entry is 331.17 kB
+- The current staging branch is pushed to GitHub, and the public home and
+  `/pilot` were smoke-tested. The Neon entry is 331.17 kB
   raw / 103.07 kB gzip, with the 220.32 kB Supabase compatibility client kept
   out of home and Neon pilot preloads. Details are in `TESTING-RESULTS.md`.
 - Existing staging migration rows now have SHA-256 checksums for the current
@@ -84,14 +84,14 @@ marked historical there.
    five reports, six records, eight Swahili translation-cache entries, one
    legacy account, and references to three private photos. The cached
    translations have an obsolete catalog hash and are excluded from activation
-   because the cache is rebuildable. Import preflight blocks safely because no
-   photo bytes are now copied and verified in Neon staging, and the legacy
-   account maps to a verified Neon Auth user. Preflight passes, but the report
+   because the cache is rebuildable. Import preflight passes because all three
+   photos are copied and verified in Neon staging, and the legacy account maps
+   to a verified Neon Auth user. The report
    origin remains unknown. Their `fictional` marker is application-set, not
    independent proof, and no report text has been reviewed. Do not activate
    the reports until a responsible operator establishes their origin and
    determines whether they should be retained. The importer requires an
-   explicit confirmation flag for activation.
+   explicit confirmation flag for activation, which has not been given.
 5. **Run current staging verification.** With fictional fixtures and separate
    citizen, reviewer, expert, publisher, and administrator accounts, verify
    submissions, private-code follow-up, photo retry/viewing, removal, retention,
