@@ -52,7 +52,8 @@ marked historical there.
   Commit `b70f9c1` now waits from the original revocation time and includes
   regression tests. It is deployed to staging Function `whispersapi` (deployment
   5). The health Function returned HTTP 200 and unauthenticated manual retention
-  returned HTTP 401. The next scheduled run remains the live cleanup-path check.
+  returned HTTP 401. The scheduled run at 06:00:01 UTC succeeded and recorded
+  zero expired reports. The queued media remains within its grace period.
 - The code now corrects public demo wording, adds Worker/static-asset security
   headers and a request-body ceiling, pins migration file checksums, bounds
   voice-output arrays, and refreshes vulnerable dependencies. Local typecheck,

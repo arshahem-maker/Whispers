@@ -11,11 +11,11 @@
   unauthenticated POST to the manual retention route returned HTTP 401, as
   expected, without invoking cleanup. The boundary regression tests described
   below cover behavior just before and after the 24-hour grace period.
-- The scheduled cleanup has not been manually invoked as a test. Hosted checks
-  prove deployment and authorization behavior; the test suite proves the grace
-  boundary. The next scheduled run remains the live retention-path check. GitHub
-  Verify workflow run 112 passed on commit `7d73c96` before these deployment-note
-  edits.
+- The scheduled cleanup was not manually invoked as a test. The hourly trigger
+  ran at `2026-11-26T06:00:01.668Z`, succeeded, and recorded zero expired
+  reports. Hosted checks prove deployment and authorization behavior; the test
+  suite proves the grace boundary. GitHub Verify workflow run 112 passed on
+  commit `7d73c96` before these deployment-note edits.
 
 ## Local retention-grace correction — 26 November 2026
 
@@ -71,6 +71,14 @@
   can be retired safely.
 - The expired invitation and stale Swahili translation cache remain in the old
   source. They are not active Neon app state; no translation data was copied.
+
+## Current branch verification — 26 November 2026
+
+- GitHub Verify run 118 passed on commit `0358dd1e39a3117893a689e18ca8165bc24451f6`:
+  [workflow run 45764941485](https://github.com/arshahem-maker/Whispers/actions/runs/45764941485).
+- The source audit metadata archive was separately confirmed to contain 11
+  events. The retention trigger's 06:00 UTC execution succeeded with zero
+  expired reports. No cleanup was manually triggered.
 
 ## Staging access and data audit — 26 November 2026
 
