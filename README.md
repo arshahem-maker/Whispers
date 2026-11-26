@@ -4,7 +4,7 @@ Whispers is an independent humanitarian reporting and review application. It
 supports a fictional demonstration, private report follow-up, workspace-scoped
 review, private media, and reviewed public updates.
 
-## Current release status — 25 November 2026
+## Current release status — 26 November 2026
 
 - `staging/neon` is the current Neon implementation branch. The production
   Neon project remains separate. A second Free-plan project, `Whispers Staging`,
@@ -29,6 +29,10 @@ review, private media, and reviewed public updates.
   baseline browser security headers; HTML responses are not cached, and
   `workers.dev` responses are marked `noindex` in both Worker and static-asset
   handling.
+- The Neon browser entry is 331 kB raw / 103 kB gzip. The legacy Supabase Auth
+  client and pilot UI load separately; the public home and Neon `/pilot` do not
+  preload the Supabase client. This is a bundle optimization, not a removal of
+  the legacy integration or proof of a complete Neon-only migration.
 - Neon Function submission and receipt bodies are capped at 64 KiB before JSON
   parsing. The migration runner now stores SHA-256 checksums and rejects future
   edits to recorded migration files. Existing staging migration records have

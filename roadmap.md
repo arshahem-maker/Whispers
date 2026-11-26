@@ -1,6 +1,6 @@
 # Whispers release roadmap
 
-Status checked 25 November 2026. This roadmap supersedes the earlier mixed
+Status checked 26 November 2026. This roadmap supersedes the earlier mixed
 Supabase/Lovable checklist. Current local and hosted guard checks are recorded
 at the top of `TESTING-RESULTS.md`; the older Supabase pilot results are clearly
 marked historical there.
@@ -44,8 +44,12 @@ marked historical there.
   headers and a request-body ceiling, pins migration file checksums, bounds
   voice-output arrays, and refreshes vulnerable dependencies. Local typecheck,
   build, lint, and Bun audit results are recorded at the top of
-  `TESTING-RESULTS.md`. Lint has 0 errors and 11 Fast Refresh warnings; Bun
-  audit reports no vulnerabilities across the 639 locked packages.
+  `TESTING-RESULTS.md`. Lint has 0 errors and 0 warnings; Bun audit reported no
+  vulnerabilities across the 639 locked packages.
+- Commit `614b942` is the current pushed staging head. GitHub Verify passed;
+  the public home and `/pilot` were smoke-tested. The Neon entry is 331.17 kB
+  raw / 103.07 kB gzip, with the 220.32 kB Supabase compatibility client kept
+  out of home and Neon pilot preloads. Details are in `TESTING-RESULTS.md`.
 - Existing staging migration rows now have SHA-256 checksums for the current
   migration files. Because the old ledger had no checksums, this cannot prove
   historical file contents; subsequent edits to these pinned files will fail.

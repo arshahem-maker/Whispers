@@ -1,5 +1,38 @@
 # Whispers verification results
 
+## Bundle and hosted route verification — 26 November 2026
+
+The Neon-only browser entry previously carried the legacy Supabase Auth client
+because the root route and global function middleware imported it eagerly. The
+legacy pilot screen also shared a route chunk with the Neon workspace. Changes
+in `da1df96` and `614b942` defer those legacy modules to their own async paths.
+
+- Staging build entry changed from 552.64 kB raw / 159.75 kB gzip to
+  331.17 kB raw / 103.07 kB gzip (221.47 kB raw and 56.68 kB gzip smaller).
+- The 220.32 kB raw Supabase compatibility client is emitted separately. The
+  home page and `/pilot` HTML do not preload it; the built entry no longer
+  contains Supabase Auth code. `/pilot` loads the Neon reviewer workspace.
+- The public staging home and `/pilot` returned HTTP 200 with `no-store`,
+  `nosniff`, and `DENY` headers. The unauthenticated reviewer API returned HTTP
+  401 with the same headers. The legacy `/review/sign-in` route returned HTTP
+  307 to `/pilot` before serving its Supabase-backed component. No authenticated
+  reviewer or citizen workflow was exercised.
+- Typecheck and lint passed; lint has zero errors and zero warnings. Vitest
+  passed all 47 tests across 13 files. Staging and default builds passed.
+- GitHub Verify passed on `614b942c16e22435e99b924676f9282c5b679c17`:
+  [run 45735838043](https://github.com/arshahem-maker/Whispers/actions/runs/45735838043)
+  and [run 45735845176](https://github.com/arshahem-maker/Whispers/actions/runs/45735845176).
+- `npm run deploy:staging` updated only the public Cloudflare Preview. One
+  attempt failed on a transient network request after uploading assets; retry
+  completed successfully. Production was not changed.
+- The Vite wrapper still prints its `vite-tsconfig-paths` compatibility
+  notice. The wrapper owns that plugin configuration, so it was not changed.
+
+AI Gateway credits were not purchased or used. The Lovable project remains
+unpublished, its latest revision is behind `staging/neon`, and its Supabase
+database is enabled. No Lovable AI edit was started because it would act on
+that stale project copy.
+
 ## Release hardening — 25 November 2026
 
 Changes after the previous verification include public fictional-demo copy,
