@@ -24,11 +24,18 @@
   change removes that duplicate route and explicitly clears its Cloudflare cron.
   No expired production reports or due media jobs were present in the read-only
   aggregate check; no report content was processed by the failed request.
+- PR #24 passed both GitHub Verify checks and merged as `33983de`. Production
+  Worker version `bce7ee40-eced-4f26-a4ed-2040d667faad` was deployed with the
+  Cloudflare cron list empty; the unused retention endpoint secret was deleted.
+  The staging Preview was refreshed from the same source at
+  <https://a9e7a1fe-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+- After both deployments, `/`, `/report`, `/pilot`, `/partners`, `/help`, and
+  `/about` returned HTTP 200 on production and staging; the removed retention
+  route returned HTTP 404 and the unauthenticated reviewer route returned
+  HTTP 401 on both. CSP, `no-store`, and `X-Frame-Options: DENY` remained.
 - Local checks on the cleanup branch passed: `npm run build`,
   `npm run typecheck`, `npm run lint`, and `npm test` (40 tests across 11
   files); Wrangler production dry-run and `git diff --check` also passed.
-  The cleanup change still needs its merge and production deploy before the
-  Cloudflare cron is considered disabled.
 
 ## Standalone build and staging retention auth — 26 November 2026
 
