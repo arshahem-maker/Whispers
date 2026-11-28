@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "whispers-neon-pilot",
-  "main": ".output/server/worker-entry.mjs",
+  "main": ".output/server/index.mjs",
   "compatibility_date": "2026-11-25",
   "compatibility_flags": ["nodejs_compat"],
   "no_bundle": true,

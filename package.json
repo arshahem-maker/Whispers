@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "postbuild": "node scripts/prepare-cloudflare-worker.mjs",
     "build:demo": "VITE_WHISPERS_REVIEWER_BACKEND=demo VITE_WHISPERS_PILOT_BACKEND=demo VITE_WHISPERS_DEMO_ONLY=true WHISPERS_PILOT_BACKEND=demo npm run build -- --mode demo",
     "build:dev": "vite build --mode development",
     "deploy:demo": "npm run build:demo && npx wrangler@latest preview --config wrangler.demo.jsonc --name owner-demo --worker-name whispers-neon-pilot --ignore-base-config",
