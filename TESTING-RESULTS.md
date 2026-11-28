@@ -1,5 +1,42 @@
 # Whispers verification results
 
+## Production app deployment and retention schedule — 28 November 2026
+
+- Production migrations 0012 and 0013 were applied transactionally to the
+  explicitly selected Neon `production` branch. The migration ledger now has
+  15 entries with the expected checksums. Production report and record data
+  were not read or changed; the full-release intake flag remains `false`.
+- GitHub PR #23's build-mode correction was deployed to the production Worker
+  at `https://whispers-neon-pilot.whispers-by-arsh.workers.dev` (Cloudflare
+  version `07644e45-995f-4e9c-a436-8cc6524102ff`, app commit
+  `12f2ea229f0acafc354a9a173b9bd19d9be1d928`). `/`, `/report`, `/pilot`,
+  `/partners`, `/help`, and `/about` returned HTTP 200; the unauthenticated
+  reviewer route returned HTTP 401. HTML included a nonce-based CSP,
+  `Cache-Control: no-store`, `X-Frame-Options: DENY`,
+  `X-Content-Type-Options: nosniff`, HSTS, and `X-Robots-Tag: noindex`.
+- The application now uses the production Neon Auth URL in its production
+  build. A staging-mode build was checked to use the separate staging Auth
+  URL. This verifies build configuration and public routes, not an authenticated
+  end-user or reviewer workflow.
+- Neon’s own `whispers-retention` scheduled function is configured hourly and
+  its production status records a successful run at `2026-11-28T17:00:03Z`.
+  A duplicate Cloudflare retention route exceeded the Worker CPU limit, so this
+  change removes that duplicate route and explicitly clears its Cloudflare cron.
+  No expired production reports or due media jobs were present in the read-only
+  aggregate check; no report content was processed by the failed request.
+- PR #24 passed both GitHub Verify checks and merged as `33983de`. Production
+  Worker version `bce7ee40-eced-4f26-a4ed-2040d667faad` was deployed with the
+  Cloudflare cron list empty; the unused retention endpoint secret was deleted.
+  The staging Preview was refreshed from the same source at
+  <https://a9e7a1fe-whispers-neon-pilot.whispers-by-arsh.workers.dev>.
+- After both deployments, `/`, `/report`, `/pilot`, `/partners`, `/help`, and
+  `/about` returned HTTP 200 on production and staging; the removed retention
+  route returned HTTP 404 and the unauthenticated reviewer route returned
+  HTTP 401 on both. CSP, `no-store`, and `X-Frame-Options: DENY` remained.
+- Local checks on the cleanup branch passed: `npm run build`,
+  `npm run typecheck`, `npm run lint`, and `npm test` (40 tests across 11
+  files); Wrangler production dry-run and `git diff --check` also passed.
+
 ## Standalone build and staging retention auth — 26 November 2026
 
 - PR #18 replaced the Lovable-specific Vite wrapper with direct TanStack Start,
@@ -159,9 +196,9 @@
   objects/frames. Inline scripts and styles remain permitted because the current
   server-rendered app does not yet supply per-response CSP nonces.
 - Production was not deployed or modified. The one-account, unmonitored staging
-  intake boundary and full-release gate are unchanged. The OAuth client secret
-  was not rotated; Google Cloud credential entry and submission require the
-  account owner to complete that step.
+  intake boundary and full-release gate are unchanged. This statement records
+  the historical state of the 26 November staging-only deployment; see the
+  28 November production deployment entry above for current status.
 - GitHub Verify passed for this pushed revision in runs
   [45781044608](https://github.com/arshahem-maker/Whispers/actions/runs/45781044608)
   and [45781036447](https://github.com/arshahem-maker/Whispers/actions/runs/45781036447).

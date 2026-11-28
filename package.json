@@ -10,6 +10,8 @@
     "build:dev": "vite build --mode development",
     "deploy:demo": "npm run build:demo && npx wrangler@latest preview --config wrangler.demo.jsonc --name owner-demo --worker-name whispers-neon-pilot --ignore-base-config",
     "deploy:staging": "npm run build -- --mode staging && npx wrangler@latest preview --config wrangler.preview.jsonc --name staging-neon --worker-name whispers-neon-pilot",
+    "deploy:production": "npm run build && npx wrangler@latest deploy --config wrangler.production.jsonc --keep-vars",
+    "migrate:production": "node --env-file=.env.local scripts/migrate-neon-production.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
