@@ -4,8 +4,14 @@
 
 - Production migrations 0012 and 0013 were applied transactionally to the
   explicitly selected Neon `production` branch. The migration ledger now has
-  15 entries with the expected checksums. Production report and record data
-  were not read or changed; the full-release intake flag remains `false`.
+  15 entries with the expected checksums. The full-release intake flag remains
+  `false`.
+- A read-only review confirmed all five production reports were explicitly
+  fictional test scenarios. The owner cleanup used the database's existing
+  revoke/redact function: all five are now removed from active views, their six
+  linked records are deleted, and five audit entries plus redacted tombstones
+  remain. Five private-media cleanup jobs are queued for the existing 24-hour
+  grace period; the hourly Neon retention function will process them afterward.
 - GitHub PR #23's build-mode correction was deployed to the production Worker
   at `https://whispers-neon-pilot.whispers-by-arsh.workers.dev` (Cloudflare
   version `07644e45-995f-4e9c-a436-8cc6524102ff`, app commit
