@@ -39,6 +39,10 @@
   `/about` returned HTTP 200 on production and staging; the removed retention
   route returned HTTP 404 and the unauthenticated reviewer route returned
   HTTP 401 on both. CSP, `no-store`, and `X-Frame-Options: DENY` remained.
+- A signed-in production browser completed Google authentication and loaded the
+  reviewer/admin workspace. It displayed no reports awaiting review. The
+  production report form was opened but not submitted; production intake
+  remains disabled, and no new report was created.
 - Local checks on the cleanup branch passed: `npm run build`,
   `npm run typecheck`, `npm run lint`, and `npm test` (40 tests across 11
   files); Wrangler production dry-run and `git diff --check` also passed.
